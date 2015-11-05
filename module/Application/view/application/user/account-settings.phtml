@@ -1,0 +1,150 @@
+ <?php $baseUrl = $this->basePath(); ?>
+
+
+<div class="container">
+	<div class="margin_top12"></div>
+	<div class="page-header">
+  <div class="clearfix"></div>  
+  <h3>Account Settings</h3></div>
+	
+   
+<div class="container margin_top2">
+<div class="content_left">
+<div class="one_half margin_top2">
+<h4>Change Password:</h4><br> 
+<div class="cforms">       
+    <div id="form_status"></div>
+    <form type="" id="" onSubmit="">
+        <!--<label class="label">Old Password <em>*</em></label>
+        <label class="input">
+            <input type="password" name="oldPswdVal" id="oldPswdVal">
+        </label>
+        <div class="clearfix"></div>-->
+        <label class="label">New Password <em>*</em></label>
+         <label class="input">
+            <input type="password" name="pswdVal" id="pswdVal">
+        </label>
+        <div class="clearfix"></div>
+        <label class="label">Confirm Password <em>*</em></label>
+         <label class="input">
+            <input type="password" name="confPswdVal" id="confPswdVal">
+        </label>	
+         <button type="button" class="btn btn-danger submitResetPswd">Submit</button>
+    </form>  
+</div></br></br>     
+<h4>Add Phone Number:</h4><br> 
+<div class="cforms ">       
+    <div id="addPhoneForm"></div>
+    <form type="" id="" onSubmit="">
+        <label class="label">Phone Number <em>*</em></label>
+         <label class="input">
+            <input type="text" name="phoneNo" id="phoneNo">
+        </label>
+        <button type="button" class="btn btn-danger addPhoneNo">Submit</button>
+    </form>
+</div> 
+ </div>          
+</div><!-- end content left side -->
+
+
+<!-- right sidebar starts -->
+<div class="right_sidebar">
+	<div class="sidebar_widget">    
+    	<div class="sidebar_title">
+        <div class="last stcode_title5"><h3><span class="line2"></span><span class="line"></span><span class="text">My Account</span></h3></div>
+        </div>        
+		<ul class="arrows_list1">        
+            <li><a href="<?php echo $baseUrl;?>/user/portfolio"><i class="fa fa-angle-right"></i> My Portfolio</a></li>
+            <li><a href="<?php echo $baseUrl;?>/user/recently-viewed"><i class="fa fa-angle-right"></i> Recently Viewed</a></li>
+            <li><a href="<?php echo $baseUrl;?>/user/enquired-properties"><i class="fa fa-angle-right"></i> Enquired Properties</a></li>
+            <li><a href="<?php echo $baseUrl;?>/user/account-settings"><i class="fa fa-angle-right"></i> Account Settings</a></li>            
+		</ul>              
+	</div><!-- end section -->
+    <div class="margin_top5"></div>
+    <div class="sidebar_widget">    
+    	<div class="sidebar_title">
+        <div class="last stcode_title5"><h3><span class="line2"></span><span class="line"></span><span class="text">Quick Links</span></h3></div>
+        </div>        
+		<ul class="arrows_list1">        
+            <li><a href="<?php echo $baseUrl;?>/faq"><i class="fa fa-angle-right"></i> Property Buying Steps</a></li>
+            <li><a href="<?php echo $baseUrl;?>/home-loan"><i class="fa fa-angle-right"></i> Home Loan</a></li>
+            <li><a href="<?php echo $baseUrl;?>/vaastu-tips"><i class="fa fa-angle-right"></i> Vaastu Tips</a></li>
+            <li><a href="<?php echo $baseUrl;?>/emi-calculator"><i class="fa fa-angle-right"></i> EMI Calculator</a></li>
+            <li><a href="<?php echo $baseUrl;?>/nri-services"><i class="fa fa-angle-right"></i> NRI services</a></li>
+            <li><a href="#"><i class="fa fa-angle-right"></i> Real Estate News</a></li>  
+		</ul>              
+	</div>
+    
+</div><!-- end right sidebar -->
+</div>
+    <!-- end section -->
+    
+</div>
+    
+    <script src="https://code.jquery.com/jquery-1.9.1.min.js"></script>
+    <script>
+    $(document).ready(function(){
+        $('#pageTitle').text('Aadinath | Account Settings');
+    });
+    $('.addPhoneNo').click(function(){
+        var phoneNo     = $('#phoneNo').val();
+        var error = 0;
+        if(phoneNo=='' || phoneNo.length !=10){
+            $('#phoneNo').css('border-color','red');
+            error++;
+        }else{
+            $('#phoneNo').css('border-color','#ccc');
+        }
+        
+        if(phoneNo!='' && phoneNo.length ==10){
+            $.post('<?php echo $baseUrl?>/front-end/user/account-settings', {phoneNo:phoneNo}, function (response) {
+                $("#addPhoneForm" ).before( "<p style='color:red'> Phone Number added Successfully<p>");  
+                return false;
+            });
+        }
+    });
+    
+    $('.submitResetPswd').click(function(){
+        var pswdVal     = $('#pswdVal').val();
+        var confPswdVal = $('#confPswdVal').val();
+        var error = 0;
+        if(pswdVal==''){
+            $('#pswdVal').css('border-color','red');
+            error++;
+        }else{
+            $('#pswdVal').css('border-color','#ccc');
+        }
+        if(confPswdVal==''){
+            $('#confPswdVal').css('border-color','red');
+            error++;
+        }else{
+            $('#confPswdVal').css('border-color','#ccc');
+        }
+        if(pswdVal!='' && confPswdVal!='' && confPswdVal!=pswdVal){
+            $('#pswdVal,#confPswdVal').css('border-color','red');
+            $("#oldPswdVal").after( "<p style='color:red'>Password don't match<p>"); 
+            error++; 
+            return false;
+        }
+        if(error==0 && pswdVal==confPswdVal){
+          $.post('<?php echo $baseUrl?>/front-end/user/account-settings', {pswdVal:pswdVal,confPswdVal:confPswdVal}, function (response) {
+            if(response=='wrongpassword'){
+                 $("#oldPswdVal" ).after( "<p style='color:red'> Invalid Old Password<p>");  
+                 return false;
+            }else{
+                 $("#form_status" ).before( "<p style='color:red'> Password Changed Successfully<p>");  
+                 return false;
+            }
+          });
+        }
+        
+    });
+    </script>
+
+
+<!---End of Builder--->
+
+
+
+  
+  

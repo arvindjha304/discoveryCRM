@@ -1,0 +1,93 @@
+ <?php $baseUrl = $this->basePath(); ?>
+
+
+<div class="container">
+	<div class="margin_top12"></div>
+	<div class="page-header">
+  <div class="clearfix"></div>  
+  <h3>Recently Viewed</h3></div>
+<div class="container margin_top2">
+<div class="content_left">    	
+        
+    <div class="bs-example margin_top2" data-example-id="bordered-table">
+    <?php if(count($this->recentViewed)){ ?>
+    <table class="table table-bordered table-striped">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Location</th>
+          <th>Rate per Sq ft.</th>
+          <th>Price</th>
+        </tr>
+      </thead>
+      <tbody>
+        <?php 
+            foreach ($this->recentViewed as $project){  ?>  
+               <tr>
+                <th scope="row"><a href="<?php echo $baseUrl;?>/projects/<?php echo $project['projectSlug']?>"><?php echo $project['project_title']?></a></th>
+                <td><?php echo $project['location_name'].', '.$project['city_name']?></td>
+                <td><?php echo $project['min_floor_plan_size'].' - '.$project['max_floor_plan_size']?> sq ft</td>
+                <td><?php echo $project['min_floor_plan_price'].' - '.$project['max_floor_plan_price']?></td>
+              </tr>
+            <?php
+            }
+        ?>       
+      </tbody>
+    </table>
+    <?php }else {?>
+        <p style="text-align:justify;" class="margin_top2">Currently there are no recently viewed by you</p>
+    <?php }?>    
+  </div><!-- /example -->     
+</div><!-- end content left side -->
+
+
+<!-- right sidebar starts -->
+<div class="right_sidebar">
+	<div class="sidebar_widget">    
+    	<div class="sidebar_title">
+        <div class="last stcode_title5"><h3><span class="line2"></span><span class="line"></span><span class="text">My Account</span></h3></div>
+        </div>        
+		<ul class="arrows_list1">        
+            <li><a href="<?php echo $baseUrl;?>/user/portfolio"><i class="fa fa-angle-right"></i> My Portfolio</a></li>
+            <li><a href="<?php echo $baseUrl;?>/user/recently-viewed"><i class="fa fa-angle-right"></i> Recently Viewed</a></li>
+            <li><a href="<?php echo $baseUrl;?>/user/enquired-properties"><i class="fa fa-angle-right"></i> Enquired Properties</a></li>
+            <li><a href="<?php echo $baseUrl;?>/user/account-settings"><i class="fa fa-angle-right"></i> Account Settings</a></li>            
+		</ul>              
+	</div><!-- end section -->
+    <div class="margin_top5"></div>
+    <div class="sidebar_widget">    
+    	<div class="sidebar_title">
+        <div class="last stcode_title5"><h3><span class="line2"></span><span class="line"></span><span class="text">Quick Links</span></h3></div>
+        </div>        
+		<ul class="arrows_list1">        
+            <li><a href="<?php echo $baseUrl;?>/faq"><i class="fa fa-angle-right"></i> Property Buying Steps</a></li>
+            <li><a href="<?php echo $baseUrl;?>/home-loan"><i class="fa fa-angle-right"></i> Home Loan</a></li>
+            <li><a href="<?php echo $baseUrl;?>/vaastu-tips"><i class="fa fa-angle-right"></i> Vaastu Tips</a></li>
+            <li><a href="<?php echo $baseUrl;?>/emi-calculator"><i class="fa fa-angle-right"></i> EMI Calculator</a></li>
+            <li><a href="<?php echo $baseUrl;?>/nri-services"><i class="fa fa-angle-right"></i> NRI services</a></li>
+            <li><a href="#"><i class="fa fa-angle-right"></i> Real Estate News</a></li>  
+		</ul>            
+	</div>
+    
+</div><!-- end right sidebar -->
+
+</div>
+    
+    <!-- end section -->
+    
+</div> 
+    
+    <script src="https://code.jquery.com/jquery-1.9.1.min.js"></script>
+    <script>
+    $(document).ready(function(){
+        $('#pageTitle').text('Aadinath | Recently Viewed');
+    });
+    </script>
+
+
+<!---End of Builder--->
+
+
+
+  
+  

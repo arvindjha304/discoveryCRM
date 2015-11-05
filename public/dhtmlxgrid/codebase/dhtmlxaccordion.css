@@ -1,0 +1,61 @@
+/*
+Product Name: dhtmlxAccordion 
+Version: 4.0.2 
+Edition: Standard 
+License: content of this file is covered by GPL. Usage outside GPL terms is prohibited. To obtain Commercial or Enterprise license contact sales@dhtmlx.com
+Copyright UAB Dinamenta http://www.dhtmlx.com
+*/
+
+.dhxacc_fullscreen{width:100%;height:100%;margin:0;overflow:hidden;}
+.dhxacc_base_dhx_skyblue{position:relative;cursor:default;overflow:hidden; min-height: 400px;height: auto  !important;}
+.dhxacc_base_dhx_skyblue div.dhx_cell_acc{position:relative;background-color:#fff;margin:0;padding:0;overflow:hidden;cursor:default;box-shadow:0 0 3px #e0e0e0;}
+
+
+.dhxacc_base_dhx_skyblue div.dhx_cell_acc div.dhx_cell_cont_acc{position:absolute;border-left:1px solid #bababa;border-right:1px solid #bababa;border-bottom:1px solid #bababa;border-top:0 solid white;overflow:auto;z-index:0;
+padding: 8px;}
+
+
+.dhxacc_base_dhx_skyblue div.dhx_cell_acc div.dhx_cell_cont_acc.dhx_cell_cont_no_borders{border-width:0;}
+
+.dhxacc_base_dhx_skyblue div.dhx_cell_acc div.dhx_cell_hdr{
+position:relative;
+
+ padding: 7px 5px;
+overflow:hidden;
+font-family:Tahoma;
+font-size:12px;
+color:#34404b;
+font-weight:bold;
+border:1px solid #bababa;
+border-radius: 5px 5px 0 0;
+background-color:#CFCFCF;
+background:linear-gradient(#E8E8E8,#CFCFCF);
+filter:progid:DXImageTransform.Microsoft.Gradient(gradientType=0,startColorStr=#E8E8E8,endColorStr=#CFCFCF) progid:DXImageTransform.Microsoft.Alpha(opacity=100);
+cursor:default;
+z-index:3;
+-webkit-user-select:none;
+-khtml-user-select:none;
+-moz-user-select:none;
+-o-user-select:none;
+user-select:none;
+-ms-user-select:none;
+}
+
+.dhxacc_base_dhx_skyblue div.dhx_cell_acc div.dhx_cell_hdr div.dhx_cell_hdr_text{position:relative;margin:0 26px 0 5px;overflow:hidden;cursor:default;}.dhxacc_base_dhx_skyblue div.dhx_cell_acc div.dhx_cell_hdr img.dhx_cell_hdr_icon{position:absolute;top:5px;left:4px;width:16px;height:16px;}.dhxacc_base_dhx_skyblue div.dhx_cell_acc div.dhx_cell_hdr div.dhx_cell_hdr_text.dhx_cell_hdr_icon{margin-left:24px;}.dhxacc_base_dhx_skyblue div.dhx_cell_acc div.dhx_cell_hdr div.dhx_cell_hdr_arrow{position:absolute;top:6px;right:4px;width:16px;height:16px;background-image:url("imgs/dhxacc_skyblue/dhxacc_btns.gif");background-repeat:no-repeat;background-position:0 0;overflow:hidden;cursor:pointer;-webkit-user-select:none;-khtml-user-select:none;-moz-user-select:none;-o-user-select:none;user-select:none;-ms-user-select:none;}.dhxacc_base_dhx_skyblue div.dhx_cell_acc.dhx_cell_closed div.dhx_cell_hdr div.dhx_cell_hdr_arrow{background-position:-16px 0;}.dhxacc_base_dhx_skyblue div.dhx_cell_acc div.dhx_cell_cont.dhx_cell_cont_not_last{border-bottom:0 solid white;}.dhxacc_base_dhx_skyblue div.dhx_cell_acc div.dhx_cell_menu_def{position:relative;overflow:hidden;border-left:1px solid #a4bed4;border-right:1px solid #a4bed4;border-bottom:1px solid #a4bed4;}.dhxacc_base_dhx_skyblue div.dhx_cell_acc div.dhx_cell_menu_no_borders{position:relative;overflow:hidden;}.dhxacc_base_dhx_skyblue div.dhx_cell_acc div.dhx_cell_menu_def div.dhtmlxMenu_dhx_skyblue_Middle,.dhxacc_base_dhx_skyblue div.dhx_cell_acc div.dhx_cell_menu_no_borders div.dhtmlxMenu_dhx_skyblue_Middle{padding:0 2px;}.dhxacc_base_dhx_skyblue div.dhx_cell_acc div.dhx_cell_toolbar_def div.dhx_toolbar_dhx_skyblue{border-top:0 solid white;}.dhxacc_base_dhx_skyblue div.dhx_cell_acc div.dhx_cell_ribbon_def div.dhxrb_with_tabbar.dhxtabbar_base_dhx_skyblue{margin-top:-1px;}.dhxacc_base_dhx_skyblue div.dhx_cell_acc div.dhx_cell_ribbon_def div.dhtmlxribbon_dhx_skyblue.dhxrb_without_tabbar{border-top:0 solid white;width:auto;}.dhxacc_base_dhx_skyblue div.dhx_cell_acc div.dhx_cell_statusbar_def{position:absolute;bottom:0;width:100%;font-family:Tahoma;font-size:11px;color:black;background-color:#ddecff;}.dhxacc_base_dhx_skyblue div.dhx_cell_acc div.dhx_cell_statusbar_def div.dhx_cell_statusbar_text{position:relative;padding:0 4px;height:21px;line-height:21px;border-bottom:1px solid #a4bed4;border-left:1px solid #a4bed4;border-right:1px solid #a4bed4;white-space:nowrap;overflow:hidden;}.dhxacc_base_dhx_skyblue div.dhx_cell_acc.acc_cell_dragged{box-shadow:0 0 5px #829cb2;z-index:5!important;}.dhxacc_base_dhx_skyblue div.dhx_cell_acc div.dhx_cell_progress_bar{position:absolute;left:0;top:0;width:100%;height:100%;background-color:white;opacity:.75;filter:progid:DXImageTransform.Microsoft.Alpha(opacity=75);z-index:1;}.dhxacc_base_dhx_skyblue div.dhx_cell_acc div.dhx_cell_progress_img{position:absolute;left:0;top:0;border:1px solid #a4bed4;background-position:center 55%;background-image:url("imgs/dhxacc_skyblue/dhxacc_cell_progress.gif");background-repeat:no-repeat;cursor:progress;z-index:2;}.dhxacc_skin_detect{position:absolute;left:0;top:-100px;margin:0;padding:0;border:0 solid white;width:10px;height:10px;overflow:hidden;}
+
+.q_list p {
+    background-color: #D9D9D9;
+    border: 1px solid #BABABA;
+    color: #404040;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    margin-bottom: 5px;
+    margin-right: 15px;
+    padding: 5px;
+    text-align: center;
+    border-radius: 5px;
+}
+.dhx_cell_cont_acc ul {
+    margin-left: 15px;
+}

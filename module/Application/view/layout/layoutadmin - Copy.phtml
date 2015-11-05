@@ -1,0 +1,103 @@
+<?php 
+if (defined('RUNNING_FROM_ROOT')) {
+  //$this->plugin('basePath')->setBasePath($this->basePath().'/public');
+} ?>
+
+<?php $baseUrl = $this->basePath(); ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Site Admin </title>
+<link href="<?php echo $baseUrl;?>/public/adminpanel/css/style.css" rel="stylesheet" />
+<script type="text/javascript" src="<?php echo $baseUrl;?>/public/adminpanel/jquery.min.js"></script>
+<script type="text/javascript" src="<?php echo $baseUrl;?>/public/adminpanel/script.js"></script>
+</head>
+
+<body>
+<div class="header">
+<div class="welcom">
+<div class="welcom-left" style="padding-top:7px;"><span style="padding-left:50px;"><a href="<?php echo $baseUrl;?>/homepage"><img src="<?php echo $baseUrl;?>/public/adminpanel/img/aadinath_logo.png" width="35%" /></a></span></div>
+<div class="welcom-right"><span style="padding-right:50px; line-height:50px;"><a href="<?php echo $baseUrl;?>/index">Launch Website</a> &nbsp; | &nbsp;
+<a href="">Change Password</a>&nbsp; | &nbsp;
+<a href="">Log Out</a></span>
+</div>
+</div>
+</div>
+
+
+<!----maincontainer---->
+<div class="container">
+
+<!----menu----->
+
+<div class="menu">
+	<div id='cssmenu' style="margin-top:30px;margin-left:30px;">
+<ul>
+   <li><a href='<?php echo $baseUrl;?>/backend/admin/index'>Dashboard</a></li>
+   
+   <li class='active has-sub'><a href='<?php echo $baseUrl;?>/backend/admin/location'>Manage Location</a>
+      <ul>
+         <li ><a href='<?php echo $baseUrl;?>/backend/admin/statelist' style="padding-left:45px;">Manage State</a> </li>
+         <li ><a href='<?php echo $baseUrl;?>/backend/admin/citylist' style="padding-left:45px;">Manage City</a> </li>
+		 <li><a href='<?php echo $baseUrl;?>/backend/admin/locationlist' style="padding-left:45px;">Manage Location</a> </li>
+      </ul>
+   </li>
+   <li class='last'><a href='<?php echo $baseUrl;?>/backend/admin/propertytypelist'>Manage Property Type</a></li>
+   <li class='last'><a href='<?php echo $baseUrl;?>/backend/admin/amentieslist'>Manage Amenities</a></li>
+   <li class='last'><a href='<?php echo $baseUrl;?>/backend/admin/builderlist'>Manage Builders</a></li>
+   <li class='active has-sub'><a href='#'>Manage Projects</a>
+   <ul>
+        <li ><a href='<?php echo $baseUrl;?>/backend/admin/projectslist' style="padding-left:45px;">Manage Projects</a> </li>
+        <li ><a href='<?php echo $baseUrl;?>/backend/admin/floorplanlist' style="padding-left:45px;">Manage Floorplan</a> </li>
+        <li class='has-sub'><a href='#' style="padding-left:45px;">Manage Banners</a>
+            <ul>
+                <li ><a href='<?php echo $baseUrl;?>/backend/admin/homepagebanners' style="padding-left:45px;">Home Page Banners</a> </li>
+                <li class='last'><a href='<?php echo $baseUrl;?>/backend/admin/bannerlist' style="padding-left:45px;">Project Banners</a> </li>
+            </ul>
+         </li>    
+   </ul>
+   
+   </li>
+   <li class='active has-sub''><a href='#'>Manage CMS</a>
+   <ul>
+        <li ><a href='<?php echo $baseUrl;?>/backend/admin/testimoniallist' style="padding-left:45px;">Manage Testimonial</a> </li>
+        <li ><a href='<?php echo $baseUrl;?>/backend/admin/addeditpages' style="padding-left:45px;">Manage Pages</a> </li>
+   </ul>
+   </li>
+   <li class='last'><a href='<?php echo $baseUrl;?>/backend/admin/addeditlogo?id=1'>Manage LOGO</a></li>
+   <li class='last'><a href='<?php echo $baseUrl;?>/backend/admin/newslist'>Manage News</a></li>
+   <!-- 
+    <li class='active has-sub'><a href='#'>Nav1</a>
+      <ul>
+         <li class='has-sub'><a href='#' style="padding-left:45px;">Nav-1-1</a>
+            <ul>
+               <li><a href='#'>Nav-1-1-1</a></li>
+               <li class='last'><a href='#'>Nav-1-1-2</a></li>
+            </ul>
+         </li>
+         <li class='has-sub'><a href='#' style="padding-left:45px;">Nav-1-2</a>
+            <ul>
+               <li><a href='#'>Nav-1-2-1</a></li>
+               <li class='last'><a href='#'>Nav-1-2-2</a></li>
+            </ul>
+         </li>
+      </ul>
+   </li>
+    -->
+</ul>
+</div>
+
+</div>
+
+<!----body---->
+<?php echo $this->layout()->content; ?>
+
+</div><!----footer------->
+<div class="footer">
+	<div class="footer-left" >All trademarks, logos and names are properties of their respective owners. All Right Reserved. ©2015 </div>
+    <div class="footer-right" ><a href=""><img src="<?php echo $baseUrl;?>/public/adminpanel/img/discovery-logo.png" /></a></div>
+    
+</div>
+</body>
+</html>

@@ -1,4 +1,9 @@
-<?php $baseUrl = $this->basePath(); ?>
+<?php $baseUrl = $this->basePath();
+
+//echo $baseUrl;exit;
+
+
+?>
 <!-- Content Wrapper. Contains page content -->
     <!-- Angular js file -->
    <style>
@@ -38,21 +43,19 @@
                 <!-- form start -->
                 <div class="container">
                     
-                   
-                    
                     <div class="col-lg-11"  style="background-color:#fff; margin-top:60px; margin-bottom:60px;">
-                        <form  action="#" method="post" ng-controller="validateCtrl" name="myForm" novalidate>
+                        <form  action="" method="post" ng-controller="validateCtrl" name="myForm" novalidate>
                             <input type="hidden" name="userId" value="<?php echo (count($this->userData[0]))? $this->userData[0]['id'] : ''?>" >
                             <div class="form-group-custom">
-                                <label>Full Name</label>
+                                <label>Full Name <span class="mandatory">*</span></label>
                                 <input type="text" name="fullName" class="form-control" placeholder="Full Name" ng-model="fullName" required>
                                 <span style="color:red;" ng-cloak ng-show="(myForm.fullName.$dirty && myForm.fullName.$invalid)">
-                                <span ng-show="myForm.fullName.$error.required">Email is required.</span>
+                                <span ng-show="myForm.fullName.$error.required">Full Name is required.</span>
                                 </span>
                             </div>
                             
                             <div class="form-group-custom">
-                              <label for="exampleInputEmail1">Email address</label>
+                              <label for="exampleInputEmail1">Email address <span class="mandatory">*</span></label>
                                 <input type="email" name="useremail" class="form-control" placeholder="Email" ng-model="useremail" required>
                                 <span style="color:red" ng-style="{color: myColor}" ng-cloak ng-show="myForm.useremail.$dirty && myForm.useremail.$invalid">
                                 <span ng-show="myForm.useremail.$error.required">Email is required.</span>
@@ -60,14 +63,14 @@
                                 </span>
                             </div>
                             <div class="form-group-custom">
-                              <label for="exampleInputPassword1">Password</label>
+                              <label for="exampleInputPassword1">Password <span class="mandatory">*</span></label>
                                <input type="text" name="userPassword" class="form-control" placeholder="Enter Password" ng-model="userPassword" required>
                                <span style="color:red" ng-cloak ng-show="myForm.userPassword.$dirty && myForm.userPassword.$invalid">
                                 <span ng-show="myForm.userPassword.$error.required">New Password is required.</span>
                                </span>
                             </div>
                             <div class="form-group-custom">
-                                <label>Phone</label>
+                                <label>Phone <span class="mandatory">*</span></label>
                                 <input type="number" class="form-control" ng-minlength="10" ng-maxlength="10" name="userPhone" placeholder="Enter Phone" ng-model="userPhone" ng-required="true">
                                 <span style="color:red" ng-cloak ng-show="myForm.userPhone.$dirty && myForm.userPhone.$invalid">
                                 <span  ng-show="myForm.userPhone.$error.required || myForm.userPhone.$error.number">Invalid Phone</span>
@@ -75,22 +78,22 @@
                                 </span>
                             </div>
                             <div class="form-group-custom">
-                                <label>Role</label>
-                                <select name="userRole" class="form-control select2 select2-hidden-accessible"  >
+                                <label>Role <span class="mandatory">*</span></label>
+                                <select name="userRole" class="form-control select2 select2-hidden-accessible"  ng-model="userRole" ng-change="getManagerNames(userRole)" >
                                     <option ng-repeat="UserRole in UserRoles" value="{{UserRole.Id}}" <?php if(count($this->userData[0])){?>ng-selected="{{ UserRole.Id == <?php echo $this->userData[0]['role_id']?> }}" <?php }?>>
                                         {{UserRole.Name}}
                                     </option>
                                 </select>
-                  			</div>
+                            </div>
                             <div class="form-group-custom">
                               <label>Reporting Manager</label>
-                              <select name="reportingManagers" class="form-control select2 select2-hidden-accessible"  >
-                                <option ng-repeat="reportingManager in reportingManagers" value="{{reportingManager.Id}}" <?php if(count($this->userData[0])){?>ng-selected="{{ reportingManager.Id == <?php echo $this->userData[0]['reporting_manager']?> }}" <?php }?>>
+                              <select name="reportingManagers" class="form-control select2 select2-hidden-accessible" ng-disabled="disbleReportingManager">
+                                <option ng-repeat="reportingManager in reportingManagers" value="{{reportingManager.Id}}" <?php if(count($this->allManagers)){?>ng-selected="{{ reportingManager.Id == <?php echo $this->userData[0]['reporting_manager']?> }}" <?php }?>>
                                     {{reportingManager.Name}}
                                 </option>
-                            </select>
+                              </select>
                             <span style="color:red" ng-cloak ng-show="myForm.reportingManagers.$dirty && myForm.reportingManagers.$error.required">Select Reporting Manager</span>
-                  			</div>                         
+                            </div>                         
                           <div class="box-footer-custom">
                             <button class="btn btn-primary" type="submit" ng-disabled="(myForm.$invalid )">Save</button>
                             <button class="btn btn-danger" type="button" style="margin-left:10px;" ng-click="cancelBtn()">Cancel</button>
@@ -111,56 +114,41 @@
    <script src="<?php echo $baseUrl;?>/public/angular.min.js"></script>
   <script>
     var app = angular.module('myApp', []);
-    app.controller('validateCtrl', function($scope) {
-        //$scope.myStyle=false;
+    app.controller('validateCtrl', function($scope, $http) {
+        $scope.disbleReportingManager=true;
+        $scope.reportingManagers = [];
 //        myColor = 'red';
         <?php if(isset($this->userData)){?>
-                $scope.fullName     = '<?php echo $this->userData[0]['username']?>';
-                $scope.useremail     = '<?php echo $this->userData[0]['useremail']?>';
+                $scope.fullName         = '<?php echo $this->userData[0]['username']?>';
+                $scope.useremail        = '<?php echo $this->userData[0]['useremail']?>';
                 $scope.userPassword     = '<?php echo $this->userPassword?>';
-                $scope.userPhone     = parseInt('<?php echo $this->userData[0]['mobile']?>');
-
-
-
-//                $scope.fullName     = 'Arvind';
-//                $scope.useremail     = 'arvind@gmail.com';
-//                $scope.userPassword     = 'password';
-//                $scope.userPhone     = parseInt('7894561230');
-                
+                $scope.userPhone        = parseInt('<?php echo $this->userData[0]['mobile']?>');
+                $scope.reportingManagers = <?php echo $this->allManagers?>;
+                $scope.disbleReportingManager=  (Object.keys($scope.reportingManagers).length > 0) ? false : true;
         <?php }?>
 
-        $scope.UserRoles = [
-            {
-                Id: 1,Name: 'Admin',Selected: true
-            }, {
-                Id: 2,Name: 'Manager',Selected: false
-            }, {
-                Id: 3, Name: 'User', Selected: false
-            }];
-        
-        
-        
-        $scope.reportingManagers = [{
-                Id: '',
-                Name: 'Select Manager',
-                Selected: false
-            },{
-                Id: 1,
-                Name: 'User 1',
-                Selected: false
-            }, {
-                Id: 2,
-                Name: 'User 2',
-                Selected: true
-            }, {
-                Id: 3,
-                Name: 'User 3',
-                Selected: false
-            }];
-        
-        
+        $scope.UserRoles = <?php echo $this->allRoles?>;
         $scope.cancelBtn = function(){
             window.location.href = '<?php echo $baseUrl?>/admin/manageusers';
+        }
+        
+        $scope.getManagerNames = function(userRole) {
+            var url = "<?php echo $baseUrl?>/admin/getmanagernames?callback=JSON_CALLBACK";
+//            var url = "<?php echo $baseUrl?>/admin/getmanagernames";
+            $http.post(url,{'userRoleId':userRole}) 
+            .success(function (data, status, headers, config) {
+                console.log(data);
+                
+                    $scope.reportingManagers = data;
+                
+                    $scope.disbleReportingManager= (userRole!=1) ? false : true;
+                
+            })
+            .error(function (data, status, headers, config) {
+                //this always gets called
+                console.log(status);
+            });
+            return false;   
         }
     });
     

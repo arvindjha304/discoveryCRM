@@ -1,0 +1,213 @@
+<?php $baseUrl = $this->basePath();
+
+//        echo '<pre>';print_r($this->formData);exit; 
+//echo $baseUrl;exit;
+
+
+?>
+<!-- Content Wrapper. Contains page content -->
+    <!-- Angular js file -->
+   <style>
+    [ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak {
+      display: none !important;
+    }
+  </style>
+  
+    
+<!-- Content Wrapper. Contains page content -->
+      <div class="content-wrapper">
+        <!-- Content Header (Page header) -->
+        <section class="content-header">
+          <h1>
+            Lead
+            <small>(Creating New Leads)</small>
+          </h1>
+          <ol class="breadcrumb">
+            <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
+            <li>Lead</li>
+            <li class="active">Creating New Leads</li>
+          </ol>
+        </section>
+
+        <!-- Main content -->
+        <section class="content">
+          <!-- Small boxes (Stat box) -->
+          <!-- /.row -->
+          <!-- Main row -->
+          <div class="row">
+            <!-- Left col -->
+            <section class="col-lg-12 connectedSortable">
+              <!-- Add user form-->
+              <div class="box box-primary box-custom">
+                <div class="box-header with-border">
+                  <h3 class="box-title">Basic Information</h3>
+                </div><!-- /.box-header -->
+                <!-- form start -->
+                <div class="container"  ng-controller="validateCtrl">
+                    <div class="col-lg-11"  style="background-color:#fff; margin-top:60px; margin-bottom:60px;">
+                        <div class="box-header" style="padding-left:0px;">
+                            <form method="post" name="myForm1" novalidate ng-submit="CheckMobile(CheckMobileNumber)">
+                            <div class="col-md-4" style="padding-left:0px;">
+                            <div class="form-group">    
+                                <input class="form-control" type="text" placeholder="Enter Mobile Number" ng-minlength="10" ng-maxlength="10" name="CheckMobileNumber" ng-model="CheckMobileNumber" required>
+                                <span style="color:red" ng-cloak ng-show="myForm1.CheckMobileNumber.$dirty && myForm.CheckMobileNumber.$invalid">
+                                <span  ng-show="myForm1.CheckMobileNumber.$error.required || myForm1.CheckMobileNumber.$error.number">Invalid Phone</span>
+                                <span  ng-show="(myForm1.CheckMobileNumber.$error.minlength || myForm1.CheckMobileNumber.$error.maxlength) ">Mobile Number should be of 10 digits</span>
+                                </span>
+                                <span id="noExistsMsg" style="display:none;color:red">Mobile Number already exists.</span>
+                            </div>
+                            </div>
+                                <div class="col-md-1"><button type="button" class="btn btn-danger" ng-disabled="(myForm1.$invalid)" ng-click="CheckMobile(CheckMobileNumber)"> Go </button></div> 
+                            </form>
+                        </div>
+                        <form style="display:none" action="" method="post" name="myForm" id="addLeadForm" novalidate>
+                          <input type="hidden" name="leadId" value="<?php echo (count($this->formData[0]))? $this->formData[0]['id'] : ''?>" >
+                          <div class="form-group-custom">
+                                <label>Customer Name <span class="mandatory">*</span></label>
+                                <input class="form-control" type="text" placeholder="Enter ..." name="CustomerName" ng-model="CustomerName" required>
+                                <span style="color:red;" ng-cloak ng-show="(myForm.CustomerName.$dirty && myForm.CustomerName.$invalid)">
+                                <span ng-show="myForm.CustomerName.$error.required">Email is required.</span></span>
+                            </div>                         
+                            <div class="form-group-custom">
+                                <label>Mobile Number <span class="mandatory">*</span></label>
+                                <input class="form-control" type="text" placeholder="i.e 9999888866" ng-minlength="10" ng-maxlength="10" name="MobileNumber" ng-model="MobileNumber" required>
+                                <span style="color:red" ng-cloak ng-show="myForm.MobileNumber.$dirty && myForm.MobileNumber.$invalid">
+                                <span  ng-show="myForm.MobileNumber.$error.required || myForm.MobileNumber.$error.number">Invalid Phone</span>
+                                <span  ng-show="(myForm.MobileNumber.$error.minlength || myForm.MobileNumber.$error.maxlength) ">Mobile Number should be of 10 digits</span>
+                                </span>
+                            </div>
+                            <div class="form-group-custom">
+                                <label>Alternate Number</label>
+                                <input class="form-control" type="text" placeholder="i.e 9999888866" ng-minlength="10" ng-maxlength="10" name="AlternateName" ng-model="AlternateName" >
+                                <span style="color:red" ng-cloak ng-show="myForm.AlternateName.$dirty && myForm.AlternateName.$invalid">
+                                <span  ng-show="myForm.AlternateName.$error.number">Invalid Phone</span>
+                                <span  ng-show="(myForm.AlternateName.$error.minlength || myForm.AlternateName.$error.maxlength) ">Alternate Number should be 10 of digits</span>
+                                </span>
+                            </div>
+                            <div class="form-group-custom">
+                                <label>Other Number</label>
+                                <input class="form-control" type="text" placeholder="i.e any format" ng-minlength="10" ng-maxlength="10" name="OtherName" ng-model="OtherName">
+                                <span style="color:red" ng-cloak ng-show="myForm.OtherName.$dirty && myForm.OtherName.$invalid">
+                                <span  ng-show="myForm.OtherName.$error.number">Invalid Phone</span>
+                                <span  ng-show="(myForm.OtherName.$error.minlength || myForm.OtherName.$error.maxlength) ">Other Number should be 10 of digits</span>
+                                </span>
+                            </div>
+                            <div class="form-group-custom">
+                              <label for="exampleInputEmail1">Email Address <span class="mandatory">*</span></label>
+                              <input type="email" placeholder="Enter email" class="form-control" name="EmailAddress" ng-model="EmailAddress" required>
+                              <span style="color:red" ng-style="{color: myColor}" ng-cloak ng-show="myForm.EmailAddress.$dirty && myForm.EmailAddress.$invalid">
+                                <span ng-show="myForm.EmailAddress.$error.required">Email is required.</span>
+                                <span ng-show="myForm.EmailAddress.$error.email">Invalid email address.</span>
+                              </span>
+                            </div>
+                            <div class="form-group-custom">
+                                <label>Address</label>
+                                <input class="form-control" type="text" placeholder="Enter..." name="Address" ng-model="Address" >
+                            </div>
+                            <div class="form-group-custom">
+                                <label>Source of Enquiry <span class="mandatory">*</span></label>
+                                <select name="SourceOfEnquiry" class="form-control select2 select2-hidden-accessible"  ng-model="SourceOfEnquiry" >
+                                    <option ng-repeat="allSource in allSources" value="{{allSource.Id}}" <?php if(count($this->formData[0])){?>ng-selected="{{ allSource.Id == <?php echo $this->formData[0]['source_of_enquiry']?> }}" <?php }?>>
+                                        {{allSource.Name}}
+                                    </option>
+                                </select>
+                                <span style="color:red;" ng-cloak ng-show="(myForm.SourceOfEnquiry.$dirty && myForm.SourceOfEnquiry.$invalid)">
+                                    <span ng-show="myForm.SourceOfEnquiry.$error.required">Email is required.</span>
+                                </span>
+                            </div>
+                            <div class="form-group-custom">
+                                <label>Budget</label>
+                                <input class="form-control" type="text" placeholder="Enter..." name="Budget" ng-model="Budget">
+                                <span style="color:red;" ng-cloak ng-show="(myForm.Budget.$dirty && myForm.Budget.$invalid)">
+                                <span ng-show="myForm.Budget.$error.required">Budget is required.</span></span>
+                            </div>
+                            <div class="form-group-custom">
+                                <label>Project Interested <span class="mandatory">*</span></label>
+                                <select name="ProjectInterested" class="form-control select2 select2-hidden-accessible"  ng-model="ProjectInterested">
+                                    <option ng-repeat="allProject in allProjects" value="{{allProject.Id}}" <?php if(count($this->formData[0])){?>ng-selected="{{ allProject.Id == <?php echo $this->formData[0]['project_interested']?> }}" <?php }?>>
+                                        {{allProject.Name}}
+                                    </option>
+                                </select>
+                                <span style="color:red;" ng-cloak ng-show="(myForm.ProjectInterested.$dirty && myForm.ProjectInterested.$invalid)">
+                                    <span ng-show="myForm.ProjectInterested.$error.required">Email is required.</span>
+                                </span>
+                            </div> 
+                            <div class="form-group-custom">
+                                <label>Requirement</label>
+                                <input class="form-control" type="text" placeholder="Enter..." name="Requirement" ng-model="Requirement">
+                            </div>                        
+                          <div class="box-footer-custom">
+                            <button class="btn btn-primary" type="submit" ng-disabled="(myForm.$invalid )">Save</button>
+                            <button class="btn btn-danger" type="button" style="margin-left:10px;" ng-click="cancelBtn()">Cancel</button>
+                          </div>
+                        </form>
+                    </div>
+                </div>
+              </div>
+              <!-- /End of Add user form -->
+
+             <!-- Add new Graph ----------------------------------------------------><!-- /.box -->             
+
+            </section><!-- /.Left col -->            
+          </div><!-- /.row (main row) -->
+
+        </section><!-- /.content -->
+      </div><!-- /.content-wrapper -->
+   <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+   <script src="<?php echo $baseUrl;?>/public/angular.min.js"></script>
+  <script>
+    var app = angular.module('myApp', []);
+    app.controller('validateCtrl', function($scope, $http) {
+        
+        $scope.allSources   = <?php echo $this->allSources?>;
+        $scope.allProjects  = <?php echo $this->allProjects?>;
+        
+        <?php if(isset($this->formData)){?>
+            $scope.CustomerName         = '<?php echo $this->formData[0]['customer_name']?>';
+            $scope.MobileNumber         = parseInt('<?php echo $this->formData[0]['mobile']?>');
+            $scope.AlternateName        = parseInt('<?php if($this->formData[0]['alt_no']!=0) echo $this->formData[0]['alt_no']?>');
+            $scope.OtherName            = parseInt('<?php if($this->formData[0]['other_no']!=0) echo $this->formData[0]['other_no']?>');
+            $scope.EmailAddress         = '<?php echo $this->formData[0]['email']?>';
+            $scope.Address              = '<?php echo $this->formData[0]['address']?>';
+//            $scope.SourceOfEnquiry      = '<?php echo $this->formData[0]['source_of_enquiry']?>';
+            $scope.Budget               = '<?php if($this->formData[0]['budget']!=0) echo $this->formData[0]['budget']?>';
+           // $scope.ProjectInterested    = '<?php echo $this->formData[0]['project_interested']?>';
+            $scope.Requirement          = '<?php echo $this->formData[0]['requirement']?>';
+        <?php }?>
+            
+        $scope.CheckMobile = function(mobileNumber){
+            
+            var url = "<?php echo $baseUrl?>/admin/checkmobilenumber";
+            $http.post(url,{'mobileNumber':mobileNumber}) 
+            .success(function (data, status, headers, config) {
+                if(data==1){
+                    $('#addLeadForm').hide('slow');
+                    $('#noExistsMsg').show();
+                }else{
+                   $scope.MobileNumber   = mobileNumber;
+                   $('#addLeadForm').show('slow'); 
+                   $('#noExistsMsg').hide();
+               }
+            })
+            .error(function (data, status, headers, config) {
+                //this always gets called
+                console.log(status);
+            });
+            return false;   
+        }
+        $scope.cancelBtn = function(){
+            window.location.href = '<?php echo $baseUrl?>/admin/manageleads';
+        }
+    });
+    
+    // ng-app was ommitted from the html so that
+    // we can manually bootstray (initialize)
+    // angular after a delay to simulate the 
+    // actual code being loaded later
+    setTimeout(function(){
+      angular.element(document).ready(function() {
+          //console.log('document Ready');
+        angular.bootstrap(document, ['myApp']);
+      });  
+    },2500);
+</script>

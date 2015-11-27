@@ -50,10 +50,18 @@ class AdminController extends AbstractActionController
     }
     public function addedituserAction()
     {
-//      echo '<pre>';print_r($this->loggedInUserDetails);exit; 
         $view = new ViewModel();
         $this->layout('layout/layoutadmin');
-         
+        $allRoles = $this->getModel()->getAllRoles();
+        $dataArray = array();
+        foreach($allRoles as $roles)
+        {
+           $tempArr         = [];
+           $tempArr['Id']   = $roles['id'];
+           $tempArr['Name'] = $roles['role_name'];
+           $dataArray[]    = $tempArr;
+        }
+        $view->setVariable('allRoles', json_encode($dataArray));
         $userId = $this->params()->fromRoute('id1', '');
         if($userId!=''){
             $arrList = $this->getModel()->getUserList($userId);
@@ -62,26 +70,33 @@ class AdminController extends AbstractActionController
                 $password = str_replace($arrList[0]['salt_key'], '', $arrList[0]['password']);
                 $view->setVariable('userPassword', base64_decode($password));
                 $view->setVariable('userData', $arrList);
+                $allManagers = $this->getModel()->getmanagernames($arrList[0]['role_id']);
+                
+//                echo '<pre>';print_r($allManagers);exit;    
+                
+                
+                $view->setVariable('allManagers', $allManagers);
             }
         }
         if($this->getRequest()->isPost()){
            $pswdVal = $this->params()->fromPost('userPassword');
            $salt = $this->create_salt();
-           $userId = $this->params()->fromPost('userId'); 
+           $userId = trim($this->params()->fromPost('userId')); 
+           $userRole = $this->params()->fromPost('userRole');
            $data = [
-              'username'          => $this->params()->fromPost('fullName'),
-              'useremail'         => $this->params()->fromPost('useremail'),
-              'mobile'            => $this->params()->fromPost('userPhone'),
+              'username'          => trim($this->params()->fromPost('fullName')),
+              'useremail'         => trim($this->params()->fromPost('useremail')),
+              'mobile'            => trim($this->params()->fromPost('userPhone')),
               'password'          => base64_encode(trim($pswdVal)).$salt,
               'salt_key'          => $salt,
-              'role_id'           => $this->params()->fromPost('userRole'),
-              'reporting_manager' => $this->params()->fromPost('reportingManagers'),
-              'comp_id'        => $this->loggedInUserDetails->comp_id
+              'role_id'           => $userRole,
+              'reporting_manager' => ($userRole!=1) ? $this->params()->fromPost('reportingManagers'): 0,
+              'comp_id'           => $this->loggedInUserDetails->comp_id
            ];
            
            if($userId!=''){
-                $data['last_updated_by']   = $this->loggedInUserDetails->id;
-                $data['last_updated']     = date('Y-m-d H:i:s');
+                $data['last_updated_by']    = $this->loggedInUserDetails->id;
+                $data['last_updated']       = date('Y-m-d H:i:s');
                $this->getModel()->updateanywhere('userlist', $data,['id'=>$userId]);
            }else{
                 $data['is_active']          = 1;
@@ -96,6 +111,18 @@ class AdminController extends AbstractActionController
         }
          return $view;
     }
+    
+    public function getmanagernamesAction() {
+        $postdata = file_get_contents("php://input");
+        $request = json_decode($postdata);
+//        echo '<pre>';print_r($request);exit;
+        $userRoleId = $request->userRoleId; 
+        $allManagers = $this->getModel()->getmanagernames($userRoleId);
+        exit($allManagers);
+    }
+    
+    
+    
     public function manageusersAction()
     {
         $view = new ViewModel();
@@ -108,11 +135,12 @@ class AdminController extends AbstractActionController
             {
 //         	    echo '<pre>';print_r($val1);exit;
                 $username		=	$val1['username'];
-                $mobile         =	$val1['mobile'];
+                $role_name                 =	$val1['role_name'];
+                $mobile                 =	$val1['mobile'];
                 $status			=	($val1['is_active']==1) ? 'Active' :	'Inactive';
                 $action			=	($val1['is_active']==1) ? '<button onclick=inActiveStatus('.$val1["id"].')>Inactive</button>' :'<button onclick=activeStatus('.$val1["id"].')>Active</button>';
                 $delete 		=	'<a href="'.$baseUrl.'/admin/addedituser/'.$val1['id'].'" ><button >Edit</button></a><button onclick=deleteRow('.$val1["id"].') >Delete</button>';
-                $dataArray[]    = array("id"=>$val1['id'],"data"=>array(0,$username,$mobile,$status,$delete.$action));
+                $dataArray[]    = array("id"=>$val1['id'],"data"=>array(0,$username,$role_name,$mobile,$status,$delete.$action));
             }
             $json = json_encode($dataArray);
             exit('{rows:'.$json.'}');
@@ -171,24 +199,33 @@ class AdminController extends AbstractActionController
         $roleRightsArr = [];
         if($roleId!=''){
            $roleArr = $this->getModel()->getRoleDetail($roleId);
-        //   echo '<pre>';print_r($roleArr);exit;
+        // echo '<pre>';print_r($roleArr);exit;
            $roleRightsArr = $this->getModel()->getRoleRights($roleId);
            $view->setVariable('roleArr', json_encode($roleArr));
            $view->setVariable('roleRightsArr', json_encode($roleRightsArr));
         }
         if($this->getRequest()->isPost()){
-            $roleRightsFormArr  = $this->params()->fromPost('roleRights');
-            $roleName           = $this->params()->fromPost('roleName');
-            $this->manageAddEditRoles($roleId,$roleRightsFormArr,$roleName,$roleRightsArr);
+            $formData = $this->params()->fromPost();
+//            $roleRightsFormArr  = $this->params()->fromPost('roleRights');
+//            $roleName           = $this->params()->fromPost('roleName');
+//            $this->manageAddEditRoles($roleId,$roleRightsFormArr,$roleName,$roleRightsArr);
+            $this->manageAddEditRoles($formData,$roleRightsArr);
             return $this->redirect()->toRoute('application',array('controller'=>'admin','action' => 'manageroles'));
         }
         return $view;
     }
     
-    public function manageAddEditRoles($roleId,$roleRightsFormArr,$roleName,$roleRightsArr) {
+    public function manageAddEditRoles($formData,$roleRightsArr) {
         
+//        echo '<pre>';print_r($formData);exit;
+        
+        $roleId             =   (isset($formData['roleId']) ?  $formData['roleId'] : '');
+        $roleRightsFormArr  =   $formData['roleRights'];
+        $roleName           =   $formData['roleName'];
+        $seniority          =   $formData['seniority'];
         $data = array(
-            'role_name'         => $roleName
+            'role_name'         =>  $roleName,
+            'seniority'         =>  $seniority
         );
         if($roleId==''){
             $data['is_active']         = 1;
@@ -232,7 +269,6 @@ class AdminController extends AbstractActionController
         }
         return 1;
     }
-    
     public function managerolesAction()
     {
         $view = new ViewModel();
@@ -249,10 +285,11 @@ class AdminController extends AbstractActionController
                 $role_name		=	$roles['role_name'];
                 $getRoleRights = $this->getModel()->getSelectedRoleRights($roles['id']);
                 $roleRights		=	$getRoleRights['roleRights'];
+                $seniority		=	$roles['seniority'];
                 $status			=	($roles['is_active']==1) ? 'Active' :	'Inactive';
                 $action			=	($roles['is_active']==1) ? '<button onclick=inActiveStatus('.$roles["id"].')>Inactive</button>' :'<button onclick=activeStatus('.$roles["id"].')>Active</button>';
                 $delete 		=	'<a href="'.$baseUrl.'/admin/addeditrole/'.$roles['id'].'" ><button >Edit</button></a><button onclick=deleteRow('.$roles["id"].') >Delete</button>';
-                $dataArray[]    = array("id"=>$roles['id'],"data"=>array(0,$role_name,$roleRights,$status,$delete.$action));
+                $dataArray[]    = array("id"=>$roles['id'],"data"=>array(0,$role_name,$roleRights,$seniority,$status,$delete.$action));
             }
 //          echo '<pre>';print_r($dataArray);exit;
             $json = json_encode($dataArray);
@@ -261,6 +298,16 @@ class AdminController extends AbstractActionController
         return $view;
     }
     
+    public function updateroleseniorityAction()
+    {
+        if($this->getRequest()->isXmlHttpRequest()){
+    		$admin = $this->getServiceLocator()->get('Application\Model\Admin');
+    		$id 	= $this->params()->fromPost('id');
+    		$value 	= $this->params()->fromPost('value');
+			$admin->updateanywhere('company_roles', array('seniority'=>$value), array('id'=>$id));
+    		exit(1);
+    	}
+    }
     
     public function projectsAction()
     {
@@ -375,6 +422,122 @@ class AdminController extends AbstractActionController
             exit('{rows:'.$json.'}');
         }
         return $view;
+    }
+    
+    public function addeditleadsAction()
+    {
+        $view = new ViewModel();
+        $this->layout('layout/layoutadmin');
+        $allSources = $this->getModel()->getAllSources();
+        $dataArray = array();
+        foreach($allSources as $sources)
+        {
+           $tempArr         = [];
+           $tempArr['Id']   = $sources['id'];
+           $tempArr['Name'] = $sources['source_name'];
+           $dataArray[]    = $tempArr;
+        }
+        $view->setVariable('allSources', json_encode($dataArray));
+        
+        
+        $allProjects = $this->getModel()->getAllProjects();
+        $dataArray = array();
+        foreach($allProjects as $projects)
+        {
+           $tempArr         = [];
+           $tempArr['Id']   = $projects['id'];
+           $tempArr['Name'] = $projects['project_name'];
+           $dataArray[]    = $tempArr;
+        }
+        $view->setVariable('allProjects', json_encode($dataArray));
+        $leadId = $this->params()->fromRoute('id1', '');
+        if($leadId!=''){
+            $arrList = $this->getModel()->getLeadList($leadId);
+//             echo '<pre>';print_r($arrList);exit;     
+            if(count($arrList)){
+                $view->setVariable('formData', $arrList);
+            }
+        }
+        if($this->getRequest()->isPost()){
+//            echo '<pre>';print_r($this->params()->fromPost());exit;   
+           $leadId = $this->params()->fromPost('leadId'); 
+           $data = [
+              'customer_name'       => $this->params()->fromPost('CustomerName'),
+              'mobile'              => $this->params()->fromPost('MobileNumber'),
+              'alt_no'              => $this->params()->fromPost('AlternateName'),
+              'other_no'            => $this->params()->fromPost('OtherName'),
+              'email'               => $this->params()->fromPost('EmailAddress'),
+              'address'             => $this->params()->fromPost('Address'),
+              'source_of_enquiry'   => $this->params()->fromPost('SourceOfEnquiry'),
+              'budget'              => $this->params()->fromPost('Budget'),
+              'project_interested'  => $this->params()->fromPost('ProjectInterested'),
+              'requirement'         => $this->params()->fromPost('Requirement')
+           ];
+           
+           if($leadId!=''){
+                $data['last_updated_by']   = $this->loggedInUserDetails->id;
+                $data['last_updated']     = date('Y-m-d H:i:s');
+                
+                
+//                echo '<pre>';print_r($data);exit;  
+                
+               $this->getModel()->updateanywhere('lead_list', $data,['id'=>$leadId]);
+           }else{
+                $data['comp_id']            = $this->loggedInUserDetails->comp_id;
+                $data['is_active']          = 1;
+                $data['is_delete']          = 0;
+                $data['created_by']         = $this->loggedInUserDetails->id;
+                $data['last_updated_by']    = $this->loggedInUserDetails->id;
+                $data['last_updated']       = date('Y-m-d H:i:s');
+                $data['date_created']       = date('Y-m-d H:i:s');
+                $this->getModel()->insertanywhere('lead_list', $data);
+           }
+            return $this->redirect()->toRoute('application',array('controller'=>'admin','action' => 'manageleads'));
+        }
+         return $view;
+    }
+    
+    public function manageleadsAction(){
+      
+        $view = new ViewModel();
+        $this->layout('layout/layoutadmin');
+    	$baseUrl = $this->getRequest()->getbaseUrl();
+        if($this->getRequest()->isXmlHttpRequest()){
+            $arrList = $this->getModel()->getLeadList();
+            $dataArray = array();
+            foreach($arrList as $val1)
+            {
+//         	    echo '<pre>';print_r($val1);exit;
+                $customer_name          =   $val1['customer_name'];
+                $mobile                 =   $val1['mobile'];
+                $source_of_enquiry      =   $val1['source_name'];
+                $project_interested     =   $val1['project_name'];
+                $status                 =   ($val1['is_active']==1) ? 'Active' :   'Inactive';
+                $action                 =   ($val1['is_active']==1) ? '<button onclick=inActiveStatus('.$val1["id"].')>Inactive</button>' :'<button onclick=activeStatus('.$val1["id"].')>Active</button>';
+                $delete                 =   '<a href="'.$baseUrl.'/admin/addeditleads/'.$val1['id'].'" ><button >Edit</button></a><button onclick=deleteRow('.$val1["id"].') >Delete</button>';
+                $dataArray[]            =   array("id"=>$val1['id'],"data"=>array(0,$customer_name,$mobile,$source_of_enquiry,$project_interested,$status,$delete.$action));
+            }
+            $json = json_encode($dataArray);
+            exit('{rows:'.$json.'}');
+        }
+        return $view;  
+        
+    }
+    
+    public function assignedleadsAction(){
+        $view = new ViewModel();
+        $this->layout('layout/layoutadmin');
+        return $view;  
+    }
+     
+    public function checkmobilenumberAction()
+    {
+        $postdata = file_get_contents("php://input");
+        $request = json_decode($postdata);
+        $mobile = $request->mobileNumber; 
+        $admin = $this->getServiceLocator()->get('Application\Model\Admin');
+        echo $admin->checkMobile($mobile);  
+        exit;
     }
     
 }

@@ -39,16 +39,16 @@
                 <div class="container">
                     <div class="col-lg-11"  style="background-color:#fff; margin-top:60px; margin-bottom:60px;">
                         <form  action="#" method="post" ng-controller="validateCtrl" name="myForm" novalidate>
-                            <input type="hidden" name="roleId" ng-model="roleId">
+                            <input type="text" name="roleId" ng-model="roleId" style="display: none;">
                             <div class="form-group-custom">
-                                <label>Role Name</label>
+                                <label>Role Name <span class="mandatory">*</span></label>
                                 <input type="text" name="roleName" class="form-control" placeholder="Role Name" ng-model="roleName"  required>
                                 <span style="color:red;" ng-cloak ng-show="(myForm.roleName.$dirty && myForm.roleName.$invalid)">
                                 <span ng-show="myForm.roleName.$error.required">Role Name is required.</span>
                                 </span>
                             </div>
                             <div class="form-group-custom">
-                                <label>Select Rights</label>
+                                <label>Select Rights <span class="mandatory">*</span></label>
                                 <div class="row">
                                     <div class="col-md-2" ng-repeat="role in allRoles">
                                     <input id="{{role.name}}" name="roleRights[]" type="checkbox" value="{{role.id}}" ng-checked="selection.indexOf(role.id) > -1" ng-click="toggleSelection(role.id)" />
@@ -58,6 +58,13 @@
                                 </div>
                                 <span id="rightsCheckbox" style="display:none;color:red;">Rights is required.</span>
                             </div> 
+                            <div class="form-group-custom">
+                                <label>Seniority <span class="mandatory">*</span></label>
+                                <input type="text" name="seniority" class="form-control" placeholder="Seniority" ng-model="seniority"  required>
+                                <span style="color:red;" ng-cloak ng-show="(myForm.seniority.$dirty && myForm.seniority.$invalid)">
+                                <span ng-show="myForm.seniority.$error.required">Seniority is required.</span>
+                                </span>
+                            </div>
                           <div class="box-footer-custom">
                             <button class="btn btn-primary" type="submit" ng-disabled="(myForm.$invalid || selection.length == 0)">Save</button>
                             <button class="btn btn-danger" type="button" style="margin-left:10px;" ng-click="cancelBtn()">Cancel</button>
@@ -76,7 +83,7 @@
         </section><!-- /.content -->
       </div>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
-   <script src="<?php echo $baseUrl;?>/public/angular.min.js"></script>
+  <script src="<?php echo $baseUrl;?>/public/angular.min.js"></script>
   <script>
     var app = angular.module('myApp', []);
     var roleArr         = <?php if(isset($this->roleArr)) echo $this->roleArr; else echo '{}'?>;
@@ -91,8 +98,9 @@
         ];
         
         if(Object.keys(roleArr).length > 0){
-            $scope.roleName = roleArr.role_name;
-            $scope.roleId   = roleArr.id;
+            $scope.roleName     = roleArr.role_name;
+            $scope.roleId       = roleArr.id;
+            $scope.seniority    = roleArr.seniority;
         }
        $scope.selection=[];
        

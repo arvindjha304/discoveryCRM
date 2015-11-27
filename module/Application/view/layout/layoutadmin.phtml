@@ -47,6 +47,12 @@ if (defined('RUNNING_FROM_ROOT')) {
         <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
     
+    <style>
+        .mandatory{
+            color :#FF0000;
+        }
+    </style>
+    
   </head>
   <body class="hold-transition skin-blue sidebar-mini">
     <div class="wrapper">
@@ -285,9 +291,9 @@ if (defined('RUNNING_FROM_ROOT')) {
                 <i class="fa fa-angle-left pull-right"></i>
               </a>
               <ul class="treeview-menu">
-                <li><a href="#"><i class="fa fa-circle-o"></i> Add Leads</a></li>
-                <li><a href="#"><i class="fa fa-circle-o"></i> View Leads</a></li>
-                <li><a href="#"><i class="fa fa-circle-o"></i> Assigned Leads</a></li>                
+                <li><a href="<?php echo $baseUrl;?>/admin/addeditleads"><i class="fa fa-circle-o"></i> Add Leads</a></li>
+                <li><a href="<?php echo $baseUrl;?>/admin/manageleads"><i class="fa fa-circle-o"></i> View Leads</a></li>
+                <li><a href="<?php echo $baseUrl;?>/admin/assignedleads"><i class="fa fa-circle-o"></i> Assigned Leads</a></li>                
               </ul>
             </li> 
             <li class="treeview">

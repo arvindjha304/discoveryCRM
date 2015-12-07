@@ -35,6 +35,12 @@
                   </div>                  
                 </div><!-- /.box-header -->
                 <div class="box-body">
+                    <?php if(isset($this->projectExists)){?>
+                        <span style="color:red;" >Project Name Already exists.</span>
+                    <?php }?>
+                        
+                        
+                        
                   <form  action="#" method="post" ng-controller="validateCtrl" name="myForm" novalidate>
                     <input type="text" name="projectId" ng-model="projectId" style="display:none;">
                     <div class="form-group-custom">

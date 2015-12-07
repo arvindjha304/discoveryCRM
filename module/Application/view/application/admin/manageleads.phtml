@@ -41,6 +41,29 @@
                   </a>
                   </div>
                 </div><!-- /.box-header -->
+                
+                <div class="box-header" ng-app="myApp" ng-controller="myCtrl">
+                    <div class="col-md-3">
+                    	<div class="form-group">                   
+                            <select style="width: 100%;" class="form-control select2" name="userRole" ng-model="userRole" ng-change="getUsers(userRole)">
+                                <option ng-repeat="UserRole in UserRoles" value="{{UserRole.Id}}" ng-selected="{{ UserRole.Id == '' }}" >
+                                        {{UserRole.Name}}
+                                </option>
+                            </select>
+                  	</div>
+                    </div>
+                    <div class="col-md-3">
+                    	<div class="form-group"> 
+                            <select style="width: 100%;" class="form-control select2" name="users" ng-model="users" ng-change="enableBtn(users)">
+                                <option ng-repeat="Users in AllUsers" value="{{Users.Id}}" ng-selected="{{ Users.Id == '' }}" >
+                                    {{Users.Name}}
+                                </option>
+                            </select>
+                  	</div>
+                    </div>
+                    <div class="col-md-1"><button type="submit" class="btn btn-danger" ng-disabled="AssignButton" ng-click="assignLead()"> Assign </button></div>                   
+                </div>
+                
                 <div class="box-body">
                     <div id="loadingDiv" class="" style="display: none">
                         <img src="images/350.gif"  border="0" />
@@ -61,8 +84,8 @@
                     <select class="form-control select2" style="width: 100%;" name="operationvalue" id="operationvalue" onchange="this.value">
                         <option value=''>Bulk Option</option>
                         <option value='delete'>Delete</option>
-                        <option value='inactive'>Inactivate</option>
-                        <option value='active' id='activated'>Activate</option>
+                        <!--<option value='inactive'>Inactivate</option>
+                        <option value='active' id='activated'>Activate</option>-->
                     </select>
                   </div>
                   </div>
@@ -75,21 +98,21 @@
           
         </section><!-- /.content -->
       </div>
-
+<script src="<?php echo $baseUrl;?>/public/angular.min.js"></script>
 <script>
 
 	var strgridURL='<?php echo $baseUrl;?>/admin/manageleads';
 	var mygrid = new dhtmlXGridObject('manageuser');
 	mygrid.setSkin("dhx_skyblue");
 	mygrid.setImagePath("<?php echo $baseUrl;?>/public/dhtmlxgrid/codebase/imgs/");
-	mygrid.setHeader(",<b>Name</b>,<b>Mobile</b>,<b>Source</b>,<b>Project</b>,<b>Status</b>,<b>Action</b>");							
-	mygrid.attachHeader("#master_checkbox,#text_filter,#text_filter,#select_filter,#select_filter,,");	
-	mygrid.setInitWidths(" 30, 150, 150, 150, 150, 150, *");
-	mygrid.enableTooltips("false,false,false,false,false,false,false");
+	mygrid.setHeader(",<b>Name</b>,<b>Mobile</b>,<b>Source</b>,<b>Project</b>,<b>Requirement</b>,<b>Punch Date</b>,<b>Open By</b>,<b>Action</b>");							
+	mygrid.attachHeader("#master_checkbox,#text_filter,#text_filter,#text_filter,#text_filter,#text_filter,#select_filter,,");	
+	mygrid.setInitWidths(" 30, 100, 100, 100, 100, 100, 100, 100, *");
+	mygrid.enableTooltips("false,false,false,false,false,false,false,false,false");
 	mygrid.enableAutoHeight(true);   
-	mygrid.setColAlign("center,left,left,left,left,left,left");
-	mygrid.setColTypes("ch,ro,ro,ro,ro,ro,ro");
-	mygrid.setColSorting("na,str,str,str,str,str,str");
+	mygrid.setColAlign("center,left,left,left,left,left,left,left,left");
+	mygrid.setColTypes("ch,ro,ro,ro,ro,ro,ro,ro,ro");
+	mygrid.setColSorting("na,str,str,str,str,str,str,str,str");
 	mygrid.enablePaging(true, 10, null, "pagingArea", true, "recinfoArea");
 	mygrid.setPagingSkin("bricks");
 	// mygrid.attachEvent("onXLS", function() { $("#preloader").show() });
@@ -104,14 +127,13 @@
 	}
 	
 	function deleteRow(id){
-		SITEROOT = '<?php echo $baseUrl?>';
-		$.post(SITEROOT+'/admin/updatestatus', {id:id,action:'delete',tableType:'USERLISTING'},function(response){
-			if(response == '1')
-			{
-				mygrid.clearAndLoad('<?php echo $baseUrl;?>/admin/manageleads',callBack,"json");
-			}
-		
-		}) ;
+            SITEROOT = '<?php echo $baseUrl?>';
+            $.post(SITEROOT+'/admin/updatestatus', {id:id,action:'delete',tableType:'USERLISTING'},function(response){
+                if(response == '1')
+                {
+                        mygrid.clearAndLoad('<?php echo $baseUrl;?>/admin/manageleads',callBack,"json");
+                }
+            }) ;
 	}
 	
 	function activeStatus(id){
@@ -128,11 +150,10 @@
 	function inActiveStatus(id){
 		SITEROOT = '<?php echo $baseUrl?>';
 		$.post(SITEROOT+'/admin/updatestatus', {id:id,action:'inactive',tableType:'USERLISTING'},function(response){
-			// alert(response);
-			if(response == '1')
-			{
-				mygrid.clearAndLoad('<?php echo $baseUrl;?>/admin/manageleads',callBack,"json");
-			}
+                    if(response == '1')
+                    {
+                            mygrid.clearAndLoad('<?php echo $baseUrl;?>/admin/manageleads',callBack,"json");
+                    }
 		}) ;
 	}
 	
@@ -140,28 +161,80 @@
 	function getSelectedIds(){
 		var selected_rows = new Array();
 		mygrid.forEachRow(function(id) {
-			if(mygrid.cells(id, 0).getValue()==1){
-				selected_rows.push(id);
-			}
+                    if(mygrid.cells(id, 0).getValue()==1){
+                            selected_rows.push(id);
+                    }
 		});		
 		return selected_rows.join(",");
 	}
 
 
 	function bulkaction(){
+            var action = $('#operationvalue').val();
+            if(action!=''){
+                var selectedIds = getSelectedIds();
+                SITEROOT = '<?php echo $baseUrl?>';
+                $.post(SITEROOT+'/admin/updatestatus', {selectedIds:selectedIds,action:action,tableType:'USERLISTING'},function(response){
+                        if(response == '1')
+                        {
+                            mygrid.clearAndLoad('<?php echo $baseUrl;?>/admin/manageleads',callBack,"json");
+                        }
+                }) ;		
+            }
+        }
 
-		var action = $('#operationvalue').val();
-			if(action!=''){
-				var selectedIds = getSelectedIds();
-				SITEROOT = '<?php echo $baseUrl?>';
-				$.post(SITEROOT+'/admin/updatestatus', {selectedIds:selectedIds,action:action,tableType:'USERLISTING'},function(response){
-					if(response == '1')
-					{
-						mygrid.clearAndLoad('<?php echo $baseUrl;?>/admin/manageleads',callBack,"json");
-					}
-				}) ;		
-			}
-		}
-
-	
+	var app = angular.module("myApp", []);
+        app.controller("myCtrl", function($scope, $http) {
+            $scope.UserRoles    = <?php echo $this->allRoles?>;
+            $scope.AllUsers     = [];
+            $scope.AssignButton = true;
+            $scope.getUsers     = function(role_id) {
+                if(role_id!=''){
+                    var url = "<?php echo $baseUrl?>/admin/getusersbyrole?callback=JSON_CALLBACK";
+                        $http.post(url,{'role_id':role_id}) 
+                        .success(function (data, status, headers, config) {
+//                            console.log(data);
+                            $scope.AllUsers = data;
+                        })
+                        .error(function (data, status, headers, config) {
+                            //this always gets called
+                            console.log(status);
+                        });
+                        return false;   
+                }else{
+                    $scope.AllUsers     = [];
+                }            
+            }
+            
+            $scope.enableBtn     = function(users) {
+                if(users!=''){
+                   $scope.AssignButton     = false;
+                }else{
+                   $scope.AssignButton     = true;
+                }            
+            }
+            
+            $scope.assignLead = function(){
+                
+                var leadIds = getSelectedIds();
+//                
+                if(leadIds!=''){
+                    var url = "<?php echo $baseUrl?>/admin/assignleadstouser?callback=JSON_CALLBACK";
+                        $http.post(url,{'leadIds':leadIds,'userId':$scope.users}) 
+                        .success(function (data, status, headers, config) {
+                            console.log(data);
+                            mygrid.clearAndLoad('<?php echo $baseUrl;?>/admin/manageleads',callBack,"json");
+//                            $scope.AllUsers = data;
+                        })
+                        .error(function (data, status, headers, config) {
+                            //this always gets called
+                            console.log(status);
+                        });
+                        return false;   
+                }
+                
+                
+            }
+            
+        });
 </script>

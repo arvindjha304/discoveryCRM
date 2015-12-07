@@ -29,512 +29,63 @@
         <!-- Main content -->
         <section class="content">
           <div class="row">
-            <div class="col-xs-12 col-md-12">
+            <div class="col-xs-12">
               <div class="box box-primary box-custom">
-              	<!----<div class="box-header"></div><!-- /.box-header -->
-                <!---<div class="box-body">
-                  <form>
-                      <div class="form-group">
-                        <label for="exampleInputEmail1">Email address</label>
-                        <input type="email" class="form-control" id="exampleInputEmail1" placeholder="Email">
-                      </div>                        
-                            <button class="btn btn-primary" type="submit">Save</button>
-                            <button class="btn btn-danger" type="submit" style="margin-left:10px;">Cancel</button>                                  
-                </form>
-                </div>
-                <hr>----><br>
                 <div class="box-header">
-               		<div class="col-md-3">
-                    	<div class="form-group">                   
-                            <select class="form-control select2" style="width: 100%;">
-                              <option selected="selected">Select Category</option>
-                              <option>abcd</option>
-                              <option>efgh</option>
-                              <option>ijkl</option>
-                              <option>mnop</option>
-                              <option>qrst</option>
-                              <option>uvwx</option>
-                            </select>
-                  		</div>
-                    </div>
+                <div class="col-md-6">
+                  <h3 class="box-title">Assigned Leads</h3>
+                  </div>
+                  
+                </div><!-- /.box-header -->
+                
+                <div class="box-header" ng-app="myApp" ng-controller="myCtrl">
                     <div class="col-md-3">
                     	<div class="form-group">                   
-                            <select class="form-control select2" style="width: 100%;">
-                              <option selected="selected">Select Role</option>
-                              <option>abcd</option>
-                              <option>efgh</option>
-                              <option>ijkl</option>
-                              <option>mnop</option>
-                              <option>qrst</option>
-                              <option>uvwx</option>
+                            <select style="width: 100%;" class="form-control select2" name="userRole" ng-model="userRole" ng-change="getUsers(userRole)">
+                                <option ng-repeat="UserRole in UserRoles" value="{{UserRole.Id}}" ng-selected="{{ UserRole.Id == '' }}" >
+                                        {{UserRole.Name}}
+                                </option>
                             </select>
-                  		</div>
+                  	</div>
                     </div>
-                    <div class="col-md-1"><button class="btn btn-danger" type="submit"> Reassign </button></div>                   
-                </div><!-- /.box-header -->
+                    <div class="col-md-3">
+                    	<div class="form-group"> 
+                            <select style="width: 100%;" class="form-control select2" name="users" ng-model="users" ng-change="enableBtn(users)">
+                                <option ng-repeat="Users in AllUsers" value="{{Users.Id}}" ng-selected="{{ Users.Id == '' }}" >
+                                    {{Users.Name}}
+                                </option>
+                            </select>
+                  	</div>
+                    </div>
+                    <div class="col-md-1"><button type="submit" class="btn btn-danger" ng-disabled="AssignButton" ng-click="assignLead()"> Reassign </button></div>                   
+                </div>
+                
                 <div class="box-body">
-                  <table id="example1" class="table table-bordered table-striped">
-                    <thead>
-                      <tr>
-                      	<th> 
-                            <input type="checkbox" class="minimal">                                        		 
-                        </th>
-                        <th>S. No.</th>
-                        <th>Name</th>
-                        <th>Mobile</th>
-                        <th>Project</th>
-                        <th>Source</th>
-                        <th>Punch Date</th>
-                        <th>Assigned to</th>
-                        <th>Assigned Date</th>                        
-                        <th>Next Meeting</th>
-                        <th>Open By</th>
-                        <th>Status</th>
-                        <th>Action</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                      	<td> 
-                            <input type="checkbox" class="minimal" checked>                                        		 
-                        </td>
-                        <td>01.</td>
-                        <td><a href="#" data-toggle="tooltip" data-placement="bottom" title="LAST ACTIVITY - Lorem ipsum dolor sit amet, consectetuer adipiscing elit.">Arvind Kumar</a></td>
-                        <script>
-							$(function () {
-							  $('[data-toggle="tooltip"]').tooltip()
-							})
-                        </script>
-                        <td>9999888866</td>
-                        <td>Galaxy</td>
-                        <td>magicbricks</td>
-                        <td>05/11/2015</td>
-                        <td>Jitendra</td>
-                        <td>05/11/2015</td>                        
-                        <td>05/12/2015 | 14:25</td>
-                        <td>Jitendra</td>
-                        <td>Interested</td>
-                        <td>
-                        	 <div class="btn-group">
-                                  <button type="button" class="btn btn-primary" title="Update Lead"><i class="fa fa-pencil-square-o"></i></button>
-                                  <button type="button" class="btn btn-primary" title="Edit Lead"><i class="fa fa-pencil"></i></button>
-                                  <button type="button" class="btn btn-primary" title="Assigned Lead"><i class="fa fa-check-square-o"></i></button>
-                        	</div>
-                        </td>
-                      </tr>
-                      <tr>
-                      	<td> 
-                            <input type="checkbox" class="minimal">                                        		 
-                        </td>
-                        <td>02.</td>
-                        <td>Arvind Kumar</td>
-                        <td>9999888866</td>
-                        <td>Galaxy</td>
-                        <td>magicbricks</td>
-                        <td>05/11/2015</td>
-                        <td>Jitendra</td>
-                        <td>05/11/2015</td>                        
-                        <td>05/12/2015 | 14:25</td>
-                        <td>Jitendra</td>
-                        <td>Interested</td>
-                        <td>
-                        	 <div class="btn-group">                                  
-                                  <button class="btn btn-info btn-flat margin-custom" title="Update Lead"><i class="fa fa-pencil-square-o"></i></button>
-                    			  <button class="btn btn-primary btn-flat margin-custom" title="Edit Lead"><i class="fa fa-pencil"></i></button>
-                    			  <button class="btn btn-danger btn-flat margin-custom" title="Assigned Lead"><i class="fa fa-check-square-o"></i></button>
-                        	</div>
-                        </td>
-                      </tr>
-                     <tr>
-                     	<td> 
-                            <input type="checkbox" class="minimal">                                        		 
-                        </td>
-                        <td>03.</td>
-                        <td>Arvind Kumar</td>
-                        <td>9999888866</td>
-                        <td>Galaxy</td>
-                        <td>magicbricks</td>
-                        <td>05/11/2015</td>
-                        <td>Jitendra</td>
-                        <td>05/11/2015</td>                        
-                        <td>05/12/2015 | 14:25</td>
-                        <td>Jitendra</td>
-                        <td>Interested</td>
-                        <td>
-                        	 <div class="btn-group">
-                                  <button type="button" class="btn btn-primary" title="Update Lead"><i class="fa fa-pencil-square-o"></i></button>
-                                  <button type="button" class="btn btn-primary" title="Edit Lead"><i class="fa fa-pencil"></i></button>
-                                  <button type="button" class="btn btn-primary" title="Assigned Lead"><i class="fa fa-check-square-o"></i></button>
-                        	</div>
-                        </td>
-                      </tr>
-                      <tr>
-                      	<td> 
-                            <input type="checkbox" class="minimal">                                        		 
-                        </td>
-                        <td>04.</td>
-                        <td>Arvind Kumar</td>
-                        <td>9999888866</td>
-                        <td>Galaxy</td>
-                        <td>magicbricks</td>
-                        <td>05/11/2015</td>
-                        <td>Jitendra</td>
-                        <td>05/11/2015</td>                        
-                        <td>05/12/2015 | 14:25</td>
-                        <td>Jitendra</td>
-                        <td>Interested</td>
-                        <td>
-                        	 <div class="btn-group">
-                                  <button type="button" class="btn btn-primary" title="Update Lead"><i class="fa fa-pencil-square-o"></i></button>
-                                  <button type="button" class="btn btn-primary" title="Edit Lead"><i class="fa fa-pencil"></i></button>
-                                  <button type="button" class="btn btn-primary" title="Assigned Lead"><i class="fa fa-check-square-o"></i></button>
-                        	</div>
-                        </td>
-                      </tr>
-                      <tr>
-                      	<td> 
-                            <input type="checkbox" class="minimal">                                        		 
-                        </td>
-                        <td>05.</td>
-                        <td>Arvind Kumar</td>
-                        <td>9999888866</td>
-                        <td>Galaxy</td>
-                        <td>magicbricks</td>
-                        <td>05/11/2015</td>
-                        <td>Jitendra</td>
-                        <td>05/11/2015</td>                       
-                        <td>05/12/2015 | 14:25</td>
-                        <td>Jitendra</td>
-                        <td>Interested</td>
-                        <td>
-                        	 <div class="btn-group">
-                                  <button type="button" class="btn btn-primary" title="Update Lead"><i class="fa fa-pencil-square-o"></i></button>
-                                  <button type="button" class="btn btn-primary" title="Edit Lead"><i class="fa fa-pencil"></i></button>
-                                  <button type="button" class="btn btn-primary" title="Assigned Lead"><i class="fa fa-check-square-o"></i></button>
-                        	</div>
-                        </td>
-                      </tr>
-                      <tr>
-                      	<td> 
-                            <input type="checkbox" class="minimal">                                        		 
-                        </td>
-                        <td>06.</td>
-                        <td>Arvind Kumar</td>
-                        <td>9999888866</td>
-                        <td>Galaxy</td>
-                        <td>magicbricks</td>
-                        <td>05/11/2015</td>
-                        <td>Jitendra</td>
-                        <td>05/11/2015</td>                        
-                        <td>05/12/2015 | 14:25</td>
-                        <td>Jitendra</td>
-                        <td>Interested</td>
-                        <td>
-                        	 <div class="btn-group">
-                                  <button type="button" class="btn btn-primary" title="Update Lead"><i class="fa fa-pencil-square-o"></i></button>
-                                  <button type="button" class="btn btn-primary" title="Edit Lead"><i class="fa fa-pencil"></i></button>
-                                  <button type="button" class="btn btn-primary" title="Assigned Lead"><i class="fa fa-check-square-o"></i></button>
-                        	</div>
-                        </td>
-                      </tr>
-                      <tr>
-                      	<td> 
-                            <input type="checkbox" class="minimal">                                        		 
-                        </td>
-                        <td>07.</td>
-                        <td>Arvind Kumar</td>
-                        <td>9999888866</td>
-                        <td>Galaxy</td>
-                        <td>magicbricks</td>
-                        <td>05/11/2015</td>
-                        <td>Jitendra</td>
-                        <td>05/11/2015</td>                        
-                        <td>05/12/2015 | 14:25</td>
-                        <td>Jitendra</td>
-                        <td>Interested</td>
-                        <td>
-                        	 <div class="btn-group">
-                                 <button type="button" class="btn btn-primary" title="Update Lead"><i class="fa fa-pencil-square-o"></i></button>
-                                  <button type="button" class="btn btn-primary" title="Edit Lead"><i class="fa fa-pencil"></i></button>
-                                  <button type="button" class="btn btn-primary" title="Assigned Lead"><i class="fa fa-check-square-o"></i></button>
-                        	</div>
-                        </td>
-                      </tr>
-                      <tr>
-                      	<td> 
-                            <input type="checkbox" class="minimal">                                        		 
-                        </td>
-                        <td>08.</td>
-                        <td>Arvind Kumar</td>
-                        <td>9999888866</td>
-                        <td>Galaxy</td>
-                        <td>magicbricks</td>
-                        <td>05/11/2015</td>
-                        <td>Jitendra</td>
-                        <td>05/11/2015</td>                        
-                        <td>05/12/2015 | 14:25</td>
-                        <td>Jitendra</td>
-                        <td>Interested</td>
-                        <td>
-                        	 <div class="btn-group">
-                                  <button type="button" class="btn btn-primary" title="Update Lead"><i class="fa fa-pencil-square-o"></i></button>
-                                  <button type="button" class="btn btn-primary" title="Edit Lead"><i class="fa fa-pencil"></i></button>
-                                  <button type="button" class="btn btn-primary" title="Assigned Lead"><i class="fa fa-check-square-o"></i></button>
-                        	</div>
-                        </td>
-                      </tr>
-                      <tr>
-                      	<td> 
-                            <input type="checkbox" class="minimal">                                        		 
-                        </td>
-                        <td>09.</td>
-                        <td>Arvind Kumar</td>
-                        <td>9999888866</td>
-                        <td>Galaxy</td>
-                        <td>magicbricks</td>
-                        <td>05/11/2015</td>
-                        <td>Jitendra</td>
-                        <td>05/11/2015</td>                        
-                        <td>05/12/2015 | 14:25</td>
-                        <td>Jitendra</td>
-                        <td>Interested</td>
-                        <td>
-                        	 <div class="btn-group">
-                                  <button type="button" class="btn btn-primary" title="Update Lead"><i class="fa fa-pencil-square-o"></i></button>
-                                  <button type="button" class="btn btn-primary" title="Edit Lead"><i class="fa fa-pencil"></i></button>
-                                  <button type="button" class="btn btn-primary" title="Assigned Lead"><i class="fa fa-check-square-o"></i></button>
-                        	</div>
-                        </td>
-                      </tr>
-                      <tr>
-                      	<td> 
-                            <input type="checkbox" class="minimal">                                        		 
-                        </td>
-                        <td>10.</td>
-                        <td>Arvind Kumar</td>
-                        <td>9999888866</td>
-                        <td>Galaxy</td>
-                        <td>magicbricks</td>
-                        <td>05/11/2015</td>
-                        <td>Jitendra</td>
-                        <td>05/11/2015</td>                        
-                        <td>05/12/2015 | 14:25</td>
-                        <td>Jitendra</td>
-                        <td>Interested</td>
-                        <td>
-                        	 <div class="btn-group">
-                                  <button type="button" class="btn btn-primary" title="Update Lead"><i class="fa fa-pencil-square-o"></i></button>
-                                  <button type="button" class="btn btn-primary" title="Edit Lead"><i class="fa fa-pencil"></i></button>
-                                  <button type="button" class="btn btn-primary" title="Assigned Lead"><i class="fa fa-check-square-o"></i></button>
-                        	</div>
-                        </td>
-                      </tr>
-                      <tr>
-                      	<td> 
-                            <input type="checkbox" class="minimal">                                        		 
-                        </td>
-                        <td>11.</td>
-                        <td>Arvind Kumar</td>
-                        <td>9999888866</td>
-                        <td>Galaxy</td>
-                        <td>magicbricks</td>
-                        <td>05/11/2015</td>
-                        <td>Jitendra</td>
-                        <td>05/11/2015</td>                        
-                        <td>05/12/2015 | 14:25</td>
-                        <td>Jitendra</td>
-                        <td>Interested</td>
-                        <td>
-                        	 <div class="btn-group">
-                                  <button type="button" class="btn btn-primary" title="Update Lead"><i class="fa fa-pencil-square-o"></i></button>
-                                  <button type="button" class="btn btn-primary" title="Edit Lead"><i class="fa fa-pencil"></i></button>
-                                  <button type="button" class="btn btn-primary" title="Assigned Lead"><i class="fa fa-check-square-o"></i></button>
-                        	</div>
-                        </td>
-                      </tr>
-                      <tr>
-                      	<td> 
-                            <input type="checkbox" class="minimal">                                        		 
-                        </td>
-                        <td>12.</td>
-                        <td>Arvind Kumar</td>
-                        <td>9999888866</td>
-                        <td>Galaxy</td>
-                        <td>magicbricks</td>
-                        <td>05/11/2015</td>
-                        <td>Jitendra</td>
-                        <td>05/11/2015</td>                        
-                        <td>05/12/2015 | 14:25</td>
-                        <td>Jitendra</td>
-                        <td>Interested</td>
-                        <td>
-                        	 <div class="btn-group">
-                                  <button type="button" class="btn btn-primary" title="Update Lead"><i class="fa fa-pencil-square-o"></i></button>
-                                  <button type="button" class="btn btn-primary" title="Edit Lead"><i class="fa fa-pencil"></i></button>
-                                  <button type="button" class="btn btn-primary" title="Assigned Lead"><i class="fa fa-check-square-o"></i></button>
-                        	</div>
-                        </td>
-                      </tr>
-                      <tr>
-                      	<td> 
-                            <input type="checkbox" class="minimal">                                        		 
-                        </td>
-                        <td>13.</td>
-                        <td>Arvind Kumar</td>
-                        <td>9999888866</td>
-                        <td>Galaxy</td>
-                        <td>magicbricks</td>
-                        <td>05/11/2015</td>
-                        <td>Jitendra</td>
-                        <td>05/11/2015</td>                        
-                        <td>05/12/2015 | 14:25</td>
-                        <td>Jitendra</td>
-                        <td>Interested</td>
-                        <td>
-                        	 <div class="btn-group">
-                                  <button type="button" class="btn btn-primary" title="Update Lead"><i class="fa fa-pencil-square-o"></i></button>
-                                  <button type="button" class="btn btn-primary" title="Edit Lead"><i class="fa fa-pencil"></i></button>
-                                  <button type="button" class="btn btn-primary" title="Assigned Lead"><i class="fa fa-check-square-o"></i></button>
-                        	</div>
-                        </td>
-                      </tr>
-                      <tr>
-                      	<td> 
-                            <input type="checkbox" class="minimal">                                        		 
-                        </td>
-                        <td>14.</td>
-                        <td>Arvind Kumar</td>
-                        <td>9999888866</td>
-                        <td>Galaxy</td>
-                        <td>magicbricks</td>
-                        <td>05/11/2015</td>
-                        <td>Jitendra</td>
-                        <td>05/11/2015</td>                       
-                        <td>05/12/2015 | 14:25</td>
-                        <td>Jitendra</td>
-                        <td>Interested</td>
-                        <td>
-                        	 <div class="btn-group">
-                                  <button type="button" class="btn btn-primary" title="Update Lead"><i class="fa fa-pencil-square-o"></i></button>
-                                  <button type="button" class="btn btn-primary" title="Edit Lead"><i class="fa fa-pencil"></i></button>
-                                  <button type="button" class="btn btn-primary" title="Assigned Lead"><i class="fa fa-check-square-o"></i></button>
-                        	</div>
-                        </td>
-                      </tr>
-                      <tr>
-                      	<td> 
-                            <input type="checkbox" class="minimal">                                        		 
-                        </td>
-                        <td>15.</td>
-                        <td>Arvind Kumar</td>
-                        <td>9999888866</td>
-                        <td>Galaxy</td>
-                        <td>magicbricks</td>
-                        <td>05/11/2015</td>
-                        <td>Jitendra</td>
-                        <td>05/11/2015</td>                        
-                        <td>05/12/2015 | 14:25</td>
-                        <td>Jitendra</td>
-                        <td>Interested</td>
-                        <td>
-                        	 <div class="btn-group">
-                                  <button type="button" class="btn btn-primary" title="Update Lead"><i class="fa fa-pencil-square-o"></i></button>
-                                  <button type="button" class="btn btn-primary" title="Edit Lead"><i class="fa fa-pencil"></i></button>
-                                  <button type="button" class="btn btn-primary" title="Assigned Lead"><i class="fa fa-check-square-o"></i></button>
-                        	</div>
-                        </td>
-                      </tr>
-                       <tr>
-                       	<td> 
-                            <input type="checkbox" class="minimal">                                        		 
-                        </td>
-                        <td>16.</td>
-                        <td>Arvind Kumar</td>
-                        <td>9999888866</td>
-                        <td>Galaxy</td>
-                        <td>magicbricks</td>
-                        <td>05/11/2015</td>
-                        <td>Jitendra</td>
-                        <td>05/11/2015</td>                       
-                        <td>05/12/2015 | 14:25</td>
-                        <td>Jitendra</td>
-                        <td>Interested</td>
-                        <td>
-                        	 <div class="btn-group">
-                                  <button type="button" class="btn btn-primary" title="Update Lead"><i class="fa fa-pencil-square-o"></i></button>
-                                  <button type="button" class="btn btn-primary" title="Edit Lead"><i class="fa fa-pencil"></i></button>
-                                  <button type="button" class="btn btn-primary" title="Assigned Lead"><i class="fa fa-check-square-o"></i></button>
-                        	</div>
-                        </td>
-                      </tr>
-                       <tr>
-                       	<td> 
-                            <input type="checkbox" class="minimal">                                        		 
-                        </td>
-                        <td>17.</td>
-                        <td>Arvind Kumar</td>
-                        <td>9999888866</td>
-                        <td>Galaxy</td>
-                        <td>magicbricks</td>
-                        <td>05/11/2015</td>
-                        <td>Jitendra</td>
-                        <td>05/11/2015</td>                        
-                        <td>05/12/2015 | 14:25</td>
-                        <td>Jitendra</td>
-                        <td>Interested</td>
-                        <td>
-                        	 <div class="btn-group">
-                                  <button type="button" class="btn btn-primary" title="Update Lead"><i class="fa fa-pencil-square-o"></i></button>
-                                  <button type="button" class="btn btn-primary" title="Edit Lead"><i class="fa fa-pencil"></i></button>
-                                  <button type="button" class="btn btn-primary" title="Assigned Lead"><i class="fa fa-check-square-o"></i></button>
-                        	</div>
-                        </td>
-                      </tr>
-                       <tr>
-                       	<td> 
-                            <input type="checkbox" class="minimal">                                        		 
-                        </td>
-                        <td>18.</td>
-                        <td>Arvind Kumar</td>
-                        <td>9999888866</td>
-                        <td>Galaxy</td>
-                        <td>magicbricks</td>
-                        <td>05/11/2015</td>
-                        <td>Jitendra</td>
-                        <td>05/11/2015</td>                        
-                        <td>05/12/2015 | 14:25</td>
-                        <td>Jitendra</td>
-                        <td>Interested</td>
-                        <td>
-                        	 <div class="btn-group">
-                                  <button type="button" class="btn btn-primary" title="Update Lead"><i class="fa fa-pencil-square-o"></i></button>
-                                  <button type="button" class="btn btn-primary" title="Edit Lead"><i class="fa fa-pencil"></i></button>
-                                  <button type="button" class="btn btn-primary" title="Assigned Lead"><i class="fa fa-check-square-o"></i></button>
-                        	</div>
-                        </td>
-                      </tr>                                                                           
-                    </tbody>
-                    <tfoot>
-                      <tr>                        
-                      </tr>
-                    </tfoot>
-                  </table>
+                    <div id="loadingDiv" class="" style="display: none">
+                        <img src="images/350.gif"  border="0" />
+                    </div>
+                    <div style="margin-left:15px" id="user_list">
+                        <div id='preloader' style="display:none;" >
+                        <img class=""src='images/animatedEllipse2.gif' border='0' style="width:50px;  left: 560px;position: absolute; top: 450px;z-index:2000"  ></div>	
+                        <div id="manageuser" class="gridbox" style="width:100% !important; background-color:white; margin-left: 0px;"></div>
+                        <div class="pagingWrap">
+                            <div style="width:100%;float:left;" id="recinfoArea"></div>
+                            <div id="pagingArea"></div>
+                        </div>
+                    </div> 
+                    
                 </div><!-- /.box-body -->
                 <div class="box-header">
-                  <div class="col-md-3">
-                  <div class="form-group">                   
-                    <select class="form-control select2" style="width: 100%;">
-                      <option selected="selected">Inactivate</option>
-                      <option>abcd</option>
-                      <option>efgh</option>
-                      <option>ijkl</option>
-                      <option>mnop</option>
-                      <option>qrst</option>
-                      <option>uvwx</option>
+                  <div class="col-md-3"><div class="form-group">                   
+                    <select class="form-control select2" style="width: 100%;" name="operationvalue" id="operationvalue" onchange="this.value">
+                        <option value=''>Bulk Option</option>
+                        <option value='delete'>Delete</option>
+                        <!--<option value='inactive'>Inactivate</option>
+                        <option value='active' id='activated'>Activate</option>-->
                     </select>
                   </div>
                   </div>
-                  <div class="col-md-1 text-right"><button class="btn btn-primary" type="submit"> Apply </button></div>
+                  <div class="col-md-1 text-right"><button class="btn btn-primary" type="submit" onclick="bulkaction()"> Apply </button></div>
                 </div>
               </div><!-- /.box -->
             </div><!-- /.col -->
@@ -543,21 +94,21 @@
           
         </section><!-- /.content -->
       </div>
-
+<script src="<?php echo $baseUrl;?>/public/angular.min.js"></script>
 <script>
 
-	var strgridURL='<?php echo $baseUrl;?>/admin/manageusers';
+	var strgridURL='<?php echo $baseUrl;?>/admin/assignedleads';
 	var mygrid = new dhtmlXGridObject('manageuser');
 	mygrid.setSkin("dhx_skyblue");
 	mygrid.setImagePath("<?php echo $baseUrl;?>/public/dhtmlxgrid/codebase/imgs/");
-	mygrid.setHeader(",<b>Name</b>,<b>Mobile</b>,<b>Status</b>,<b>Action</b>");							
-	mygrid.attachHeader("#master_checkbox,#text_filter,#select_filter,,");	
-	mygrid.setInitWidths(" 30, 290, 200, 150, *");
-	mygrid.enableTooltips("false,false,false,false,false");
+	mygrid.setHeader(",<b>Name</b>,<b>Mobile</b>,<b>Source</b>,<b>Project</b>,<b>Punch Date</b>,<b>Assigned To</b>,<b>Assigned Date</b>,<b>Next Meeting</b>,<b>Open By</b>,<b>Lead Status</b>,<b>Action</b>");							
+	mygrid.attachHeader("#master_checkbox,#text_filter,#text_filter,#select_filter,#select_filter,,,,,,,,");	
+	mygrid.setInitWidths(" 30, 90, 90, 90, 90, 90, 90, 90, 90, 90, 90, *");
+	mygrid.enableTooltips("false,false,false,false,false,false,false,false,false,false,false,false");
 	mygrid.enableAutoHeight(true);   
-	mygrid.setColAlign("center,left,left,left,left");
-	mygrid.setColTypes("ch,ro,ro,ro,ro");
-	mygrid.setColSorting("na,str,str,str,str");
+	mygrid.setColAlign("center,left,left,left,left,left,left,left,left,left,left,left");
+	mygrid.setColTypes("ch,ro,ro,ro,ro,ro,ro,ro,ro,ro,ro,ro");
+	mygrid.setColSorting("na,str,str,str,str,str,str,str,str,str,str,str");
 	mygrid.enablePaging(true, 10, null, "pagingArea", true, "recinfoArea");
 	mygrid.setPagingSkin("bricks");
 	// mygrid.attachEvent("onXLS", function() { $("#preloader").show() });
@@ -572,36 +123,33 @@
 	}
 	
 	function deleteRow(id){
-		SITEROOT = '<?php echo $baseUrl?>';
-		$.post(SITEROOT+'/admin/updatestatus', {id:id,action:'delete',tableType:'USERLISTING'},function(response){
-			if(response == '1')
-			{
-				mygrid.clearAndLoad('<?php echo $baseUrl;?>/admin/manageusers',callBack,"json");
-			}
-		
-		}) ;
+            SITEROOT = '<?php echo $baseUrl?>';
+            $.post(SITEROOT+'/admin/updatestatus', {id:id,action:'delete',tableType:'USERLISTING'},function(response){
+                if(response == '1')
+                {
+                        mygrid.clearAndLoad('<?php echo $baseUrl;?>/admin/manageleads',callBack,"json");
+                }
+            }) ;
 	}
 	
 	function activeStatus(id){
-		SITEROOT = '<?php echo $baseUrl?>';
-		$.post(SITEROOT+'/admin/updatestatus', {id:id,action:'active',tableType:'USERLISTING'},function(response){
-			if(response == '1')
-			{
-				mygrid.clearAndLoad('<?php echo $baseUrl;?>/admin/manageusers',callBack,"json");
-			}
-		
-		}) ;
+            SITEROOT = '<?php echo $baseUrl?>';
+            $.post(SITEROOT+'/admin/updatestatus', {id:id,action:'active',tableType:'USERLISTING'},function(response){
+                if(response == '1')
+                {
+                    mygrid.clearAndLoad('<?php echo $baseUrl;?>/admin/manageleads',callBack,"json");
+                }
+            }) ;
 		
 	}
 	
 	function inActiveStatus(id){
 		SITEROOT = '<?php echo $baseUrl?>';
 		$.post(SITEROOT+'/admin/updatestatus', {id:id,action:'inactive',tableType:'USERLISTING'},function(response){
-			// alert(response);
-			if(response == '1')
-			{
-				mygrid.clearAndLoad('<?php echo $baseUrl;?>/admin/manageusers',callBack,"json");
-			}
+                    if(response == '1')
+                    {
+                            mygrid.clearAndLoad('<?php echo $baseUrl;?>/admin/manageleads',callBack,"json");
+                    }
 		}) ;
 	}
 	
@@ -609,28 +157,77 @@
 	function getSelectedIds(){
 		var selected_rows = new Array();
 		mygrid.forEachRow(function(id) {
-			if(mygrid.cells(id, 0).getValue()==1){
-				selected_rows.push(id);
-			}
+                    if(mygrid.cells(id, 0).getValue()==1){
+                            selected_rows.push(id);
+                    }
 		});		
 		return selected_rows.join(",");
 	}
 
 
 	function bulkaction(){
+            var action = $('#operationvalue').val();
+            if(action!=''){
+                var selectedIds = getSelectedIds();
+                SITEROOT = '<?php echo $baseUrl?>';
+                $.post(SITEROOT+'/admin/updatestatus', {selectedIds:selectedIds,action:action,tableType:'USERLISTING'},function(response){
+                        if(response == '1')
+                        {
+                            mygrid.clearAndLoad('<?php echo $baseUrl;?>/admin/assignedleads',callBack,"json");
+                        }
+                }) ;		
+            }
+        }
 
-		var action = $('#operationvalue').val();
-			if(action!=''){
-				var selectedIds = getSelectedIds();
-				SITEROOT = '<?php echo $baseUrl?>';
-				$.post(SITEROOT+'/admin/updatestatus', {selectedIds:selectedIds,action:action,tableType:'USERLISTING'},function(response){
-					if(response == '1')
-					{
-						mygrid.clearAndLoad('<?php echo $baseUrl;?>/admin/manageusers',callBack,"json");
-					}
-				}) ;		
-			}
-		}
-
-	
+	var app = angular.module("myApp", []);
+        app.controller("myCtrl", function($scope, $http) {
+            $scope.UserRoles    = <?php echo $this->allRoles?>;
+            $scope.AllUsers     = [];
+            $scope.AssignButton = true;
+            $scope.getUsers     = function(role_id) {
+                if(role_id!=''){
+                    var url = "<?php echo $baseUrl?>/admin/getusersbyrole?callback=JSON_CALLBACK";
+                        $http.post(url,{'role_id':role_id}) 
+                        .success(function (data, status, headers, config) {
+//                            console.log(data);
+                            $scope.AllUsers = data;
+                        })
+                        .error(function (data, status, headers, config) {
+                            //this always gets called
+                            console.log(status);
+                        });
+                        return false;   
+                }else{
+                    $scope.AllUsers     = [];
+                }            
+            }
+            
+            $scope.enableBtn     = function(users) {
+                if(users!=''){
+                   $scope.AssignButton     = false;
+                }else{
+                   $scope.AssignButton     = true;
+                }            
+            }
+            
+            $scope.assignLead = function(){
+                
+                var leadIds = getSelectedIds();
+//                
+                if(leadIds!=''){
+                    var url = "<?php echo $baseUrl?>/admin/reassignleadstouser?callback=JSON_CALLBACK";
+                        $http.post(url,{'leadIds':leadIds,'userId':$scope.users}) 
+                        .success(function (data, status, headers, config) {
+                            console.log(data);
+                            mygrid.clearAndLoad('<?php echo $baseUrl;?>/admin/assignedleads',callBack,"json");
+//                            $scope.AllUsers = data;
+                        })
+                        .error(function (data, status, headers, config) {
+                            //this always gets called
+                            console.log(status);
+                        });
+                        return false;   
+                }
+            }
+        });
 </script>

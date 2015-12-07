@@ -21,10 +21,11 @@ class Module implements AutoloaderProviderInterface, ConfigProviderInterface, Vi
     public function onBootstrap(MvcEvent $e)
     {
         $eventManager        	= $e->getApplication()->getEventManager();	
-		$sm 					= $e->getApplication()->getServiceManager();
+	$sm 			= $e->getApplication()->getServiceManager();
         $moduleRouteListener 	= new ModuleRouteListener();
-		$sharedManager 			= $eventManager->getSharedManager();
+	$sharedManager 		= $eventManager->getSharedManager();
         $moduleRouteListener->attach($eventManager);
+        date_default_timezone_set("Asia/Calcutta");
     }
 
     public function getConfig()

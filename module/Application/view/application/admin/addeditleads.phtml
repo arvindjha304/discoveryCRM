@@ -62,7 +62,7 @@
                         </div>
                         <form style="display:none" action="" method="post" name="myForm" id="addLeadForm" novalidate>
                           <input type="hidden" name="leadId" value="<?php echo (count($this->formData[0]))? $this->formData[0]['id'] : ''?>" >
-                          <div class="form-group-custom">
+                            <div class="form-group-custom">
                                 <label>Customer Name <span class="mandatory">*</span></label>
                                 <input class="form-control" type="text" placeholder="Enter ..." name="CustomerName" ng-model="CustomerName" required>
                                 <span style="color:red;" ng-cloak ng-show="(myForm.CustomerName.$dirty && myForm.CustomerName.$invalid)">

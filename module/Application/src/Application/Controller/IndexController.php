@@ -36,27 +36,44 @@ class IndexController extends AbstractActionController
     public function indexAction()
     {
         $view = new ViewModel();
-		$view->setTerminal(true);
+	$view->setTerminal(true);
+        
+        $id1 =  $this->params()->fromRoute('id1');
+        if(isset($id1)){
+          $view->setVariable('loginFailed', $id1);
+        }
+       
         if($this->request->isPost()){
             $useremail = $this->params()->fromPost('email');
             $password = $this->params()->fromPost('password');
             $remember_me = $this->params()->fromPost('remember_me');
             $remember_me = (isset($remember_me)) ? 1 : 0;
-            
-//           echo $useremail.'==='.$password.'==='.$remember_me;exit;
-            
             if($useremail!='' && $password!=''){
-                $this->userLogin($useremail,$password,$remember_me);
-                $this->redirect()->toRoute('application',array('controller'=>'index','action' => 'otp-code'));
+               
+                $loginStatus = $this->userLogin($useremail,$password,$remember_me);
+                
+                
+//                echo $loginStatus;exit;
+                
+                
+                if($loginStatus==0){
+                    
+//                    echo $loginStatus;exit;
+                    
+                    $this->redirect()->toUrl('index/index/0');
+                    
+//                    $this->redirect()->toRoute('application',array('controller'=>'index','action' => 'index','id1' => 'loginFailed'));
+                }else{
+                   $this->redirect()->toRoute('application',array('controller'=>'index','action' => 'otp-code')); 
+                }
+                
+                
             }
         }
         return $view;
     }
     
     public function userLogin($useremail,$password,$remember_me=0){
-        
-//        echo $remember_me;exit;
-        
         
         $authAdapter 	= new AuthAdapter($this->getAdapter(), 'userlist','useremail', 'password', 'CONCAT(?,salt_key) and is_active=1 and is_delete=0');
         $authAdapter->setIdentity(trim($useremail));
@@ -75,12 +92,9 @@ class IndexController extends AbstractActionController
             $auth->getStorage()->write($data);
             $identity = $auth->getIdentity();
             $this->getModel()->generateOTP();
-            
-//            print_r($identity);
-//            exit('LoginSuccessfull');
-            return true;	
+            return 1;	
         }else{
-            exit('LoginFailed');
+            return 0;
         }
     }
     

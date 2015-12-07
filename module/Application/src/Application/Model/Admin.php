@@ -89,16 +89,14 @@ use Zend\Authentication\AuthenticationService;
             if($leadId!=''){
                 $select->where->equalTo('id',$leadId);
             }else{
-                $select->join(['pl'=>'project_list'],'pl.id=lead_list.project_interested',['id','project_name'])
-                ->join(['sl'=>'source_list'],'sl.id=lead_list.source_of_enquiry',['id','source_name']);
+                $select->join(['pl'=>'project_list'],'pl.id=lead_list.project_interested',['project_name'])
+                ->join(['sl'=>'source_list'],'sl.id=lead_list.source_of_enquiry',['source_name'])
+                ->join(['ul'=>'userlist'],'ul.id=lead_list.created_by',['open_by'=>'username'])
+                    ->where(['lead_list.is_assigned'=>0]);
             }
             $select->where(['lead_list.is_delete'=>0,'lead_list.comp_id'=>$this->loggedInUserDetails->comp_id]);
         })->toArray();
-        
-        
 //        echo '<pre>';print_r($leadList);exit;
-        
-        
         return $leadList;
     }
     
@@ -154,14 +152,68 @@ use Zend\Authentication\AuthenticationService;
         return $result;
     }
 	
+    public function getAllRolesJson(){
+        
+        $allRoles = $this->getAllRoles();
+        $dataArray = array(['Id'=>"",'Name'=>'Select Role']);
+        foreach($allRoles as $roles)
+        {
+            if($roles['is_active']==1){
+                $tempArr         = [];
+                $tempArr['Id']   = $roles['id'];
+                $tempArr['Name'] = $roles['role_name'];
+                $dataArray[]    = $tempArr;
+            }
+        }
+        
+//        echo '<pre>';print_r($dataArray);exit;
+        
+        return json_encode($dataArray);
+    }
+    
+    
+    public function getUsersByRoleJson($role_id){
+        
+        $allRoles = $this->getAllRoles();
+        
+        $tableGateway = new TableGateway('userlist',$this->getAdapter());
+        $userList = $tableGateway->select(function($select) use ($role_id){
+                $select->where->equalTo('userlist.role_id',$role_id);
+            $select->join(['cr'=>'company_roles'],'cr.id=userlist.role_id','role_name');
+            $select->where(['userlist.is_delete'=>0,'userlist.comp_id'=>$this->loggedInUserDetails->comp_id]);
+        })->toArray();
+        
+//        echo '<pre>';print_r($userList);exit;
+        
+        $dataArray = array(['Id'=>"",'Name'=>'Select User']);
+        foreach($userList as $roles)
+        {
+           $tempArr         = [];
+           $tempArr['Id']   = $roles['id'];
+           $tempArr['Name'] = $roles['username'];
+           $dataArray[]    = $tempArr;
+        }
+        
+//        echo '<pre>';print_r($dataArray);exit;
+        
+        return json_encode($dataArray);
+    }
     public function getAllSources(){
         
         $sql = new Sql($this->getAdapter());
         $select = $sql->select()
             ->from('source_list')
             ->where(['is_delete'=>0,'comp_id'=>$this->loggedInUserDetails->comp_id]);
-        $result = $sql->prepareStatementForSqlObject($select)->execute();
-        return $result;
+        $allSources = $sql->prepareStatementForSqlObject($select)->execute();
+        $dataArray = array();
+        foreach($allSources as $sources)
+        {
+           $tempArr         = [];
+           $tempArr['Id']   = $sources['id'];
+           $tempArr['Name'] = $sources['source_name'];
+           $dataArray[]    = $tempArr;
+        }
+        return json_encode($dataArray);
     }
     public function getAllProjects(){
         
@@ -169,8 +221,16 @@ use Zend\Authentication\AuthenticationService;
         $select = $sql->select()
             ->from('project_list')
             ->where(['is_delete'=>0,'comp_id'=>$this->loggedInUserDetails->comp_id]);
-        $result = $sql->prepareStatementForSqlObject($select)->execute();
-        return $result;
+        $allProjects = $sql->prepareStatementForSqlObject($select)->execute();
+        $dataArray = array();
+        foreach($allProjects as $projects)
+        {
+           $tempArr         = [];
+           $tempArr['Id']   = $projects['id'];
+           $tempArr['Name'] = $projects['project_name'];
+           $dataArray[]    = $tempArr;
+        }
+        return json_encode($dataArray);
     }
     public function getProjectDetail($projectId){
         
@@ -207,18 +267,12 @@ use Zend\Authentication\AuthenticationService;
         return $result;
     }
     public function getmanagernames($userRoleId){
-//        echo '1111';exit;
         
         $sql = new Sql($this->getAdapter());
         $select = $sql->select()
                 ->from('company_roles')
-                ->where(['id'=>$userRoleId]);
-        
+                ->where(['id'=>$userRoleId,'is_active'=>1,'is_delete'=>0]);
         $roleDetail = $sql->prepareStatementForSqlObject($select)->execute()->current();
-        
-//        echo '<pre>';print_r($roleDetail);exit;
-        
-        
         $where = new Where();
         $sql = new Sql($this->getAdapter());
         $select = $sql->select()
@@ -227,7 +281,7 @@ use Zend\Authentication\AuthenticationService;
                 ->join(['cr'=>'company_roles'], 'cr.id=ul.role_id','role_name');
         $where->lessThan('cr.seniority', $roleDetail['seniority']);
         $select->where($where);
-        $select->where(['ul.is_active'=>1,'ul.is_delete'=>0,'ul.comp_id'=>$this->loggedInUserDetails->comp_id,'cr.is_active'=>1,'cr.is_delete'=>0,'cr.comp_id'=>$this->loggedInUserDetails->comp_id])
+        $select->where(['ul.is_active'=>1,'ul.is_delete'=>0,'ul.comp_id'=>$this->loggedInUserDetails->comp_id,'cr.is_active'=>1,'cr.is_delete'=>0])
                 ->order('cr.seniority');
         $result = $sql->prepareStatementForSqlObject($select)->execute();
         $dataArray = array();
@@ -240,6 +294,9 @@ use Zend\Authentication\AuthenticationService;
                $dataArray[]     = $tempArr;
             }
         }
+        
+//        echo '<pre>';print_r($dataArray);exit;
+        
         return json_encode($dataArray);;
     }
     
@@ -257,6 +314,34 @@ use Zend\Authentication\AuthenticationService;
         $result = $sql->prepareStatementForSqlObject($select)->execute()->count();
 //        echo $result;exit;
         if($result>0) return 1; else return 0;
+    }
+    
+    public function getAssignedLeads(){
+        $tableGateway = new TableGateway('assigned_lead',$this->getAdapter());
+        $leadList = $tableGateway->select(function($select){
+            
+            $select->join(['ll'=>'lead_list'],'assigned_lead.lead_id=ll.id',['lead_id'=>'id','customer_name','mobile','created_by','punchDate'=>'punch_date'])
+                    ->join(['pl'=>'project_list'],'pl.id=ll.project_interested',['project_name'])
+                    ->join(['sl'=>'source_list'],'sl.id=ll.source_of_enquiry',['source_name'])
+                    ->join(['uls'=>'updated_lead_status'],'uls.lead_id=ll.id',['next_meeting','lead_status','last_activity'],'left')
+                    ->join(['usrAsg'=>'userlist'],'usrAsg.id=assigned_lead.assigned_to',['assignedTo'=>'username'])
+                    ->join(['usrOpn'=>'userlist'],'usrOpn.id=ll.created_by',['openBy'=>'username']);
+            
+            $select->where(['ll.is_delete'=>0,'ll.comp_id'=>$this->loggedInUserDetails->comp_id,'assigned_lead.is_active'=>1]);
+        })->toArray();
+        
+//        echo '<pre>';print_r($leadList);exit;
+        return $leadList;
+    }
+    
+    public function checkProjectName($fieldVal){
+        
+        $tableGateway = new TableGateway('project_list',$this->getAdapter());
+        $projects = $tableGateway->select(function($select) use($fieldVal){
+            $select->where(['project_name'=>$fieldVal,'is_active'=>1,'is_delete'=>0]);
+        })->toArray();
+        
+        if(count($projects)) return 1; else return 0;
     }
     
     

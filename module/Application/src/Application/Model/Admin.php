@@ -323,7 +323,7 @@ use Zend\Authentication\AuthenticationService;
             $select->join(['ll'=>'lead_list'],'assigned_lead.lead_id=ll.id',['lead_id'=>'id','customer_name','mobile','created_by','punchDate'=>'punch_date'])
                     ->join(['pl'=>'project_list'],'pl.id=ll.project_interested',['project_name'])
                     ->join(['sl'=>'source_list'],'sl.id=ll.source_of_enquiry',['source_name'])
-                    ->join(['uls'=>'updated_lead_status'],'uls.lead_id=ll.id',['next_meeting','lead_status','last_activity'],'left')
+                    ->join(['uls'=>'updated_lead_status'],'uls.lead_id=ll.id',['next_meeting'=>'date_time_value','lead_status'=>'status_type','last_feedback'],'left')
                     ->join(['usrAsg'=>'userlist'],'usrAsg.id=assigned_lead.assigned_to',['assignedTo'=>'username'])
                     ->join(['usrOpn'=>'userlist'],'usrOpn.id=ll.created_by',['openBy'=>'username']);
             
@@ -342,6 +342,15 @@ use Zend\Authentication\AuthenticationService;
         })->toArray();
         
         if(count($projects)) return 1; else return 0;
+    }
+    
+    public function getLeadUpdatesHistory($leadId) {
+        $tableGateway = new TableGateway('updated_lead_status',$this->getAdapter());
+        $projects = $tableGateway->select(function($select) use($leadId){
+            $select->join(['usr'=>'userlist'],'usr.id=updated_lead_status.updated_by',['updated_by'=>'username']);
+            $select->where(['updated_lead_status.lead_id'=>$leadId,'updated_lead_status.comp_id'=>$this->loggedInUserDetails->comp_id]);
+        })->toArray();
+        return $projects;
     }
     
     

@@ -146,21 +146,22 @@
                 </label>
             </div>
           <div class="box-body" style="display:none" id="leadStatusDiv">
-            
-          <div class="row" >
+            <form method="post" name="myForm2" novalidate>
+            <input type="hidden"  ng-model="leadStatusForm.leadId" name="leadId">
+            <div class="row" >
             <div class="col-xs-12 col-sm-12 col-md-12">
               <!-- jQuery Knob -->
               <div class="box-solid" style="background-color:#ecf0f5;border:1px solid #d2d6de;">               
                 <div class="box-body">
                   <div class="row">
                     <div class="col-md-4 col-sm-6 col-xs-6 text-center">
-                        <input type="radio" name="statusType" ng-model="statusType" class="minimal" value=1> Interested                      
+                        <input type="radio" name="statusType" ng-model="leadStatusForm.statusType" class="minimal" value=1 > Interested                      
                     </div><!-- ./col -->
                     <div class="col-md-4 col-sm-6 col-xs-6 text-center">
-                      <input type="radio" name="statusType" ng-model="statusType" class="minimal" value=2> Not Interested                        
+                      <input type="radio" name="statusType" ng-model="leadStatusForm.statusType" class="minimal" value=2 > Not Interested                        
                     </div><!-- ./col -->
                     <div class="col-md-4 col-sm-6 col-xs-6 text-center">
-                      <input type="radio" name="statusType" ng-model="statusType" class="minimal" value=3> Not Answering                      
+                      <input type="radio" name="statusType" ng-model="leadStatusForm.statusType" class="minimal" value=3 > Not Answering                      
                     </div><!-- ./col -->                   
                   </div><!-- /.row -->
                 </div><!-- /.box-body -->
@@ -169,20 +170,20 @@
           </div><!-- /.row -->
           
           
-          <div class="row" style="margin-top:30px;" ng-show="(statusType=='1')">
+          <div class="row" style="margin-top:30px;" ng-show="(leadStatusForm.statusType=='1')">
             <div class="col-xs-12 col-sm-12 col-md-12">
             <!-- jQuery Knob -->
             <div class="box-solid" style="background-color:#ecf0f5;border:1px solid #d2d6de;">               
               <div class="box-body">
                 <div class="row">
                   <div class="col-md-4 col-sm-6 col-xs-6 text-center">
-                    <input type="radio" name="interestedType" ng-model="interestedType" class="minimal" value=1> For Site Visit                    
+                    <input type="radio" name="interestedType" ng-model="leadStatusForm.interestedType" class="minimal" value=1> For Site Visit                    
                   </div><!-- ./col -->
                   <div class="col-md-4 col-sm-6 col-xs-6 text-center">
-                    <input type="radio" name="interestedType" ng-model="interestedType" class="minimal" value=2> For Meeting                      
+                    <input type="radio" name="interestedType" ng-model="leadStatusForm.interestedType" class="minimal" value=2> For Meeting                      
                   </div><!-- ./col -->
                   <div class="col-md-4 col-sm-6 col-xs-6 text-center">
-                    <input type="radio" name="interestedType" ng-model="interestedType" class="minimal" value=3> For Follow Up                      
+                    <input type="radio" name="interestedType" ng-model="leadStatusForm.interestedType" class="minimal" value=3> For Follow Up                      
                   </div><!-- ./col -->                   
                 </div><!-- /.row -->
               </div><!-- /.box-body -->
@@ -191,7 +192,7 @@
         </div><!-- /.row -->
           
           
-          <div class="row" style="margin-top:30px;" ng-show="(statusType=='2')">
+          <div class="row" style="margin-top:30px;" ng-show="(leadStatusForm.statusType=='2')">
             <div class="col-xs-12 col-sm-12 col-md-12">
               <!-- jQuery Knob -->
               <div class="box-solid" style="background-color:#ecf0f5;border:1px solid #d2d6de;">               
@@ -201,11 +202,11 @@
                      <label>Bogus Lead</label>                                           
                     </div><!-- ./col -->
                     <div class="col-md-2 col-sm-3 col-xs-3 text-center">                     
-                       <input type="radio" name="r1" class="minimal" checked> 
+                       <input type="radio"  name="bogusLead"  ng-model="leadStatusForm.bogusLead" class="minimal" value="1"> 
                         <label> Yes</label>                    
                     </div><!-- ./col -->
                     <div class="col-md-2 col-sm-3 col-xs-3 text-center">                     
-                       <input type="radio" name="r1" class="minimal"> 
+                       <input type="radio"  name="bogusLead"  ng-model="leadStatusForm.bogusLead" class="minimal" value="2"> 
                         <label> No</label>                     
                     </div><!-- ./col -->                                      
                   </div><!-- /.row -->                 
@@ -220,7 +221,7 @@
               <div class="box-solid">               
                 <div class="box-body">
                   <div class="row">
-                    <div class="col-md-4 col-sm-6 col-xs-6" ng-show="(statusType=='1' && interestedType=='1')">
+                    <div class="col-md-4 col-sm-6 col-xs-6" ng-show="(leadStatusForm.statusType=='1' && leadStatusForm.interestedType=='1')">
                        <!-- Date and time range -->
                           <div class="form-group">
                             <label>Site Visit Date & Time</label>
@@ -228,12 +229,12 @@
                               <div class="input-group-addon">
                                 <i class="fa fa-calendar"></i>
                               </div>
-                              <input type="text" class="form-control pull-right form_datetime1" name="siteVisitDateTime"  ng-model="siteVisitDateTime">
+                              <input type="text" class="form-control pull-right form_datetime1" name="dateTimeValue"  ng-model="leadStatusForm.dateTimeValue">
                             </div><!-- /.input group -->
                           </div><!-- /.form group -->                                      
                     </div><!-- ./col -->
                     
-                    <div class="col-md-4 col-sm-6 col-xs-6" ng-show="(statusType=='1' && interestedType=='2')">
+                    <div class="col-md-4 col-sm-6 col-xs-6" ng-show="(leadStatusForm.statusType=='1' && leadStatusForm.interestedType=='2')">
                        <!-- Date and time range -->
                         <div class="form-group">
                           <label>Meeting Date & Time</label>
@@ -241,12 +242,12 @@
                             <div class="input-group-addon">
                               <i class="fa fa-calendar"></i>
                             </div>
-                            <input type="text" class="form-control pull-right form_datetime2" name="meetingDateTime"  ng-model="meetingDateTime">
+                            <input type="text" class="form-control pull-right form_datetime2" name="dateTimeValue"  ng-model="leadStatusForm.dateTimeValue">
                           </div><!-- /.input group -->
                         </div><!-- /.form group -->                    
                     </div><!-- ./col -->
                     
-                    <div class="col-md-4 col-sm-6 col-xs-6" ng-show="(statusType=='1' && interestedType=='3')">
+                    <div class="col-md-4 col-sm-6 col-xs-6" ng-show="(leadStatusForm.statusType=='1' && leadStatusForm.interestedType=='3')">
                        <!-- Date and time range -->
                         <div class="form-group">
                           <label>Follow Up Date & Time</label>
@@ -254,7 +255,7 @@
                             <div class="input-group-addon">
                               <i class="fa fa-calendar"></i>
                             </div>
-                            <input type="text" class="form-control pull-right form_datetime3" name="followUpDateTime"  ng-model="followUpDateTime" >
+                            <input type="text" class="form-control pull-right form_datetime3" name="dateTimeValue"  ng-model="leadStatusForm.dateTimeValue" >
                           </div><!-- /.input group -->
                         </div><!-- /.form group -->                     
                     </div><!-- ./col -->                   
@@ -265,7 +266,7 @@
           </div>
           
           
-        <div class="row" ng-show="(statusType=='1' && (interestedType=='1' || interestedType=='2' || interestedType=='3'))">
+        <div class="row" ng-show="(leadStatusForm.statusType=='1' && leadStatusForm.interestedType)">
             <div class="col-xs-12 col-sm-12 col-md-12">
               <!-- jQuery Knob -->
               <div class="box-solid" style="background-color:#ecf0f5;border:1px solid #d2d6de;;margin-bottom:30px">               
@@ -275,19 +276,19 @@
                      <label>Rate this lead</label>                      	                    
                     </div><!-- ./col -->
                     <div class="col-md-2 col-sm-3 col-xs-3 text-center">                    	
-                      	<input type="radio" name="r1" class="minimal" > 
+                      	<input type="radio" name="rateThisLead" ng-model="leadStatusForm.rateThisLead" class="minimal" value=1 > 
                         <label> Avg.</label>                    
                     </div><!-- ./col -->
                     <div class="col-md-2 col-sm-3 col-xs-3 text-center">                    	
-                      	<input type="radio" name="r1" class="minimal"> 
+                      	<input type="radio" name="rateThisLead" ng-model="leadStatusForm.rateThisLead" class="minimal" value=2> 
                         <label> Medium</label>                     
                     </div><!-- ./col -->
                     <div class="col-md-2 col-sm-3 col-xs-3 text-center">                    	
-                      	<input type="radio" name="r1" class="minimal">
+                      	<input type="radio" name="rateThisLead" ng-model="leadStatusForm.rateThisLead" class="minimal" value=3>
                         <label> Good</label>                     
                     </div><!-- ./col --> 
                     <div class="col-md-2 col-sm-3 col-xs-3 text-center">                    	
-                      	<input type="radio" name="r1" class="minimal">
+                      	<input type="radio" name="rateThisLead" ng-model="leadStatusForm.rateThisLead" class="minimal" value=4>
                         <label> Hot</label>                     
                     </div><!-- ./col -->                   
                   </div><!-- /.row -->                 
@@ -296,15 +297,44 @@
             </div><!-- /.col --> 
           </div>
           
+          
+        <div class="row" ng-show="(leadStatusForm.rateThisLead && leadStatusForm.statusType=='1')">
+            <div class="col-xs-12 col-sm-12 col-md-12">
+              <!-- jQuery Knob -->
+              <div class="box-solid" style="background-color:#ecf0f5;border:1px solid #d2d6de;;margin-bottom:30px">               
+                <div class="box-body">
+                  <div class="row">
+                    <div class="col-md-2 col-sm-12 col-xs-12 text-center">                  
+                     <label>Client Type</label>                      	                    
+                    </div><!-- ./col -->
+                    <div class="col-md-2 col-sm-3 col-xs-3 text-center">                    	
+                      	<input type="radio" name="clientType" ng-model="leadStatusForm.clientType" class="minimal" value=1 > 
+                        <label> Client</label>                    
+                    </div><!-- ./col -->
+                    <div class="col-md-2 col-sm-3 col-xs-3 text-center">                    	
+                      	<input type="radio" name="clientType" ng-model="leadStatusForm.clientType" class="minimal" value=2> 
+                        <label> Broker</label>                     
+                    </div><!-- ./col -->                  
+                  </div><!-- /.row -->                 
+                </div><!-- /.box-body -->
+              </div><!-- /.box -->
+            </div><!-- /.col --> 
+          </div>
+        
+        
+        
+        
           <div class="row">
             <div class="col-xs-12 col-sm-12 col-md-12">
                 <label>Description</label>
-                <textarea class="form-control" rows="3"></textarea>                         
+                <textarea class="form-control" rows="3" ng-model="leadStatusForm.description"></textarea>                         
             </div><!-- /.col --> 
           </div>
             <div class="box-footer">
-                <button class="btn btn-primary" type="submit">Submit</button>
+                <button class="btn btn-primary" ng-click="submitLeadStatus();"  >Submit</button>
+                <img id="updateStatusLoader" src="<?php echo $baseUrl;?>/public/dist/img/Snakes_chasing.gif" style="Padding-left:15px; width:45px;display: none;" >
             </div>
+            </form>
             </div><!-- /.box-body -->
             
           </div>
@@ -326,30 +356,38 @@
               <ul class="timeline">
                <h4>Status History</h4><hr>
                 <!-- timeline item -->
-                <li>                 
-                  <div class="timeline-item">                    
-                    <h3 class="timeline-header text-red">No Answer</h3>
-                    <div class="timeline-body">
-                      <strong>Next Visit :</strong> 05-11-2015 | 15:10:00<br>
-                  <strong>Update By :</strong> Arvind Jha<br>
-                  <strong>Updated On :</strong> 03-11-2015 | 12:50:46<br>
-                  <strong>Rating :</strong> Average
-                    </div>                    
-                  </div>
-                </li>
-                <!-- END timeline item -->
-                <!-- timeline item -->
-                 <li>                 
-                  <div class="timeline-item">                    
-                    <h3 class="timeline-header text-red">No Answer</h3>
-                    <div class="timeline-body">
-                      <strong>Next Visit :</strong> 05-11-2015 | 15:10:00<br>
-                  <strong>Update By :</strong> Arvind Jha<br>
-                  <strong>Updated On :</strong> 03-11-2015 | 12:50:46<br>
-                  <strong>Rating :</strong> Average
-                    </div>                    
-                  </div>
-                </li>              
+                <?php if(count($this->leadUpdatesHistory)){
+                    foreach($this->leadUpdatesHistory as $leadHistory){
+                        
+                        
+//                       echo '<pre>';print_r($leadHistory);
+                ?>        
+                      
+                        
+                    <li>                 
+                        <div class="timeline-item">                    
+                          <h3 class="timeline-header text-red">
+                          <?php if($leadHistory['status_type'] == 1)                              
+                              echo 'Interested';                              
+                            elseif($leadHistory['status_type'] == 2)
+                                echo 'Not Interested ';
+                             else  
+                                 echo 'Not Answering';
+                              ?></h3>
+                          <div class="timeline-body">
+                            <strong>Next Visit :</strong> <?php if($leadHistory['date_time_value'] != '0000-00-00 00:00:00.0') echo $leadHistory['date_time_value']; else echo '';?><br>
+                            <strong>Update By :</strong> <?php echo $leadHistory['updated_by'];?><br>
+                            <strong>Updated On :</strong> <?php echo $leadHistory['updated_on'];?><br>
+                            <?php //if{?>  
+                            <strong>Rating :</strong> <?php if($leadHistory['lead_rating'] != '0') echo $leadHistory['lead_rating']; else echo '';?>
+                          </div>                    
+                        </div>
+                    </li>
+                <?php        
+                    }   
+                } 
+                ?>
+                              
               </ul>
             </div>               
               </div><!-- /.row -->
@@ -361,7 +399,7 @@
         </section><!-- /.content -->
       </div>
   
-  <script src="<?php echo $baseUrl;?>/public/plugins/jQuery/jQuery-2.1.4.min.js"></script>
+    <script src="<?php echo $baseUrl;?>/public/plugins/jQuery/jQuery-2.1.4.min.js"></script>
   
     <script src="<?php echo $baseUrl;?>/public/angular.min.js"></script>
     <script type="text/javascript" src="<?php echo $baseUrl;?>/public/date/bootstrap-datetimepicker.js" charset="UTF-8"></script>
@@ -465,7 +503,6 @@
         };
     });
    app.controller('updateStatus', function($scope, $http) {
-       $scope.siteVisitDateTime = '';
        $scope.showLeadStatusDiv = function(){
 //            console.log($scope.showLeadDiv);
             if($scope.showLeadDiv == true)
@@ -473,6 +510,36 @@
             else
                 $('#leadStatusDiv').hide('slow');
        }
-        
+       $scope.leadStatusForm = {
+            leadId               : '<?php echo $this->formData[0]['id']?>'
+        }
+        $scope.leadStatusResetForm = {
+            statusType           :  '',
+            interestedType       :  '',
+            bogusLead            :  '',
+            dateTimeValue        :  '',
+            rateThisLead         :  '',
+            clientType           :  '',
+            description          :  ''
+        }
+       
+       $scope.submitLeadStatus = function(){
+           
+//         console.log($scope.leadStatusForm);  
+            var url = "<?php echo $baseUrl?>/admin/submitleadstatus?callback=JSON_CALLBACK";
+            $('#updateStatusLoader').show();
+            $http.post(url,$scope.leadStatusForm) 
+            .success(function (data, status, headers, config) {
+                console.log(data);
+                $('#updateStatusLoader').hide();
+                window.location.reload();
+                return false;
+            })
+            .error(function (data, status, headers, config) {
+                //this always gets called
+                console.log(status);
+            });
+            return false;  
+       }
     });
 </script>

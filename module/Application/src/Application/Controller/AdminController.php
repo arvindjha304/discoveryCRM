@@ -531,12 +531,17 @@ class AdminController extends AbstractActionController
             if(count($arrList)){
                 $view->setVariable('formData', $arrList);
             }
+            $leadUpdatesHistory = $this->getModel()->getLeadUpdatesHistory($leadId);
+//             echo '<pre>';print_r($leadUpdatesHistory);exit;     
+            $view->setVariable('leadUpdatesHistory', $leadUpdatesHistory);
         }
-        if($this->getRequest()->isPost()){}
+        
+        
+        
         return $view;
     }
     
-    public function updateleadstatusAction(){
+    public function updateleadstatusAction(){   
         
         $postdata = file_get_contents("php://input");
         $request = json_decode($postdata);
@@ -560,6 +565,30 @@ class AdminController extends AbstractActionController
         $this->getModel()->updateanywhere('lead_list', $data,['id'=>$leadId]);
         exit('Lead Updated');
     }
+    
+    
+    public function submitleadstatusAction(){
+        
+        $postdata = file_get_contents("php://input");
+        $request = json_decode($postdata);
+//         echo '<pre>';print_r($request);exit;  
+            $data = [
+                'lead_id'            => $request->leadId,
+                'status_type'        => $request->statusType,
+                'interested_type'    => ($request->statusType==1) ? $request->interestedType : 0,
+                'bogus_lead'         => ($request->statusType==2) ? $request->bogusLead : 0,
+                'date_time_value'    => ($request->statusType==1) ? $request->dateTimeValue.':00' : '',
+                'lead_rating'        => ($request->statusType==1) ? $request->rateThisLead : 0,
+                'client_type'        => ($request->statusType==1) ? $request->clientType : 0,
+                'last_feedback'      => $request->description,
+                'updated_by'         => $this->loggedInUserDetails->id,
+                'updated_on'         => date('Y-m-d H:i:s'),
+                'comp_id'            => $this->loggedInUserDetails->comp_id
+            ];  
+        $this->getModel()->insertanywhere('updated_lead_status', $data); 
+        exit('Added Lead Status');
+    }
+    
     public function assignedleadsAction(){
       
         $view = new ViewModel();
@@ -569,6 +598,7 @@ class AdminController extends AbstractActionController
     	$baseUrl = $this->getRequest()->getbaseUrl();
         if($this->getRequest()->isXmlHttpRequest()){
             $arrList = $this->getModel()->getAssignedLeads();
+//             echo '<pre>';print_r($arrList);exit;
             $dataArray = array();
             foreach($arrList as $val1)
             {
@@ -586,6 +616,7 @@ class AdminController extends AbstractActionController
                 $delete                 =   '<a href="'.$baseUrl.'/admin/updatelead/'.$val1['lead_id'].'" ><button >Edit</button></a><button >Delete</button>';
                 $dataArray[]            =   array("id"=>$val1['lead_id'],"data"=>array(0,$customer_name,$mobile,$source_of_enquiry,$project_interested,$punch_date,$assigned_to,$assigned_date,$next_meeting,$open_by,$lead_status,$delete));
             }
+//    echo '<pre>';print_r($dataArray);exit; 
             $json = json_encode($dataArray);
             exit('{rows:'.$json.'}');
         }
@@ -637,7 +668,6 @@ class AdminController extends AbstractActionController
                     'comp_id'       => $this->loggedInUserDetails->comp_id
                 ]; 
                 $this->getModel()->insertanywhere('assigned_lead', $data);
-                
             }
         }
         exit;

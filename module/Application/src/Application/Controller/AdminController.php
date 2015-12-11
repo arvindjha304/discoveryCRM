@@ -558,7 +558,7 @@ class AdminController extends AbstractActionController
            'budget'              => $request->Budget,
            'project_interested'  => $request->ProjectInterested,
            'requirement'         => $request->Requirement,
-           'punch_date'          => $request->PunchDate.':00',
+           'punch_date'          => $request->PunchDate,
         ];   
         $data['last_updated_by']   = $this->loggedInUserDetails->id;
         $data['last_updated']     = date('Y-m-d H:i:s');
@@ -585,6 +585,16 @@ class AdminController extends AbstractActionController
                 'updated_on'         => date('Y-m-d H:i:s'),
                 'comp_id'            => $this->loggedInUserDetails->comp_id
             ];  
+        $leadId   = $request->leadId;
+        $leadUpdatesHistory = $this->getModel()->getLeadUpdatesHistory($leadId); 
+        
+//        echo '<pre>';print_r($leadUpdatesHistory);exit;
+        if(count($leadUpdatesHistory)){
+            $updatedata = ['is_active'=>0];
+            $where      = ['lead_id'=>$leadId];
+            $this->getModel()->updateanywhere('updated_lead_status', $updatedata, $where); 
+        }
+            
         $this->getModel()->insertanywhere('updated_lead_status', $data); 
         exit('Added Lead Status');
     }
@@ -596,8 +606,46 @@ class AdminController extends AbstractActionController
         $allRoles = $this->getModel()->getAllRolesJson();
         $view->setVariable('allRoles', $allRoles);
     	$baseUrl = $this->getRequest()->getbaseUrl();
+        $arrList = $this->getModel()->getAssignedLeads();
+        
+//         echo '<pre>';print_r($arrList);exit;
+        if(count($arrList)){
+            $notAssignedArr       = [];
+            $siteVisitArr       = [];
+            $meetingArr         = [];
+            $followUpArr        = [];
+            $notInterestedArr   = []; 
+            $notAnsweringArr    = [];
+                       
+           foreach($arrList as $val1)
+           {    
+                if($val1['status_type']=='')   {
+                    $notAssignedArr[] =  $val1['lead_id'] ;
+                }elseif($val1['status_type']==1)   {
+                    if($val1['interested_type']==1)   
+                      $siteVisitArr[] =  $val1['lead_id'] ;
+                    elseif($val1['interested_type']==2)   
+                      $meetingArr[] =  $val1['lead_id'] ;
+                    elseif($val1['interested_type']==3)   
+                      $followUpArr[] =  $val1['lead_id'] ;
+                }elseif($val1['status_type']==2)   {
+                    $notInterestedArr[] =  $val1['lead_id'] ;
+                }elseif($val1['status_type']==3)   {
+                    $notAnsweringArr[] =  $val1['lead_id'] ;
+                }
+           }
+           $view->setVariable('notAssignedArr', json_encode($notAssignedArr));
+           $view->setVariable('siteVisitArr', json_encode($siteVisitArr));
+           $view->setVariable('meetingArr', json_encode($meetingArr));
+           $view->setVariable('followUpArr', json_encode($followUpArr));
+           $view->setVariable('notInterestedArr', json_encode($notInterestedArr));
+           $view->setVariable('notAnsweringArr', json_encode($notAnsweringArr));
+        }
+        
+        
+        
         if($this->getRequest()->isXmlHttpRequest()){
-            $arrList = $this->getModel()->getAssignedLeads();
+//            $arrList = $this->getModel()->getAssignedLeads();
 //             echo '<pre>';print_r($arrList);exit;
             $dataArray = array();
             foreach($arrList as $val1)
@@ -612,8 +660,23 @@ class AdminController extends AbstractActionController
                 $assigned_date          =   $val1['assigned_date'];
                 $next_meeting           =   $val1['next_meeting'];
                 $open_by                =   $val1['openBy'];
-                $lead_status            =   '';
-                $delete                 =   '<a href="'.$baseUrl.'/admin/updatelead/'.$val1['lead_id'].'" ><button >Edit</button></a><button >Delete</button>';
+                
+                if($val1['status_type']==''){
+                    $lead_status  =   'Not Assigned';
+                }elseif($val1['status_type']==1){
+                    if($val1['interested_type']==1) 
+                    $lead_status   =   'Site Visit';
+                    elseif($val1['interested_type']==2)
+                    $lead_status   =   'Meeting';
+                    elseif($val1['interested_type']==3) 
+                    $lead_status   =   'Follow Up';
+                }elseif($val1['status_type']==2){
+                    $lead_status   =   'Not Interested';
+                }elseif($val1['status_type']==3){
+                    $lead_status   =   'Not Answered';
+                }
+                
+                $delete                 =   '<a href="'.$baseUrl.'/admin/updatelead/'.$val1['lead_id'].'" ><button title="Update Lead" class="btn btn-primary" type="button"><i class="fa fa-pencil-square-o"></i></button></a>';
                 $dataArray[]            =   array("id"=>$val1['lead_id'],"data"=>array(0,$customer_name,$mobile,$source_of_enquiry,$project_interested,$punch_date,$assigned_to,$assigned_date,$next_meeting,$open_by,$lead_status,$delete));
             }
 //    echo '<pre>';print_r($dataArray);exit; 

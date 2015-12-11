@@ -319,11 +319,11 @@ use Zend\Authentication\AuthenticationService;
     public function getAssignedLeads(){
         $tableGateway = new TableGateway('assigned_lead',$this->getAdapter());
         $leadList = $tableGateway->select(function($select){
-            
+            $onExpression = new Expression('uls.lead_id=ll.id AND uls.is_active = 1');
             $select->join(['ll'=>'lead_list'],'assigned_lead.lead_id=ll.id',['lead_id'=>'id','customer_name','mobile','created_by','punchDate'=>'punch_date'])
                     ->join(['pl'=>'project_list'],'pl.id=ll.project_interested',['project_name'])
                     ->join(['sl'=>'source_list'],'sl.id=ll.source_of_enquiry',['source_name'])
-                    ->join(['uls'=>'updated_lead_status'],'uls.lead_id=ll.id',['next_meeting'=>'date_time_value','lead_status'=>'status_type','last_feedback'],'left')
+                    ->join(['uls'=>'updated_lead_status'],$onExpression,['next_meeting'=>'date_time_value','lead_status'=>'status_type','last_feedback','status_type','interested_type'],'left')
                     ->join(['usrAsg'=>'userlist'],'usrAsg.id=assigned_lead.assigned_to',['assignedTo'=>'username'])
                     ->join(['usrOpn'=>'userlist'],'usrOpn.id=ll.created_by',['openBy'=>'username']);
             

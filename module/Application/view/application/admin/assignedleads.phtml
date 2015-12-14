@@ -31,15 +31,19 @@
           <div class="row">
             <div class="col-xs-12">
               <div class="box box-primary box-custom">
-                <div class="box-header">
+                <!---<div class="box-header">
                 <div class="col-md-6">
                   <h3 class="box-title">Assigned Leads</h3>
                   </div>
                   
                 </div><!-- /.box-header -->
                 
-                <div class="box-header" ng-app="myApp" ng-controller="myCtrl">
-                    <div class="col-md-3">
+                <div class="box-header" ng-app="myApp" ng-controller="myCtrl">                    
+                    <div class="col-md-12">
+                        <div class="col-md-5">
+                            <div class="row"><h3 class="box-title box-title-custom-heading">Assigned Leads</h3></div>
+                            <div class="row">
+                                <div class="col-md-4 assigned-head-form-pad">
                     	<div class="form-group">                   
                             <select style="width: 100%;" class="form-control select2" name="userRole" ng-model="userRole" ng-change="getUsers(userRole)">
                                 <option ng-repeat="UserRole in UserRoles" value="{{UserRole.Id}}" ng-selected="{{ UserRole.Id == '' }}" >
@@ -48,7 +52,7 @@
                             </select>
                   	</div>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-5">
                     	<div class="form-group"> 
                             <select style="width: 100%;" class="form-control select2" name="users" ng-model="users" ng-change="enableBtn(users)">
                                 <option ng-repeat="Users in AllUsers" value="{{Users.Id}}" ng-selected="{{ Users.Id == '' }}" >
@@ -57,8 +61,24 @@
                             </select>
                   	</div>
                     </div>
-                    <div class="col-md-1"><button type="submit" class="btn btn-danger" ng-disabled="AssignButton" ng-click="assignLead()"> Reassign </button></div>                   
-                </div>
+                    <div class="col-md-3"><button type="submit" class="btn btn-danger" ng-disabled="AssignButton" ng-click="assignLead()"> Reassign </button></div> 
+                            </div>
+                                              
+                        </div>
+                        <div class="col-md-6 col-md-offset-1">
+                            <div class="row" style="padding-top:15px;">                                
+                                <div class="col-md-4 label-margin"><span class="label label-sitevisit">&nbsp;&nbsp;&nbsp;</span> Site Visit</div>
+                                <div class="col-md-4 label-margin"><span class="label label-followup">&nbsp;&nbsp;&nbsp;</span> Follow Up</div>
+                                <div class="col-md-4 label-margin"><span class="label label-meeting">&nbsp;&nbsp;&nbsp;</span> Meeting</div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4 label-margin"><span class="label label-notanswering">&nbsp;&nbsp;&nbsp;</span> Not Answering</div>
+                                <div class="col-md-4 label-margin"><span class="label label-notinterested">&nbsp;&nbsp;&nbsp;</span> Not Interested</div>
+                                <div class="col-md-4 label-margin"><span class="label label-notassigned">&nbsp;&nbsp;&nbsp;</span> Not Assigned</div>
+                            </div>
+                        </div>
+                    </div>                    
+                    </div>
                 
                 <div class="box-body">
                     <div id="loadingDiv" class="" style="display: none">
@@ -94,6 +114,43 @@
           
         </section><!-- /.content -->
       </div>
+
+<!-- Reassign Modal -->
+        <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">REASSIGN VIEW</h4>
+              </div>
+              <div class="modal-body">
+              	<div class="row">
+                    <div class="col-md-6"><strong>Name : </strong> <span id="currentUser"></span></div>
+                  <div class="col-md-6"><strong>Mobile : </strong> <span id="currentUserMobile"></span></div>                  
+                </div>
+                <div class="row marg-top-3 reassign-view-scroll">
+              	  <div class="table-responsive">
+                  	 <table class="table table-bordered table-striped">
+                     	<colgroup>
+                             <col class="col-xs-2">
+                             <col class="col-xs-5">
+                             <col class="col-xs-5">
+                        </colgroup>
+                        <thead>
+                        <tr>
+                            <th>S. No.</th>
+                            <th>Assign Person</th>
+                            <th>Assign Date</th>
+                         </tr>
+                        </thead>
+                          <tbody id="reassignedUsers"> </tbody>
+                     </table>
+                  </div>
+                </div>                
+              </div>              
+            </div>
+          </div>
+        </div>
 <script src="<?php echo $baseUrl;?>/public/angular.min.js"></script>
 <script>
         var notAssignedArr  =<?php echo $this->notAssignedArr;?>;
@@ -134,6 +191,30 @@
 		
 	}
         
+        function reassignView(leadId){
+            
+            
+            SITEROOT = '<?php echo $baseUrl?>';
+            $.post(SITEROOT+'/admin/reassignview', {leadId:leadId},function(response){
+                if (response.length > 0) {
+                    var reassignedUsers = '';
+                    var count=1;
+                    $.each(response, function(key, value ) {
+                        
+//                        console.log(key);
+                        if(key==0){
+                            $('#currentUser').text(value.username);
+                            $('#currentUserMobile').text(value.mobile);
+                        }
+                        
+                        reassignedUsers += '<tr><td>'+count+'</td><td>'+value.username+'</td><td>'+value.assigned_date+'</td></tr>';
+                        count++;
+                    });
+                    $('#reassignedUsers').html(reassignedUsers);
+                    $("#myModal").modal("show");
+                }  
+            },'json') ; 
+        }
         
         function setRowColor(){
             
@@ -165,13 +246,13 @@
                 });
            }
             
-            if(Object.keys(notInterestedArr).length >0){
+           if(Object.keys(notInterestedArr).length >0){
                 $.each( notInterestedArr, function( key, value ) {
                      mygrid.setRowColor(value,"#ffffcc");
 //                    alert( key + ": " + value );
                 });
            }	 
-            if(Object.keys(notAnsweringArr).length >0){
+           if(Object.keys(notAnsweringArr).length >0){
                 $.each( notAnsweringArr, function( key, value ) {
                      mygrid.setRowColor(value,"#ffe0b3");
 //                    alert( key + ": " + value );
@@ -198,7 +279,6 @@
                     mygrid.clearAndLoad('<?php echo $baseUrl;?>/admin/manageleads',callBack,"json");
                 }
             }) ;
-		
 	}
 	
 	function inActiveStatus(id){

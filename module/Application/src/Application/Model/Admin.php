@@ -327,7 +327,9 @@ use Zend\Authentication\AuthenticationService;
                     ->join(['usrAsg'=>'userlist'],'usrAsg.id=assigned_lead.assigned_to',['assignedTo'=>'username'])
                     ->join(['usrOpn'=>'userlist'],'usrOpn.id=ll.created_by',['openBy'=>'username']);
             
-            $select->where(['ll.is_delete'=>0,'ll.comp_id'=>$this->loggedInUserDetails->comp_id,'assigned_lead.is_active'=>1]);
+            $select->where(['ll.is_delete'=>0,'ll.comp_id'=>$this->loggedInUserDetails->comp_id,'assigned_lead.is_active'=>1])
+                ->order('assigned_lead.assigned_date DESC');
+            
         })->toArray();
         
 //        echo '<pre>';print_r($leadList);exit;
@@ -353,5 +355,17 @@ use Zend\Authentication\AuthenticationService;
         return $projects;
     }
     
+    public function reassignview($leadId) {
+        $table  = new TableGateway('assigned_lead',$this->getAdapter());
+        $select = $table->select(function($select) use($leadId){
+            $select->columns(['assigned_date','is_active']);
+            $select->join(['usr'=>'userlist'],'usr.id=assigned_lead.assigned_to',['username','mobile']);
+            $select->where(['assigned_lead.lead_id'=>$leadId,'assigned_lead.comp_id'=>$this->loggedInUserDetails->comp_id])
+                    ->order('assigned_lead.assigned_date desc');
+            
+        })->toArray();
+//        echo '<pre>';print_r($select);exit;
+        return $select;
+    }
     
 }

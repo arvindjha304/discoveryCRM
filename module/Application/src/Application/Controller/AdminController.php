@@ -535,9 +535,6 @@ class AdminController extends AbstractActionController
 //             echo '<pre>';print_r($leadUpdatesHistory);exit;     
             $view->setVariable('leadUpdatesHistory', $leadUpdatesHistory);
         }
-        
-        
-        
         return $view;
     }
     
@@ -651,7 +648,8 @@ class AdminController extends AbstractActionController
             foreach($arrList as $val1)
             {
 //         	    echo '<pre>';print_r($val1);exit;
-                $customer_name          =   $val1['customer_name'];
+                $reassignView = ($val1['is_reassigned']==1) ? '<br><span class="label label-danger" onclick="return reassignView(\''.$val1['lead_id'].'\')">Reassign View</span>' : '';
+                $customer_name          =   $val1['customer_name'].$reassignView;
                 $mobile                 =   $val1['mobile'];
                 $source_of_enquiry      =   $val1['source_name'];
                 $project_interested     =   $val1['project_name'];
@@ -673,11 +671,10 @@ class AdminController extends AbstractActionController
                 }elseif($val1['status_type']==2){
                     $lead_status   =   'Not Interested';
                 }elseif($val1['status_type']==3){
-                    $lead_status   =   'Not Answered';
+                    $lead_status   =   'Not Answering';
                 }
-                
-                $delete                 =   '<a href="'.$baseUrl.'/admin/updatelead/'.$val1['lead_id'].'" ><button title="Update Lead" class="btn btn-primary" type="button"><i class="fa fa-pencil-square-o"></i></button></a>';
-                $dataArray[]            =   array("id"=>$val1['lead_id'],"data"=>array(0,$customer_name,$mobile,$source_of_enquiry,$project_interested,$punch_date,$assigned_to,$assigned_date,$next_meeting,$open_by,$lead_status,$delete));
+                $delete      =   '<a href="'.$baseUrl.'/admin/updatelead/'.$val1['lead_id'].'" ><button title="Update Lead" class="btn btn-primary" type="button"><i class="fa fa-pencil-square-o"></i></button></a>';
+                $dataArray[] =   array("id"=>$val1['lead_id'],"data"=>array(0,$customer_name,$mobile,$source_of_enquiry,$project_interested,$punch_date,$assigned_to,$assigned_date,$next_meeting,$open_by,$lead_status,$delete));
             }
 //    echo '<pre>';print_r($dataArray);exit; 
             $json = json_encode($dataArray);
@@ -712,7 +709,6 @@ class AdminController extends AbstractActionController
     }
     
     public function reassignleadstouserAction(){
-        $view = new ViewModel();
         $this->layout('layout/layoutadmin');
         $postdata = file_get_contents("php://input");
         $request = json_decode($postdata);
@@ -728,6 +724,7 @@ class AdminController extends AbstractActionController
                     'assigned_to'   => $userId,
                     'assigned_by'   => $this->loggedInUserDetails->id,
                     'assigned_date' => date('Y-m-d H:i:s'),
+                    'is_reassigned' => 1,
                     'comp_id'       => $this->loggedInUserDetails->comp_id
                 ]; 
                 $this->getModel()->insertanywhere('assigned_lead', $data);
@@ -746,4 +743,17 @@ class AdminController extends AbstractActionController
         exit;
     }
     
+    
+    public function reassignviewAction(){
+        if($this->getRequest()->isXmlHttpRequest()){
+            $leadId = $this->params()->fromPost('leadId');
+            $reassignviewList = $this->getModel()->reassignview($leadId);
+//          echo '<pre>';print_r($reassignviewList);exit;
+            
+            exit(json_encode($reassignviewList));
+            
+//            echo json_encode($reassignviewList);
+//            exit;
+        }
+    }
 }

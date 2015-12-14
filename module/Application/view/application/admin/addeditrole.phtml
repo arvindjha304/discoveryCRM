@@ -65,6 +65,10 @@
                                 <span ng-show="myForm.seniority.$error.required">Seniority is required.</span>
                                 </span>
                             </div>
+                            <div class="form-group-custom">
+                                <label style="padding-right:10px;">Is App Admin </label>
+                                <input type="checkbox" name="isAppAdmin"  ng-model="isAppAdmin" />
+                            </div>
                           <div class="box-footer-custom">
                             <button class="btn btn-primary" type="submit" ng-disabled="(myForm.$invalid || selection.length == 0)">Save</button>
                             <button class="btn btn-danger" type="button" style="margin-left:10px;" ng-click="cancelBtn()">Cancel</button>

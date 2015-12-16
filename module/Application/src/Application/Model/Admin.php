@@ -76,10 +76,7 @@ use Zend\Authentication\AuthenticationService;
             $select->join(['cr'=>'company_roles'],'cr.id=userlist.role_id','role_name');
             $select->where(['userlist.is_delete'=>0,'userlist.comp_id'=>$this->loggedInUserDetails->comp_id]);
         })->toArray();
-        
-        
 //        echo '<pre>';print_r($userList);exit;
-        
         return $userList;
     }
     
@@ -315,7 +312,22 @@ use Zend\Authentication\AuthenticationService;
 //        echo $result;exit;
         if($result>0) return 1; else return 0;
     }
-    
+     
+    public function checkMobile($mobile) {
+        
+        $sql = new Sql($this->getAdapter());
+        $where = new Where();
+        $where->OR->equalTo('mobile', $mobile);
+//        $where->OR->equalTo('alt_no', $mobile);
+//        $where->OR->equalTo('other_no', $mobile);
+        
+        $select = $sql->select()->from('lead_list');
+        $select->where($where);
+        $select->where(['is_active'=>1,'is_delete'=>0,'comp_id'=>$this->loggedInUserDetails->comp_id]);
+        $result = $sql->prepareStatementForSqlObject($select)->execute()->count();
+//        echo $result;exit;
+        if($result>0) return 1; else return 0;
+    }
     public function getAssignedLeads(){
         $tableGateway = new TableGateway('assigned_lead',$this->getAdapter());
         $leadList = $tableGateway->select(function($select){
@@ -323,7 +335,7 @@ use Zend\Authentication\AuthenticationService;
             $select->join(['ll'=>'lead_list'],'assigned_lead.lead_id=ll.id',['lead_id'=>'id','customer_name','mobile','created_by','punchDate'=>'punch_date'])
                     ->join(['pl'=>'project_list'],'pl.id=ll.project_interested',['project_name'])
                     ->join(['sl'=>'source_list'],'sl.id=ll.source_of_enquiry',['source_name'])
-                    ->join(['uls'=>'updated_lead_status'],$onExpression,['next_meeting'=>'date_time_value','lead_status'=>'status_type','last_feedback','status_type','interested_type'],'left')
+                    ->join(['uls'=>'updated_lead_status'],$onExpression,['next_meeting'=>'date_time_value','lead_status'=>'status_type','last_feedback','status_type','interested_type','client_type'],'left')
                     ->join(['usrAsg'=>'userlist'],'usrAsg.id=assigned_lead.assigned_to',['assignedTo'=>'username'])
                     ->join(['usrOpn'=>'userlist'],'usrOpn.id=ll.created_by',['openBy'=>'username']);
             
@@ -360,6 +372,7 @@ use Zend\Authentication\AuthenticationService;
         $select = $table->select(function($select) use($leadId){
             $select->columns(['assigned_date','is_active']);
             $select->join(['usr'=>'userlist'],'usr.id=assigned_lead.assigned_to',['username','mobile']);
+            $select->join(['ldlst'=>'lead_list'],'ldlst.id=assigned_lead.lead_id',['customer_name','customer_mobile'=>'mobile']);
             $select->where(['assigned_lead.lead_id'=>$leadId,'assigned_lead.comp_id'=>$this->loggedInUserDetails->comp_id])
                     ->order('assigned_lead.assigned_date desc');
             

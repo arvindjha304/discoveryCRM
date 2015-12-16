@@ -80,7 +80,7 @@
                       <div class="input-group-addon">
                         <i class="fa fa-calendar"></i>
                       </div>
-                      <input type="text" class="form-control pull-right form_datetime" name="PunchDate" ng-model="formData.PunchDate" required>
+                        <input type="text" class="form-control pull-right form_datetime" ng-disabled="true" name="PunchDate" ng-model="formData.PunchDate" required>
                     </div><!-- /.input group -->
                     
                       <span style="color:red" ng-cloak ng-show="myForm.PunchDate.$dirty && myForm.PunchDate.$invalid">
@@ -358,28 +358,38 @@
                 <!-- timeline item -->
                 <?php if(count($this->leadUpdatesHistory)){
                     foreach($this->leadUpdatesHistory as $leadHistory){
-                        
-                        
 //                       echo '<pre>';print_r($leadHistory);
-                ?>        
-                      
-                        
+                ?> 
                     <li>                 
                         <div class="timeline-item">                    
                           <h3 class="timeline-header text-red">
-                          <?php if($leadHistory['status_type'] == 1)                              
+                          <?php echo $leadHistory['last_feedback'];
+                          /*if($leadHistory['status_type'] == 1)                              
                               echo 'Interested';                              
                             elseif($leadHistory['status_type'] == 2)
                                 echo 'Not Interested ';
                              else  
-                                 echo 'Not Answering';
+                                 echo 'Not Answering';*/
                               ?></h3>
                           <div class="timeline-body">
                             <strong>Next Visit :</strong> <?php if($leadHistory['date_time_value'] != '0000-00-00 00:00:00.0') echo $leadHistory['date_time_value']; else echo '';?><br>
                             <strong>Update By :</strong> <?php echo $leadHistory['updated_by'];?><br>
                             <strong>Updated On :</strong> <?php echo $leadHistory['updated_on'];?><br>
                             <?php //if{?>  
-                            <strong>Rating :</strong> <?php if($leadHistory['lead_rating'] != '0') echo $leadHistory['lead_rating']; else echo '';?>
+                            <strong>Rating :</strong> <?php if($leadHistory['lead_rating'] != '0'){
+//                               echo $leadHistory['lead_rating']; 
+                                
+                              if($leadHistory['lead_rating'] == 1)                              
+                                echo 'Average';                              
+                              elseif($leadHistory['lead_rating'] == 2)
+                                echo 'Medium';
+                              elseif($leadHistory['lead_rating'] == 3)
+                                echo 'Good';
+                              else  
+                                echo 'Hot';
+                                
+                                
+                            } else echo '';?>
                           </div>                    
                         </div>
                     </li>
@@ -488,6 +498,10 @@
             
             var url = "<?php echo $baseUrl?>/admin/updateleadstatus?callback=JSON_CALLBACK";
             $('#updateLeadLoader').show();
+            
+            console.log($scope.formData);
+            
+            
             $http.post(url,$scope.formData) 
             .success(function (data, status, headers, config) {
                 console.log(data);

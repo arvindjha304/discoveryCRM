@@ -106,8 +106,8 @@
 	mygrid.setSkin("dhx_skyblue");
 	mygrid.setImagePath("<?php echo $baseUrl;?>/public/dhtmlxgrid/codebase/imgs/");
 	mygrid.setHeader(",<b>Name</b>,<b>Mobile</b>,<b>Source</b>,<b>Project</b>,<b>Requirement</b>,<b>Punch Date</b>,<b>Open By</b>,<b>Action</b>");							
-	mygrid.attachHeader("#master_checkbox,#text_filter,#text_filter,#text_filter,#text_filter,#text_filter,#select_filter,,");	
-	mygrid.setInitWidths(" 30, 100, 100, 100, 100, 100, 100, 100, *");
+	mygrid.attachHeader("#master_checkbox,#text_filter,#text_filter,#text_filter,#text_filter,#text_filter,#text_filter,#text_filter,");	
+	mygrid.setInitWidths(" 30, 150, 100, 150, 150, 150, 100, 100, *");
 	mygrid.enableTooltips("false,false,false,false,false,false,false,false,false");
 	mygrid.enableAutoHeight(true);   
 	mygrid.setColAlign("center,left,left,left,left,left,left,left,left");
@@ -122,7 +122,9 @@
 	// mygrid.parse(<?php echo $this->jsonData?>,callBack,"json");
 	mygrid.clearAndLoad(strgridURL,callBack,"json");
 	function callBack(){
-		
+            $(function () {
+               $('[data-toggle="tooltip"]').tooltip()
+            })
 		
 	}
 	

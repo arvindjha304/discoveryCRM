@@ -1,8 +1,5 @@
 <?php $baseUrl = $this->basePath();
-
 //echo $baseUrl;exit;
-
-
 ?>
 <!-- Content Wrapper. Contains page content -->
     <!-- Angular js file -->
@@ -56,7 +53,7 @@
                             
                             <div class="form-group-custom">
                               <label for="exampleInputEmail1">Email address <span class="mandatory">*</span></label>
-                                <input type="email" name="useremail" class="form-control" placeholder="Email" ng-model="useremail" required>
+                                <input type="email" name="useremail" class="form-control" placeholder="Email" ng-model="useremail"  required>
                                 <span style="color:red" ng-style="{color: myColor}" ng-cloak ng-show="myForm.useremail.$dirty && myForm.useremail.$invalid">
                                 <span ng-show="myForm.useremail.$error.required">Email is required.</span>
                                 <span ng-show="myForm.useremail.$error.email">Invalid email address.</span>
@@ -130,6 +127,33 @@
         $scope.UserRoles = <?php echo $this->allRoles?>;
         $scope.cancelBtn = function(){
             window.location.href = '<?php echo $baseUrl?>/admin/manageusers';
+        }
+//        ()
+         $scope.CheckUserEmail = function(useremail){
+                $scope.useremailExistsErr = true;
+                var url = "<?php echo $baseUrl?>/admin/checkuseremail";
+                $http.post(url,{'useremail':useremail}) 
+                .success(function (data, status, headers, config) {
+                    
+            alert(data);
+            return false;
+                    
+                    if(data==1){
+                        $('#useremailExists').show();
+                        $scope.useremailExistsErr = true;
+                    }else{
+                        $('#useremailExists').hide();
+                        $scope.useremailExistsErr = false;
+                    }
+                    
+                   console.log(data); 
+                })
+                .error(function (data, status, headers, config) {
+                    //this always gets called
+                    console.log(status);
+                });
+                return false;   
+//            }    
         }
         
         $scope.getManagerNames = function(userRole) {

@@ -190,4 +190,9 @@ class IndexController extends AbstractActionController
         $this->redirect()->toRoute('application',array('controller'=>'index','action' => 'otp-code'));
     }
     
+    public function logoutAction(){
+        $auth = new AuthenticationService();
+        $auth->clearIdentity();
+        $this->redirect()->toRoute('application',array('controller'=>'index'));
+    }
 }

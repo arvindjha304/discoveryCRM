@@ -115,6 +115,7 @@
 	mygrid.setColSorting("na,str,str,str,str,str,str,str,str");
 	mygrid.enablePaging(true, 10, null, "pagingArea", true, "recinfoArea");
 	mygrid.setPagingSkin("bricks");
+        mygrid.attachEvent("onEditCell",doOnCellEdit);
 	// mygrid.attachEvent("onXLS", function() { $("#preloader").show() });
 	// mygrid.attachEvent("onXLE", function() { $("#preloader").hide() });		
 	mygrid.attachEvent("onFilterEnd", callBack);													
@@ -125,12 +126,19 @@
             $(function () {
                $('[data-toggle="tooltip"]').tooltip()
             })
-		
+	}
+	
+	function doOnCellEdit(stage,rowId,cellInd,newValue,oldValue){
+            if(stage==2){
+                SITEROOT = '<?php echo $baseUrl?>';
+                $.post(SITEROOT+'/admin/updateleadintable', {id:rowId,value:newValue},function(response){}) ;
+            }
+            return true;
 	}
 	
 	function deleteRow(id){
             SITEROOT = '<?php echo $baseUrl?>';
-            $.post(SITEROOT+'/admin/updatestatus', {id:id,action:'delete',tableType:'USERLISTING'},function(response){
+            $.post(SITEROOT+'/admin/updatestatus', {id:id,action:'delete',tableType:'LEADLISTING'},function(response){
                 if(response == '1')
                 {
                         mygrid.clearAndLoad('<?php echo $baseUrl;?>/admin/manageleads',callBack,"json");
@@ -138,26 +146,26 @@
             }) ;
 	}
 	
-	function activeStatus(id){
-            SITEROOT = '<?php echo $baseUrl?>';
-            $.post(SITEROOT+'/admin/updatestatus', {id:id,action:'active',tableType:'USERLISTING'},function(response){
-                if(response == '1')
-                {
-                    mygrid.clearAndLoad('<?php echo $baseUrl;?>/admin/manageleads',callBack,"json");
-                }
-            }) ;
-		
-	}
-	
-	function inActiveStatus(id){
-		SITEROOT = '<?php echo $baseUrl?>';
-		$.post(SITEROOT+'/admin/updatestatus', {id:id,action:'inactive',tableType:'USERLISTING'},function(response){
-                    if(response == '1')
-                    {
-                            mygrid.clearAndLoad('<?php echo $baseUrl;?>/admin/manageleads',callBack,"json");
-                    }
-		}) ;
-	}
+//	function activeStatus(id){
+//            SITEROOT = '<?php echo $baseUrl?>';
+//            $.post(SITEROOT+'/admin/updatestatus', {id:id,action:'active',tableType:'USERLISTING'},function(response){
+//                if(response == '1')
+//                {
+//                    mygrid.clearAndLoad('<?php echo $baseUrl;?>/admin/manageleads',callBack,"json");
+//                }
+//            }) ;
+//		
+//	}
+//	
+//	function inActiveStatus(id){
+//		SITEROOT = '<?php echo $baseUrl?>';
+//		$.post(SITEROOT+'/admin/updatestatus', {id:id,action:'inactive',tableType:'USERLISTING'},function(response){
+//                    if(response == '1')
+//                    {
+//                            mygrid.clearAndLoad('<?php echo $baseUrl;?>/admin/manageleads',callBack,"json");
+//                    }
+//		}) ;
+//	}
 	
 	
 	function getSelectedIds(){
@@ -176,11 +184,11 @@
             if(action!=''){
                 var selectedIds = getSelectedIds();
                 SITEROOT = '<?php echo $baseUrl?>';
-                $.post(SITEROOT+'/admin/updatestatus', {selectedIds:selectedIds,action:action,tableType:'USERLISTING'},function(response){
-                        if(response == '1')
-                        {
-                            mygrid.clearAndLoad('<?php echo $baseUrl;?>/admin/manageleads',callBack,"json");
-                        }
+                $.post(SITEROOT+'/admin/updatestatus', {selectedIds:selectedIds,action:action,tableType:'LEADLISTING'},function(response){
+                    if(response == '1')
+                    {
+                        mygrid.clearAndLoad('<?php echo $baseUrl;?>/admin/manageleads',callBack,"json");
+                    }
                 }) ;		
             }
         }

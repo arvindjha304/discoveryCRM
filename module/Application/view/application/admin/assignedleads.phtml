@@ -87,11 +87,12 @@
                     <div style="margin-left:15px" id="user_list">
                         <div id='preloader' style="display:none;" >
                         <img class=""src='images/animatedEllipse2.gif' border='0' style="width:50px;  left: 560px;position: absolute; top: 450px;z-index:2000"  ></div>	
-                        <div id="manageuser" class="gridbox" style="width:100% !important; background-color:white; margin-left: 0px;"></div>
                         <div class="pagingWrap">
                             <div style="width:100%;float:left;" id="recinfoArea"></div>
                             <div id="pagingArea"></div>
                         </div>
+                        
+                        <div id="manageuser" class="gridbox" style="width:100% !important; background-color:white; margin-left: 0px;"></div>
                     </div> 
                     
                 </div><!-- /.box-body -->
@@ -166,15 +167,15 @@
 	var mygrid = new dhtmlXGridObject('manageuser');
 	mygrid.setSkin("dhx_skyblue");
 	mygrid.setImagePath("<?php echo $baseUrl;?>/public/dhtmlxgrid/codebase/imgs/");
-	mygrid.setHeader(",<b>Name</b>,<b>Mobile</b>,<b>Source</b>,<b>Project</b>,<b>Punch Date</b>,<b>Assigned To</b>,<b>Assigned Date</b>,<b>Next Meeting</b>,<b>Open By</b>,<b>Lead Status</b>,<b>Last Activity</b>,<b>Client Type</b>,<b>Action</b>");							
-	mygrid.attachHeader("#master_checkbox,#text_filter,#text_filter,#text_filter,#text_filter,#text_filter,#text_filter,#text_filter,#text_filter,#text_filter,#text_filter,#text_filter,#text_filter,");	
-	mygrid.setInitWidths(" 30, 110, 90, 110, 90, 90, 90, 90, 90, 90, 100, 100, 100, *");
-	mygrid.enableTooltips("false,false,false,false,false,false,false,false,false,false,false,false,false,false");
+	mygrid.setHeader(",<b>Sr. No.</b>,<b>Name</b>,<b>Mobile</b>,<b>Source</b>,<b>Project</b>,<b>Punch Date</b>,<b>Assigned To</b>,<b>Assigned Date</b>,<b>Next Meeting</b>,<b>Open By</b>,<b>Lead Status</b>,<b>Last Activity</b>,<b>Client Type</b>,<b>Action</b>");							
+	mygrid.attachHeader("#master_checkbox,,#text_filter,#text_filter,#text_filter,#text_filter,#text_filter,#text_filter,#text_filter,#text_filter,#text_filter,#text_filter,#text_filter,#text_filter,");	
+	mygrid.setInitWidths(" 30, 50, 110, 90, 110, 90, 90, 90, 90, 90, 90, 100, 100, 100, *");
+	mygrid.enableTooltips("false,false,false,false,false,false,false,false,false,false,false,false,false,false,false");
 	mygrid.enableAutoHeight(true);   
-	mygrid.setColAlign("center,left,left,left,left,left,left,left,left,left,left,left,left,left");
-	mygrid.setColTypes("ch,ro,ro,ro,ro,ro,ro,ro,ro,ro,ro,ro,ro,ro");
-	mygrid.setColSorting("na,str,str,str,str,str,str,str,str,str,str,str,str,str");
-//	mygrid.enablePaging(true, 10, null, "pagingArea", true, "recinfoArea");
+	mygrid.setColAlign("center,left,left,left,left,left,left,left,left,left,left,left,left,left,left");
+	mygrid.setColTypes("ch,ro,ro,ro,ro,ro,ro,ro,ro,ro,ro,ro,ro,ro,ro");
+	mygrid.setColSorting("na,str,str,str,str,str,str,str,str,str,str,str,str,str,str");
+	mygrid.enablePaging(true, 10, null, "pagingArea", true, "recinfoArea");
 	mygrid.setPagingSkin("bricks");
 	// mygrid.attachEvent("onXLS", function() { $("#preloader").show() });
 	// mygrid.attachEvent("onXLE", function() { $("#preloader").hide() });		

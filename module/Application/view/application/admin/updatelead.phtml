@@ -142,13 +142,36 @@
 	<div class="box box-default"  ng-controller="updateStatus"> 
             <div class="checkbox box-body" style="background-color:#ecf0f5; margin-top:30px;">
                 <label>
-                    <input type="checkbox" ng-click="showLeadStatusDiv()" ng-model="showLeadDiv"> Update Lead Status
+                    <input type="checkbox" ng-click="showLeadStatusDiv()" ng-model="showLeadDiv" > Update Lead Status
                 </label>
             </div>
-          <div class="box-body" style="display:none" id="leadStatusDiv">
+          <div class="box-body" <?php if(count($this->leadUpdatesHistory)==0){?>style="display:none"<?php }?> id="leadStatusDiv">
             <form method="post" name="myForm2" novalidate>
             <input type="hidden"  ng-model="leadStatusForm.leadId" name="leadId">
             <div class="row" >
+            <div class="col-xs-12 col-sm-12 col-md-12">
+              <!-- jQuery Knob -->
+              <div class="box-solid" style="background-color:#ecf0f5;border:1px solid #d2d6de;;margin-bottom:30px">               
+                <div class="box-body">
+                  <div class="row">
+                    <div class="col-md-2 col-sm-12 col-xs-12 text-center">                  
+                     <label>Client Type</label>                      	                    
+                    </div><!-- ./col -->
+                    <div class="col-md-2 col-sm-3 col-xs-3 text-center">                    	
+                      	<input type="radio" name="clientType" ng-model="leadStatusForm.clientType" class="minimal" value=1 > 
+                        <label> Client</label>                    
+                    </div><!-- ./col -->
+                    <div class="col-md-2 col-sm-3 col-xs-3 text-center">                    	
+                      	<input type="radio" name="clientType" ng-model="leadStatusForm.clientType" class="minimal" value=2> 
+                        <label> Broker</label>                     
+                    </div><!-- ./col -->                  
+                  </div><!-- /.row -->                 
+                </div><!-- /.box-body -->
+              </div><!-- /.box -->
+            </div><!-- /.col --> 
+          </div>
+        
+            <div class="row" ng-show="(leadStatusForm.clientType)">
             <div class="col-xs-12 col-sm-12 col-md-12">
               <!-- jQuery Knob -->
               <div class="box-solid" style="background-color:#ecf0f5;border:1px solid #d2d6de;">               
@@ -297,33 +320,6 @@
             </div><!-- /.col --> 
           </div>
           
-          
-        <div class="row" ng-show="(leadStatusForm.rateThisLead && leadStatusForm.statusType=='1')">
-            <div class="col-xs-12 col-sm-12 col-md-12">
-              <!-- jQuery Knob -->
-              <div class="box-solid" style="background-color:#ecf0f5;border:1px solid #d2d6de;;margin-bottom:30px">               
-                <div class="box-body">
-                  <div class="row">
-                    <div class="col-md-2 col-sm-12 col-xs-12 text-center">                  
-                     <label>Client Type</label>                      	                    
-                    </div><!-- ./col -->
-                    <div class="col-md-2 col-sm-3 col-xs-3 text-center">                    	
-                      	<input type="radio" name="clientType" ng-model="leadStatusForm.clientType" class="minimal" value=1 > 
-                        <label> Client</label>                    
-                    </div><!-- ./col -->
-                    <div class="col-md-2 col-sm-3 col-xs-3 text-center">                    	
-                      	<input type="radio" name="clientType" ng-model="leadStatusForm.clientType" class="minimal" value=2> 
-                        <label> Broker</label>                     
-                    </div><!-- ./col -->                  
-                  </div><!-- /.row -->                 
-                </div><!-- /.box-body -->
-              </div><!-- /.box -->
-            </div><!-- /.col --> 
-          </div>
-        
-        
-        
-        
           <div class="row">
             <div class="col-xs-12 col-sm-12 col-md-12">
                 <label>Description</label>
@@ -517,6 +513,28 @@
         };
     });
    app.controller('updateStatus', function($scope, $http) {
+        
+        var leadUpdatesCurrent = <?php echo $this->leadUpdatesCurrent?>;
+//        console.log(leadUpdatesCurrent.status_type);
+        if(Object.keys(leadUpdatesCurrent).length > 0){
+            $scope.leadStatusForm = {
+                leadId               :  '<?php echo $this->formData[0]['id']?>',
+                statusType           :  leadUpdatesCurrent.status_type,
+                interestedType       :  leadUpdatesCurrent.interested_type,
+                bogusLead            :  leadUpdatesCurrent.bogus_lead,
+                dateTimeValue        :  leadUpdatesCurrent.date_time_value.substr(0, 16),
+                rateThisLead         :  leadUpdatesCurrent.lead_rating,
+                clientType           :  leadUpdatesCurrent.client_type,
+                description          :  leadUpdatesCurrent.last_feedback,
+            }
+            $scope.showLeadDiv = true;
+        }else{
+            $scope.leadStatusForm = {
+                leadId               :  '<?php echo $this->formData[0]['id']?>'
+            }
+        }
+           
+
        $scope.showLeadStatusDiv = function(){
 //            console.log($scope.showLeadDiv);
             if($scope.showLeadDiv == true)
@@ -524,18 +542,17 @@
             else
                 $('#leadStatusDiv').hide('slow');
        }
-       $scope.leadStatusForm = {
-            leadId               : '<?php echo $this->formData[0]['id']?>'
-        }
-        $scope.leadStatusResetForm = {
-            statusType           :  '',
-            interestedType       :  '',
-            bogusLead            :  '',
-            dateTimeValue        :  '',
-            rateThisLead         :  '',
-            clientType           :  '',
-            description          :  ''
-        }
+       
+        
+//        $scope.leadStatusResetForm = {
+//            statusType           :  '',
+//            interestedType       :  '',
+//            bogusLead            :  '',
+//            dateTimeValue        :  '',
+//            rateThisLead         :  '',
+//            clientType           :  '',
+//            description          :  ''
+//        }
        
        $scope.submitLeadStatus = function(){
            

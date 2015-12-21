@@ -28,9 +28,9 @@ class AdminController extends AbstractActionController
         return parent::onDispatch($e);
     }
 
-	public function getbaseUrl(){
-		$baseUrl = $this->getRequest()->getbaseUrl();
-	}
+    public function getbaseUrl(){
+            $baseUrl = $this->getRequest()->getbaseUrl();
+    }
     public function getAdapter(){
         return $this->getServiceLocator()->get('Zend\Db\Adapter\Adapter');
     }
@@ -48,6 +48,30 @@ class AdminController extends AbstractActionController
          // $view->setVariable('aboutUsData', $indexModel->getAboutUs());
          return $view;
     }
+    public function checkuseremailAction(){
+         $postdata = file_get_contents("php://input");
+        $request = json_decode($postdata);
+        if(count($request)){
+            
+//            echo '<pre>';print_r($request);exit; 
+            
+            
+            $useremail  = $request->useremail;
+            if($useremail!='')
+              echo $this->getModel()->checkUserEmail($useremail);
+        }
+        exit;
+    }
+    public function checkuserphoneAction(){
+        $postdata = file_get_contents("php://input");
+        $request = json_decode($postdata);
+        if(count($request)){
+            $userPhone  = $request->userPhone;
+            if($userPhone!='')
+                echo $this->getModel()->checkUserPhone($userPhone);
+        }
+        exit;
+    }
     public function addedituserAction()
     {
         $view = new ViewModel();
@@ -57,16 +81,12 @@ class AdminController extends AbstractActionController
         $userId = $this->params()->fromRoute('id1', '');
         if($userId!=''){
             $arrList = $this->getModel()->getUserList($userId);
-            // echo '<pre>';print_r($arrList);exit;     
+//             echo '<pre>';print_r($arrList);exit;     
             if(count($arrList)){
                 $password = str_replace($arrList[0]['salt_key'], '', $arrList[0]['password']);
                 $view->setVariable('userPassword', base64_decode($password));
                 $view->setVariable('userData', $arrList);
                 $allManagers = $this->getModel()->getmanagernames($arrList[0]['role_id']);
-                
-//                echo '<pre>';print_r($allManagers);exit;    
-                
-                
                 $view->setVariable('allManagers', $allManagers);
             }
         }
@@ -153,6 +173,8 @@ class AdminController extends AbstractActionController
             elseif($tableType == 'ROLELISTING')  $tableName = 'company_roles';
             elseif($tableType == 'PROJECTLISTING')  $tableName = 'project_list';
             elseif($tableType == 'SOURCELISTING')  $tableName = 'source_list';
+            elseif($tableType == 'LEADLISTING')  $tableName = 'lead_list';
+            
             
             if($tableName!=''){ 
                 if(isset($selectedIds)){
@@ -317,6 +339,10 @@ class AdminController extends AbstractActionController
             $projectId = $this->params()->fromPost('projectId');
             $ProjectName = $this->params()->fromPost('ProjectName');
             
+//            $checkProjectName = $this->getModel()->checkProjectName($ProjectName);
+            
+//            echo $checkProjectName;exit;
+            
             $data = array(
                 'project_name'         => $ProjectName
             );
@@ -359,6 +385,14 @@ class AdminController extends AbstractActionController
         return $view;
     }
     
+    public function checkprojectnameAction(){
+         $postdata = file_get_contents("php://input");
+        $request = json_decode($postdata);
+        $projectName  = $request->projectName;
+        if($projectName!='')
+            echo $this->getModel()->checkProjectName($projectName);
+        exit;
+    }
     
     public function sourcesAction()
     {
@@ -417,6 +451,15 @@ class AdminController extends AbstractActionController
         return $view;
     }
     
+    public function checksourcenameAction(){
+         $postdata = file_get_contents("php://input");
+        $request = json_decode($postdata);
+        $sourceName  = $request->sourceName;
+        if($sourceName!='')
+            echo $this->getModel()->checkSourceName($sourceName);
+        exit;
+    }
+    
     public function addeditleadsAction()
     {
         $view = new ViewModel();
@@ -464,6 +507,7 @@ class AdminController extends AbstractActionController
                 $data['created_by']         = $this->loggedInUserDetails->id;
                 $data['last_updated_by']    = $this->loggedInUserDetails->id;
                 $data['last_updated']       = date('Y-m-d H:i:s');
+                $data['punch_date']         = date('Y-m-d H:i:s');
                 $data['date_created']       = date('Y-m-d H:i:s');
                 $this->getModel()->insertanywhere('lead_list', $data);
            }
@@ -480,23 +524,43 @@ class AdminController extends AbstractActionController
         $view->setVariable('allRoles', $allRoles);
     	$baseUrl = $this->getRequest()->getbaseUrl();
         if($this->getRequest()->isXmlHttpRequest()){
-            $arrList = $this->getModel()->getLeadList();
+           $arrList = $this->getModel()->getLeadList();
+           $table = new TableGateway('source_list',$this->getAdapter());
+           $source_list = $table->select(['is_delete'=>0,'comp_id'=>$this->loggedInUserDetails->comp_id])->toArray();
+            
+//    echo $leadHtml;exit;        
             $dataArray = array();
             foreach($arrList as $val1)
             {
-//         	    echo '<pre>';print_r($val1);exit;
+    //         	    echo '<pre>';print_r($val1);exit;
+
+                
+                $sourceHtml = '<select>'; 
+                if(count($source_list)){
+                     foreach($source_list as $source){
+                        $sourceHtml .= '<option value='.$source["id"].' >'.$source["source_name"].'</option>'; 
+                     }  
+                }
+                $sourceHtml .= '</select>';
+                
                 
                 $dateArr = explode(' ',$val1['punch_date']);
-                
                 $customer_name          =   $val1['customer_name'];
                 $mobile                 =   $val1['mobile'];
-                $source_of_enquiry      =   $val1['source_name'];
+//                $source_of_enquiry      =   $val1['source_name'];
+//                $source_of_enquiry      =   '<select>
+//    <option value="1">option 1</option>
+//    <option value="2">option 2</option>
+//    </select>';
+                
+                $source_of_enquiry      =   $sourceHtml;
+                
                 $project_interested     =   $val1['project_name'];
-//                $requirement            =   $val1['requirement'];
+    //                $requirement            =   $val1['requirement'];
                 $requirement            =   '<a href="#" data-toggle="tooltip" data-placement="right" title="Requirement - '.$val1['requirement'].'">'.  substr($val1['requirement'], 0, 15).'</a>';
                 $punch_date             =   $dateArr[0];
                 $open_by                =   $val1['open_by'];
-//                $status		=	($val1['is_active']==1) ? 'Active' : 'Inactive';
+    //                $status		=	($val1['is_active']==1) ? 'Active' : 'Inactive';
                 //$action               =   ($val1['is_active']==1) ? '<button onclick=inActiveStatus('.$val1["id"].')>Inactive</button>' :'<button onclick=activeStatus('.$val1["id"].')>Active</button>';
                 $delete                 =   '<a href="'.$baseUrl.'/admin/addeditleads/'.$val1['id'].'" ><button >Edit</button></a><button onclick=deleteRow('.$val1["id"].') >Delete</button>';
                 $dataArray[]            =   array("id"=>$val1['id'],"data"=>array(0,$customer_name,$mobile,$source_of_enquiry,$project_interested,$requirement,$punch_date,$open_by,$delete));
@@ -529,6 +593,7 @@ class AdminController extends AbstractActionController
         $view->setVariable('allProjects',$allProjects);
         
         $leadId = $this->params()->fromRoute('id1', '');
+        $leadUpdatesCurrent = '';
         if($leadId!=''){
             $arrList = $this->getModel()->getLeadList($leadId);
 //             echo '<pre>';print_r($arrList);exit;     
@@ -538,7 +603,14 @@ class AdminController extends AbstractActionController
             $leadUpdatesHistory = $this->getModel()->getLeadUpdatesHistory($leadId);
 //             echo '<pre>';print_r($leadUpdatesHistory);exit;     
             $view->setVariable('leadUpdatesHistory', $leadUpdatesHistory);
+            
+            
+            if(count($leadUpdatesHistory)) {
+                $leadUpdatesCurrent = $leadUpdatesHistory[0];
+            }
+            
         }
+         $view->setVariable('leadUpdatesCurrent', (count($leadUpdatesCurrent)) ? json_encode($leadUpdatesCurrent) : $leadUpdatesCurrent);
         return $view;
     }
     
@@ -563,13 +635,7 @@ class AdminController extends AbstractActionController
         ];   
         $data['last_updated_by']   = $this->loggedInUserDetails->id;
         $data['last_updated']     = date('Y-m-d H:i:s');
-        
 //        echo '<pre>';print_r($data);
-        
-        
-        
-        
-        
         $this->getModel()->updateanywhere('lead_list', $data,['id'=>$leadId]);
         exit('Lead Updated');
     }
@@ -582,12 +648,12 @@ class AdminController extends AbstractActionController
 //         echo '<pre>';print_r($request);exit;  
             $data = [
                 'lead_id'            => $request->leadId,
+                'client_type'        => $request->clientType,
                 'status_type'        => $request->statusType,
                 'interested_type'    => ($request->statusType==1) ? $request->interestedType : 0,
                 'bogus_lead'         => ($request->statusType==2) ? $request->bogusLead : 0,
                 'date_time_value'    => ($request->statusType==1) ? $request->dateTimeValue.':00' : '',
                 'lead_rating'        => ($request->statusType==1) ? $request->rateThisLead : 0,
-                'client_type'        => ($request->statusType==1) ? $request->clientType : 0,
                 'last_feedback'      => $request->description,
                 'updated_by'         => $this->loggedInUserDetails->id,
                 'updated_on'         => date('Y-m-d H:i:s'),
@@ -654,6 +720,7 @@ class AdminController extends AbstractActionController
 //            $arrList = $this->getModel()->getAssignedLeads();
 //             echo '<pre>';print_r($arrList);exit;
             $dataArray = array();
+            $kk=1;
             foreach($arrList as $val1)
             {
 //         	    echo '<pre>';print_r($val1);exit;
@@ -662,13 +729,19 @@ class AdminController extends AbstractActionController
                 $mobile                 =   $val1['mobile'];
                 $source_of_enquiry      =   $val1['source_name'];
                 $project_interested     =   $val1['project_name'];
-                $punch_date             =   $val1['punchDate'];
+                $punchDateArr = explode(' ', $val1['punchDate']);
+                $punch_date             =   $punchDateArr[0].' | '.substr($punchDateArr[1], 0, 5);
                 $assigned_to            =   $val1['assignedTo'];
-                $assigned_date          =   $val1['assigned_date'];
-                $next_meeting           =   $val1['next_meeting'];
+                $assignedDateArr        = explode(' ', $val1['assigned_date']);
+                $assigned_date          =   $assignedDateArr[0].' | '.substr($assignedDateArr[1], 0, 5);
+                if($val1['next_meeting']!=''){
+                    $nextMeetingDateArr    = explode(' ', $val1['next_meeting']);
+                    $next_meeting          =   ($nextMeetingDateArr[0]!='0000-00-00') ? $nextMeetingDateArr[0].' | '.substr($nextMeetingDateArr[1], 0, 5) : '';
+                }else{
+                  $next_meeting = '';  
+                }
                 $open_by                =   $val1['openBy'];
-                $last_feedback          =   '<a href="#" data-toggle="tooltip" data-placement="right" title="Last Activity - '.$val1['last_feedback'].'">'.  substr($val1['last_feedback'], 0, 15).'</a>';
-               // $requirement            =   '<a href="#" data-toggle="tooltip" data-placement="right" title="Requirement - '.$val1['requirement'].'">'.  substr($val1['requirement'], 0, 15).'</a>';
+                $last_feedback          =   '<a href="#" data-toggle="tooltip" data-placement="left" title="Last Activity - '.$val1['last_feedback'].'">'.  substr($val1['last_feedback'], 0, 15).'</a>';
                 $client_type            =   ($val1['client_type'] ==1) ? 'Client' : 'Broker';
                 
                 if($val1['status_type']==''){
@@ -686,7 +759,8 @@ class AdminController extends AbstractActionController
                     $lead_status   =   'Not Answering';
                 }
                 $delete      =   '<a href="'.$baseUrl.'/admin/updatelead/'.$val1['lead_id'].'" ><button title="Update Lead" class="btn btn-primary" type="button"><i class="fa fa-pencil-square-o"></i></button></a>';
-                $dataArray[] =   array("id"=>$val1['lead_id'],"data"=>array(0,$customer_name,$mobile,$source_of_enquiry,$project_interested,$punch_date,$assigned_to,$assigned_date,$next_meeting,$open_by,$lead_status,$last_feedback,$client_type,$delete));
+                $dataArray[] =   array("id"=>$val1['lead_id'],"data"=>array(0,$kk,$customer_name,$mobile,$source_of_enquiry,$project_interested,$punch_date,$assigned_to,$assigned_date,$next_meeting,$open_by,$lead_status,$last_feedback,$client_type,$delete));
+                $kk++;
             }
 //    echo '<pre>';print_r($dataArray);exit; 
             $json = json_encode($dataArray);
@@ -721,7 +795,7 @@ class AdminController extends AbstractActionController
     }
     
     public function reassignleadstouserAction(){
-        $this->layout('layout/layoutadmin');
+//        $this->layout('layout/layoutadmin');
         $postdata = file_get_contents("php://input");
         $request = json_decode($postdata);
 //        echo '<pre>';print_r($request);exit;
@@ -749,36 +823,42 @@ class AdminController extends AbstractActionController
     {
         $postdata = file_get_contents("php://input");
         $request = json_decode($postdata);
-        $mobile = $request->mobileNumber; 
-        if($mobile!=''){
-            $admin = $this->getServiceLocator()->get('Application\Model\Admin');
-            echo $admin->checkMobile($mobile);  
+        if(count($request)){
+            $mobile = $request->mobileNumber; 
+            if($mobile!=''){
+                $admin = $this->getServiceLocator()->get('Application\Model\Admin');
+                echo $admin->checkMobile($mobile);  
+            }   
         }
         exit;
     }
     
       
-    public function checkuseremailAction()
-    {
-        $postdata = file_get_contents("php://input");
-        $request = json_decode($postdata);
-        $useremail = $request->useremail; 
-        if($useremail!=''){
-            $admin = $this->getServiceLocator()->get('Application\Model\Admin');
-            echo $admin->checkUseremail($useremail);  
-        }
-        exit;
-    }
-    public function reassignviewAction(){
+//    public function checkuseremailAction()
+//    {
+//        $postdata = file_get_contents("php://input");
+//        $request = json_decode($postdata);
+//        $useremail = $request->useremail; 
+//        if($useremail!=''){
+//            $admin = $this->getServiceLocator()->get('Application\Model\Admin');
+//            echo $admin->checkUseremail($useremail);  
+//        }
+//        exit;
+//    }
+    public function updateleadintableAction(){
         if($this->getRequest()->isXmlHttpRequest()){
             $leadId = $this->params()->fromPost('leadId');
             $reassignviewList = $this->getModel()->reassignview($leadId);
 //          echo '<pre>';print_r($reassignviewList);exit;
-            
             exit(json_encode($reassignviewList));
-            
-//            echo json_encode($reassignviewList);
-//            exit;
+        }
+    }
+     public function reassignviewAction(){
+        if($this->getRequest()->isXmlHttpRequest()){
+            $leadId = $this->params()->fromPost('leadId');
+            $reassignviewList = $this->getModel()->reassignview($leadId);
+//          echo '<pre>';print_r($reassignviewList);exit;
+            exit(json_encode($reassignviewList));
         }
     }
 }

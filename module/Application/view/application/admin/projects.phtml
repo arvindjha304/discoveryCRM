@@ -32,7 +32,7 @@
               	<div class="box-header">
                 <div class="col-md-12" style="padding-left:0px;">
                   <h3 class="box-title">Add/Edit Project</h3>
-                  </div>                  
+                </div>                  
                 </div><!-- /.box-header -->
                 <div class="box-body">
                     <?php if(isset($this->projectExists)){?>
@@ -45,12 +45,13 @@
                     <input type="text" name="projectId" ng-model="projectId" style="display:none;">
                     <div class="form-group-custom">
                         <label>Project Name</label>
-                        <input type="text" name="ProjectName" class="form-control" placeholder="Project Name" ng-model="ProjectName" required>
+                        <input type="text" name="ProjectName" class="form-control" placeholder="Project Name" ng-model="ProjectName" ng-blur="checkProjectName(ProjectName)" required>
                         <span style="color:red;" ng-cloak ng-show="(myForm.ProjectName.$dirty && myForm.ProjectName.$invalid)">
                         <span ng-show="myForm.ProjectName.$error.required">Project Name is required.</span>
                         </span>
+                        <span id="ProjectNameExists" style="display:none;color:red">Project Name already exists.</span>
                     </div>                        
-                    <button class="btn btn-primary" type="submit" ng-disabled="(myForm.$invalid )">Save</button>
+                    <button class="btn btn-primary" type="submit" ng-disabled="(disableButton==true || myForm.$invalid )">Save</button>
                     <button class="btn btn-danger" type="button" style="margin-left:10px;" ng-click="cancelBtn()">Cancel</button>    
                 </form>
                 </div>
@@ -183,14 +184,34 @@
 
 	var app = angular.module('myApp', []);
     var projectDetail         = <?php if(isset($this->projectDetail)) echo $this->projectDetail; else echo '{}'?>;
-    app.controller('validateCtrl', function($scope) {
-        
+    app.controller('validateCtrl', function($scope,$http) {
+        $scope.disableButton = false;
        if(Object.keys(projectDetail).length >0){
            $scope.projectId = projectDetail.id;
            $scope.ProjectName = projectDetail.project_name;
        }
         $scope.cancelBtn = function(){
             window.location.href = '<?php echo $baseUrl?>/admin/projects';
+        }
+        $scope.checkProjectName = function(projectName){
+            var url = "<?php echo $baseUrl?>/admin/checkprojectname?callback=JSON_CALLBACK";
+//            var url = "<?php echo $baseUrl?>/admin/getmanagernames";
+            $http.post(url,{'projectName':projectName}) 
+            .success(function (data, status, headers, config) {
+                console.log(data);
+                if(data==1 && projectName!=projectDetail.project_name){
+                    $('#ProjectNameExists').show();
+                    $scope.disableButton = true;
+                }else{
+                    $('#ProjectNameExists').hide();
+                    $scope.disableButton = false;
+                }
+            })
+            .error(function (data, status, headers, config) {
+                //this always gets called
+                console.log(status);
+            });
+            return false;  
         }
     });
     

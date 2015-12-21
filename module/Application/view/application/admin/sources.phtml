@@ -39,12 +39,13 @@
                     <input type="text" name="sourceId" ng-model="sourceId" style="display:none;">
                     <div class="form-group-custom">
                         <label>Source Name</label>
-                        <input type="text" name="SourceName" class="form-control" placeholder="Source Name" ng-model="SourceName" required>
+                        <input type="text" name="SourceName" class="form-control" placeholder="Source Name" ng-model="SourceName" ng-blur="checkSourceName(SourceName)" required>
                         <span style="color:red;" ng-cloak ng-show="(myForm.SourceName.$dirty && myForm.SourceName.$invalid)">
                         <span ng-show="myForm.SourceName.$error.required">Project Name is required.</span>
                         </span>
+                        <span id="SourceNameExists" style="display:none;color:red">Project Name already exists.</span>
                     </div>                        
-                    <button class="btn btn-primary" type="submit" ng-disabled="(myForm.$invalid )">Save</button>
+                    <button class="btn btn-primary" type="submit" ng-disabled="(disableButton==true || myForm.$invalid )">Save</button>
                     <button class="btn btn-danger" type="button" style="margin-left:10px;" ng-click="cancelBtn()">Cancel</button>    
                 </form>
                 </div>
@@ -175,16 +176,37 @@
         }
     }
 
-	var app = angular.module('myApp', []);
+    var app = angular.module('myApp', []);
     var sourceDetail         = <?php if(isset($this->sourceDetail)) echo $this->sourceDetail; else echo '{}'?>;
-    app.controller('validateCtrl', function($scope) {
+    
+    app.controller('validateCtrl', function($scope,$http) {
         
+       $scope.disableButton = false;
        if(Object.keys(sourceDetail).length >0){
            $scope.sourceId = sourceDetail.id;
            $scope.SourceName = sourceDetail.source_name;
        }
         $scope.cancelBtn = function(){
             window.location.href = '<?php echo $baseUrl?>/admin/sources';
+        }
+        $scope.checkSourceName = function(sourceName){
+            var url = "<?php echo $baseUrl?>/admin/checksourcename?callback=JSON_CALLBACK";
+            $http.post(url,{'sourceName':sourceName}) 
+            .success(function (data, status, headers, config) {
+                console.log(data);
+                if(data==1 && sourceName!=sourceDetail.source_name){
+                    $('#SourceNameExists').show();
+                    $scope.disableButton = true;
+                }else{
+                    $('#SourceNameExists').hide();
+                    $scope.disableButton = false;
+                }
+            })
+            .error(function (data, status, headers, config) {
+                //this always gets called
+                console.log(status);
+            });
+            return false;  
         }
     });
     

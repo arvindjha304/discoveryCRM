@@ -89,7 +89,7 @@ use Zend\Authentication\AuthenticationService;
                 $select->join(['pl'=>'project_list'],'pl.id=lead_list.project_interested',['project_name'])
                 ->join(['sl'=>'source_list'],'sl.id=lead_list.source_of_enquiry',['source_name'])
                 ->join(['ul'=>'userlist'],'ul.id=lead_list.created_by',['open_by'=>'username'])
-                    ->where(['lead_list.is_assigned'=>0]);
+                    ->where(['lead_list.is_assigned'=>0,'sl.is_delete'=>0,'ul.is_active'=>1,'ul.is_delete'=>0]);
             }
             $select->where(['lead_list.is_delete'=>0,'lead_list.comp_id'=>$this->loggedInUserDetails->comp_id]);
         })->toArray();
@@ -313,21 +313,21 @@ use Zend\Authentication\AuthenticationService;
         if($result>0) return 1; else return 0;
     }
      
-    public function checkMobile($mobile) {
-        
-        $sql = new Sql($this->getAdapter());
-        $where = new Where();
-        $where->OR->equalTo('mobile', $mobile);
-//        $where->OR->equalTo('alt_no', $mobile);
-//        $where->OR->equalTo('other_no', $mobile);
-        
-        $select = $sql->select()->from('lead_list');
-        $select->where($where);
-        $select->where(['is_active'=>1,'is_delete'=>0,'comp_id'=>$this->loggedInUserDetails->comp_id]);
-        $result = $sql->prepareStatementForSqlObject($select)->execute()->count();
-//        echo $result;exit;
-        if($result>0) return 1; else return 0;
-    }
+//    public function checkMobile($mobile) {
+//        
+//        $sql = new Sql($this->getAdapter());
+//        $where = new Where();
+//        $where->OR->equalTo('mobile', $mobile);
+////        $where->OR->equalTo('alt_no', $mobile);
+////        $where->OR->equalTo('other_no', $mobile);
+//        
+//        $select = $sql->select()->from('lead_list');
+//        $select->where($where);
+//        $select->where(['is_active'=>1,'is_delete'=>0,'comp_id'=>$this->loggedInUserDetails->comp_id]);
+//        $result = $sql->prepareStatementForSqlObject($select)->execute()->count();
+////        echo $result;exit;
+//        if($result>0) return 1; else return 0;
+//    }
     public function getAssignedLeads(){
         $tableGateway = new TableGateway('assigned_lead',$this->getAdapter());
         $leadList = $tableGateway->select(function($select){
@@ -348,21 +348,13 @@ use Zend\Authentication\AuthenticationService;
         return $leadList;
     }
     
-    public function checkProjectName($fieldVal){
-        
-        $tableGateway = new TableGateway('project_list',$this->getAdapter());
-        $projects = $tableGateway->select(function($select) use($fieldVal){
-            $select->where(['project_name'=>$fieldVal,'is_active'=>1,'is_delete'=>0]);
-        })->toArray();
-        
-        if(count($projects)) return 1; else return 0;
-    }
     
     public function getLeadUpdatesHistory($leadId) {
         $tableGateway = new TableGateway('updated_lead_status',$this->getAdapter());
         $projects = $tableGateway->select(function($select) use($leadId){
             $select->join(['usr'=>'userlist'],'usr.id=updated_lead_status.updated_by',['updated_by'=>'username']);
-            $select->where(['updated_lead_status.lead_id'=>$leadId,'updated_lead_status.comp_id'=>$this->loggedInUserDetails->comp_id]);
+            $select->where(['updated_lead_status.lead_id'=>$leadId,'updated_lead_status.comp_id'=>$this->loggedInUserDetails->comp_id])
+                ->order('updated_lead_status.updated_on desc');
         })->toArray();
         return $projects;
     }
@@ -381,4 +373,37 @@ use Zend\Authentication\AuthenticationService;
         return $select;
     }
     
+    public function checkProjectName($projectName){
+        
+        $tableGateway = new TableGateway('project_list',$this->getAdapter());
+        $projects = $tableGateway->select(function($select) use($projectName){
+            $select->where(['project_name'=>$projectName,'is_delete'=>0,'comp_id'=>$this->loggedInUserDetails->comp_id]);
+        })->toArray();
+        if(count($projects)) return 1; else return 0;
+    }
+    public function checkSourceName($sourceName){
+        $tableGateway = new TableGateway('source_list',$this->getAdapter());
+        $projects = $tableGateway->select(function($select) use($sourceName){
+            $select->where(['source_name'=>$sourceName,'is_delete'=>0,'comp_id'=>$this->loggedInUserDetails->comp_id]);
+        })->toArray();
+        
+//        echo '<pre>';print_r($projects);exit;
+        
+        if(count($projects)) return 1; else return 0;
+    }
+    
+    public function checkUserEmail($useremail){
+        $tableGateway = new TableGateway('userlist',$this->getAdapter());
+        $projects = $tableGateway->select(function($select) use($useremail){
+            $select->where(['useremail'=>$useremail,'is_delete'=>0,'comp_id'=>$this->loggedInUserDetails->comp_id]);
+        })->toArray();
+        if(count($projects)) return 1; else return 0;
+    }
+    public function checkUserPhone($userPhone){
+        $tableGateway = new TableGateway('userlist',$this->getAdapter());
+        $projects = $tableGateway->select(function($select) use($userPhone){
+            $select->where(['mobile'=>$userPhone,'is_delete'=>0,'comp_id'=>$this->loggedInUserDetails->comp_id]);
+        })->toArray();
+        if(count($projects)) return 1; else return 0;
+    }
 }

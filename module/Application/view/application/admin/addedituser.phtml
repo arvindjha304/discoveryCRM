@@ -1,5 +1,8 @@
 <?php $baseUrl = $this->basePath();
+
 //echo $baseUrl;exit;
+
+
 ?>
 <!-- Content Wrapper. Contains page content -->
     <!-- Angular js file -->
@@ -53,11 +56,12 @@
                             
                             <div class="form-group-custom">
                               <label for="exampleInputEmail1">Email address <span class="mandatory">*</span></label>
-                                <input type="email" name="useremail" class="form-control" placeholder="Email" ng-model="useremail"  required>
+                              <input type="email" name="useremail" class="form-control" placeholder="Email" ng-model="useremail" ng-blur="checkUserEmail(useremail)" required>
                                 <span style="color:red" ng-style="{color: myColor}" ng-cloak ng-show="myForm.useremail.$dirty && myForm.useremail.$invalid">
                                 <span ng-show="myForm.useremail.$error.required">Email is required.</span>
                                 <span ng-show="myForm.useremail.$error.email">Invalid email address.</span>
                                 </span>
+                              <span id="UserEmailExists" style="display:none;color:red">Email Address already exists.</span>
                             </div>
                             <div class="form-group-custom">
                               <label for="exampleInputPassword1">Password <span class="mandatory">*</span></label>
@@ -68,11 +72,12 @@
                             </div>
                             <div class="form-group-custom">
                                 <label>Phone <span class="mandatory">*</span></label>
-                                <input type="number" class="form-control" ng-minlength="10" ng-maxlength="10" name="userPhone" placeholder="Enter Phone" ng-model="userPhone" ng-required="true">
+                                <input type="number" class="form-control" ng-minlength="10" ng-maxlength="10" name="userPhone" placeholder="Enter Phone" ng-model="userPhone" ng-blur="checkUserPhone(userPhone)" ng-required="true">
                                 <span style="color:red" ng-cloak ng-show="myForm.userPhone.$dirty && myForm.userPhone.$invalid">
                                 <span  ng-show="myForm.userPhone.$error.required || myForm.userPhone.$error.number">Invalid Phone</span>
                                 <span  ng-show="(myForm.userPhone.$error.minlength || myForm.userPhone.$error.maxlength) ">Phone should be 10 of digits</span>
                                 </span>
+                                <span id="UserPhoneExists" style="display:none;color:red">Phone Number already exists.</span>
                             </div>
                             <div class="form-group-custom">
                                 <label>Role <span class="mandatory">*</span></label>
@@ -92,7 +97,7 @@
                             <span style="color:red" ng-cloak ng-show="myForm.reportingManagers.$dirty && myForm.reportingManagers.$error.required">Select Reporting Manager</span>
                             </div>                         
                           <div class="box-footer-custom">
-                            <button class="btn btn-primary" type="submit" ng-disabled="(myForm.$invalid )">Save</button>
+                            <button class="btn btn-primary" type="submit" ng-disabled="(disableButton==true || myForm.$invalid )">Save</button>
                             <button class="btn btn-danger" type="button" style="margin-left:10px;" ng-click="cancelBtn()">Cancel</button>
                           </div>
                         </form>
@@ -113,6 +118,8 @@
     var app = angular.module('myApp', []);
     app.controller('validateCtrl', function($scope, $http) {
         $scope.disbleReportingManager=true;
+        $scope.disableButton = false;
+       
         $scope.reportingManagers = [];
 //        myColor = 'red';
         <?php if(isset($this->userData)){?>
@@ -128,32 +135,42 @@
         $scope.cancelBtn = function(){
             window.location.href = '<?php echo $baseUrl?>/admin/manageusers';
         }
-//        ()
-         $scope.CheckUserEmail = function(useremail){
-                $scope.useremailExistsErr = true;
-                var url = "<?php echo $baseUrl?>/admin/checkuseremail";
-                $http.post(url,{'useremail':useremail}) 
+        
+        $scope.checkUserEmail = function(useremail){
+            
+            var url = "<?php echo $baseUrl?>/admin/checkuseremail?callback=JSON_CALLBACK";
+            if(useremail!=''){
+               $http.post(url,{'useremail':useremail}) 
                 .success(function (data, status, headers, config) {
-                    
-            alert(data);
-            return false;
-                    
-                    if(data==1){
-                        $('#useremailExists').show();
-                        $scope.useremailExistsErr = true;
+                    console.log(data);
+                    if(data==1 && useremail!='<?php echo $this->userData[0]["useremail"]?>'){
+    //                if(data==1){
+                        $('#UserEmailExists').show();
+                        $scope.disableButton = true;
                     }else{
-                        $('#useremailExists').hide();
-                        $scope.useremailExistsErr = false;
+                        $('#UserEmailExists').hide();
+                        $scope.disableButton = false;
                     }
-                    
-                   console.log(data); 
-                })
-                .error(function (data, status, headers, config) {
-                    //this always gets called
-                    console.log(status);
-                });
-                return false;   
-//            }    
+                }) 
+            }
+            return false; 
+        }
+        $scope.checkUserPhone = function(userPhone){
+            var url = "<?php echo $baseUrl?>/admin/checkuserphone?callback=JSON_CALLBACK";
+            if(userPhone!=''){
+                $http.post(url,{'userPhone':userPhone}) 
+                .success(function (data, status, headers, config) {
+                    console.log(data);
+                    if(data==1 && userPhone!='<?php echo $this->userData[0]["mobile"]?>'){
+                        $('#UserPhoneExists').show();
+                        $scope.disableButton = true;
+                    }else{
+                        $('#UserPhoneExists').hide();
+                        $scope.disableButton = false;
+                    }
+                }) 
+            }
+            return false; 
         }
         
         $scope.getManagerNames = function(userRole) {

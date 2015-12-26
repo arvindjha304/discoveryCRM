@@ -10,79 +10,99 @@ use Zend\Db\Sql\Sql;
 use Zend\Db\Sql\Where;
 use Zend\Db\Sql\Expression;
 use Zend\Authentication\AuthenticationService;
+use Zend\Session\Container;
 
 
  class Admin extends AbstractTableGateway implements ServiceLocatorAwareInterface {
 
 	protected $serviceLocator;
 	protected $tableGateway;
-	public  $dbAdapterConfig;
-    private $loggedInUserDetails;
+//	public  $dbAdapterConfig;
+        private $roleRightsArr;
+        private $loggedInUserDetails;
 	
-	public function getAdapter() {
-     return $this->serviceLocator->get('Zend\Db\Adapter\Adapter');
-	}
-     public function __construct(AbstractTableGateway $tableGateway)
-     {
+    public function getAdapter() {
+        return $this->serviceLocator->get('Zend\Db\Adapter\Adapter');
+    }
+    public function __construct(AbstractTableGateway $tableGateway)
+    {
         $this->tableGateway = $tableGateway;
         $auth = new AuthenticationService();
         $this->loggedInUserDetails = $auth->getIdentity(); 
-     }
+        $roleInSession = new Container('roleInSession');
+        $this->roleRightsArr       = $roleInSession->roleRightsArr;
+    }
 	 
-	 public function setServiceLocator(ServiceLocatorInterface $serviceLocator) {
-		$this->serviceLocator = $serviceLocator;
-	 }
+    public function setServiceLocator(ServiceLocatorInterface $serviceLocator) {
+        $this->serviceLocator = $serviceLocator;
+    }
 
-	public function getServiceLocator() {
+    public function getServiceLocator() {
         return $this->serviceLocator;
-	}
+    }
     public function updateanywhere($mytable, array $data, $where) {
-		$db =$this->getServiceLocator()->get('Zend\Db\Adapter\Adapter');
-		$table = new TableGateway($mytable, $db);
-		$results = $table->update($data, $where);
-		return 1;
-	}
+        $db =$this->getServiceLocator()->get('Zend\Db\Adapter\Adapter');
+        $table = new TableGateway($mytable, $db);
+        $results = $table->update($data, $where);
+        return 1;
+    }
 
-	public function deleteanywhere($mytable, $where) {
-		$db =$this->getServiceLocator()->get('Zend\Db\Adapter\Adapter');
-		$table = new TableGateway($mytable, $db);
-		$data = array(
-		    'is_delete'	=> 	 1 ,
-		);
-		$results = $table->update($data, $where);
-		//$table->delete($where); 
-		return 1;
-	}
-    
-	public function insertanywhere($mytable, array $data) {
+    public function deleteanywhere($mytable, $where) {
+        $db =$this->getServiceLocator()->get('Zend\Db\Adapter\Adapter');
+        $table = new TableGateway($mytable, $db);
+        $data = array(
+            'is_delete'	=> 	 1 ,
+        );
+        $results = $table->update($data, $where);
+        //$table->delete($where); 
+        return 1;
+    }
 
-		$db = $this->getServiceLocator()->get('Zend\Db\Adapter\Adapter');
-		$table = new TableGateway($mytable, $db);
-		$results = $table->insert($data);
-	}
-	public function lastInsertId($mytable, array $data) {
-		$db = $this->getServiceLocator()->get('Zend\Db\Adapter\Adapter');
-		$table = new TableGateway($mytable, $db);
-		$results = $table->insert($data);
+    public function insertanywhere($mytable, array $data) {
+        $db = $this->getServiceLocator()->get('Zend\Db\Adapter\Adapter');
+        $table = new TableGateway($mytable, $db);
+        $results = $table->insert($data);
+    }
+    public function lastInsertId($mytable, array $data) {
+        $db = $this->getServiceLocator()->get('Zend\Db\Adapter\Adapter');
+        $table = new TableGateway($mytable, $db);
+        $results = $table->insert($data);
         $id = $table->lastInsertValue;
         return $id;
-	}
+    }
 	
     public function getUserList($userId=''){
         $tableGateway = new TableGateway('userlist',$this->getAdapter());
         $userList = $tableGateway->select(function($select) use ($userId){
             if($userId!='')
                 $select->where->equalTo('userlist.id',$userId);
-            $select->join(['cr'=>'company_roles'],'cr.id=userlist.role_id','role_name');
+            $select->join(['cr'=>'company_roles'],'cr.id=userlist.role_id','role_name')
+                    ->join(['usr'=>'userlist'],'usr.id=userlist.last_updated_by',['lastUpdatedBy'=>'username']);
             $select->where(['userlist.is_delete'=>0,'userlist.comp_id'=>$this->loggedInUserDetails->comp_id]);
         })->toArray();
 //        echo '<pre>';print_r($userList);exit;
         return $userList;
     }
     
+    
+    public function getTeamUserArr(){
+       $teamUserArr = [];
+        if($this->roleRightsArr['seniority']==3){
+            $table = new TableGateway('userlist',$this->getAdapter());
+            $teamUserArr = $table->select(function($select){
+                $select->columns(['teamUsrIds' => new Expression('GROUP_CONCAT(id)')]);
+                $select->where(['reporting_manager'=>$this->loggedInUserDetails->id,'is_active'=>1,'is_delete'=>0]);
+            })->toArray();
+        }
+        return $teamUserArr;
+    }
+    
+    
     public function getLeadList($leadId=''){
+        $teamUserArr = $this->getTeamUserArr();
+        
         $tableGateway = new TableGateway('lead_list',$this->getAdapter());
-        $leadList = $tableGateway->select(function($select) use ($leadId){
+        $leadList = $tableGateway->select(function($select) use ($leadId,$teamUserArr){
             if($leadId!=''){
                 $select->where->equalTo('id',$leadId);
             }else{
@@ -90,6 +110,17 @@ use Zend\Authentication\AuthenticationService;
                 ->join(['sl'=>'source_list'],'sl.id=lead_list.source_of_enquiry',['source_name'])
                 ->join(['ul'=>'userlist'],'ul.id=lead_list.created_by',['open_by'=>'username'])
                     ->where(['lead_list.is_assigned'=>0,'sl.is_delete'=>0,'ul.is_active'=>1,'ul.is_delete'=>0]);
+                if($this->roleRightsArr['seniority']==4){
+                    $select->where(['lead_list.created_by'=>$this->loggedInUserDetails->id]);
+                }elseif($this->roleRightsArr['seniority']==3){
+                    if(count($teamUserArr)){
+                        $allUserStr = $teamUserArr[0]['teamUsrIds'].','.$this->loggedInUserDetails->id;
+                        $allUserArr = explode(',',$allUserStr);
+                        $select->where->in('lead_list.created_by',$allUserArr);
+                    }else{
+                        $select->where(['lead_list.created_by'=>$this->loggedInUserDetails->id]);
+                    }    
+                }
             }
             $select->where(['lead_list.is_delete'=>0,'lead_list.comp_id'=>$this->loggedInUserDetails->comp_id]);
         })->toArray();
@@ -143,8 +174,12 @@ use Zend\Authentication\AuthenticationService;
         $sql = new Sql($this->getAdapter());
         $select = $sql->select()
                 ->from('company_roles')
-                ->where(['is_delete'=>0,'comp_id'=>$this->loggedInUserDetails->comp_id])
-                ->order('seniority');
+                ->where(['is_delete'=>0,'comp_id'=>$this->loggedInUserDetails->comp_id]);
+        if($this->roleRightsArr['seniority']!=1)
+            $select->where->greaterThan ('seniority', $this->roleRightsArr['seniority']);
+        
+        $select->order('seniority');
+                
         $result = $sql->prepareStatementForSqlObject($select)->execute();
         return $result;
     }
@@ -171,17 +206,14 @@ use Zend\Authentication\AuthenticationService;
     
     public function getUsersByRoleJson($role_id){
         
-        $allRoles = $this->getAllRoles();
-        
         $tableGateway = new TableGateway('userlist',$this->getAdapter());
         $userList = $tableGateway->select(function($select) use ($role_id){
-                $select->where->equalTo('userlist.role_id',$role_id);
+            $select->where->equalTo('userlist.role_id',$role_id);
             $select->join(['cr'=>'company_roles'],'cr.id=userlist.role_id','role_name');
+             if($this->roleRightsArr['seniority']==3)
+                 $select->where(['userlist.reporting_manager'=>$this->loggedInUserDetails->id]);
             $select->where(['userlist.is_delete'=>0,'userlist.comp_id'=>$this->loggedInUserDetails->comp_id]);
         })->toArray();
-        
-//        echo '<pre>';print_r($userList);exit;
-        
         $dataArray = array(['Id'=>"",'Name'=>'Select User']);
         foreach($userList as $roles)
         {
@@ -190,9 +222,7 @@ use Zend\Authentication\AuthenticationService;
            $tempArr['Name'] = $roles['username'];
            $dataArray[]    = $tempArr;
         }
-        
 //        echo '<pre>';print_r($dataArray);exit;
-        
         return json_encode($dataArray);
     }
     public function getAllSources(){
@@ -329,19 +359,31 @@ use Zend\Authentication\AuthenticationService;
 //        if($result>0) return 1; else return 0;
 //    }
     public function getAssignedLeads(){
+        $teamUserArr = $this->getTeamUserArr();
         $tableGateway = new TableGateway('assigned_lead',$this->getAdapter());
-        $leadList = $tableGateway->select(function($select){
+        $leadList = $tableGateway->select(function($select) use ($teamUserArr){
             $onExpression = new Expression('uls.lead_id=ll.id AND uls.is_active = 1');
             $select->join(['ll'=>'lead_list'],'assigned_lead.lead_id=ll.id',['lead_id'=>'id','customer_name','mobile','created_by','punchDate'=>'punch_date'])
                     ->join(['pl'=>'project_list'],'pl.id=ll.project_interested',['project_name'])
                     ->join(['sl'=>'source_list'],'sl.id=ll.source_of_enquiry',['source_name'])
                     ->join(['uls'=>'updated_lead_status'],$onExpression,['next_meeting'=>'date_time_value','lead_status'=>'status_type','last_feedback','status_type','interested_type','client_type'],'left')
                     ->join(['usrAsg'=>'userlist'],'usrAsg.id=assigned_lead.assigned_to',['assignedTo'=>'username'])
+                    ->join(['asby'=>'userlist'],'asby.id=assigned_lead.assigned_by',['assignedBy'=>'username'])
                     ->join(['usrOpn'=>'userlist'],'usrOpn.id=ll.created_by',['openBy'=>'username']);
             
-            $select->where(['ll.is_delete'=>0,'ll.comp_id'=>$this->loggedInUserDetails->comp_id,'assigned_lead.is_active'=>1])
-                ->order('assigned_lead.assigned_date DESC');
-            
+            $select->where(['ll.is_delete'=>0,'ll.comp_id'=>$this->loggedInUserDetails->comp_id,'assigned_lead.is_active'=>1]);
+            if($this->roleRightsArr['seniority']==4){
+                $select->where(['assigned_lead.assigned_to'=>$this->loggedInUserDetails->id]);
+            }elseif($this->roleRightsArr['seniority']==3){
+                if(count($teamUserArr)){
+                    $allUserStr = $teamUserArr[0]['teamUsrIds'].','.$this->loggedInUserDetails->id;
+                    $allUserArr = explode(',',$allUserStr);
+                    $select->where->in('assigned_lead.assigned_to',$allUserArr);
+                }else{
+                    $select->where(['assigned_lead.assigned_to'=>$this->loggedInUserDetails->id]);
+                }    
+            }
+            $select->order('assigned_lead.assigned_date DESC');
         })->toArray();
         
 //        echo '<pre>';print_r($leadList);exit;
@@ -363,7 +405,8 @@ use Zend\Authentication\AuthenticationService;
         $table  = new TableGateway('assigned_lead',$this->getAdapter());
         $select = $table->select(function($select) use($leadId){
             $select->columns(['assigned_date','is_active']);
-            $select->join(['usr'=>'userlist'],'usr.id=assigned_lead.assigned_to',['username','mobile']);
+            $select->join(['usr'=>'userlist'],'usr.id=assigned_lead.assigned_to',['assigned_to'=>'username'])
+                    ->join(['usr2'=>'userlist'],'usr2.id=assigned_lead.assigned_by',['assigned_by'=>'username']);
             $select->join(['ldlst'=>'lead_list'],'ldlst.id=assigned_lead.lead_id',['customer_name','customer_mobile'=>'mobile']);
             $select->where(['assigned_lead.lead_id'=>$leadId,'assigned_lead.comp_id'=>$this->loggedInUserDetails->comp_id])
                     ->order('assigned_lead.assigned_date desc');

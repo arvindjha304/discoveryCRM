@@ -13,16 +13,20 @@ use Zend\Mvc\Controller\AbstractActionController;
 use Zend\View\Model\ViewModel;
 use Zend\Db\TableGateway\TableGateway;
 use Zend\Authentication\AuthenticationService;
+use Zend\Session\Container;
 
 class AdminController extends AbstractActionController
 {
     private $loggedInUserDetails;
+    private $roleRightsArr;
     public function onDispatch(\Zend\Mvc\MvcEvent $e) 
     {
         $auth = new AuthenticationService();
-        if($auth->hasIdentity())
-            $this->loggedInUserDetails = $auth->getIdentity(); 
-        else
+        $roleInSession = new Container('roleInSession');
+        if($auth->hasIdentity()){
+            $this->loggedInUserDetails  = $auth->getIdentity();
+            $this->roleRightsArr        = $roleInSession->roleRightsArr;
+        }else
             return $this->redirect()->toRoute('application',array('controller'=>'index','action' => 'index'));
         
         return parent::onDispatch($e);
@@ -42,11 +46,27 @@ class AdminController extends AbstractActionController
     }
     public function dashboardAction()
     {
-         $view = new ViewModel();
-         $this->layout('layout/layoutadmin');
-         // $indexModel = $this->getServiceLocator()->get('Application\Model\Index');
-         // $view->setVariable('aboutUsData', $indexModel->getAboutUs());
-         return $view;
+        $view = new ViewModel();
+        $this->layout('layout/layoutadmin');
+        $this->adminpages();
+//        $roleInSession = new Container('roleInSession');
+//        $roleRightsArr  = $roleInSession->roleRightsArr; 
+        
+//         echo '<pre>';print_r($this->roleRightsArr);exit; 
+        
+        return $view;
+    }
+     public function userdashboardAction()
+    {
+        $view = new ViewModel();
+        $this->layout('layout/layoutadmin');
+
+//        $roleInSession = new Container('roleInSession');
+//        $roleRightsArr  = $roleInSession->roleRightsArr; 
+        
+//         echo '<pre>';print_r($this->roleRightsArr);exit; 
+        
+        return $view;
     }
     public function checkuseremailAction(){
          $postdata = file_get_contents("php://input");
@@ -76,6 +96,7 @@ class AdminController extends AbstractActionController
     {
         $view = new ViewModel();
         $this->layout('layout/layoutadmin');
+        $this->adminpages();
         $allRoles = $this->getModel()->getAllRolesJson();
         $view->setVariable('allRoles', $allRoles);
         $userId = $this->params()->fromRoute('id1', '');
@@ -134,25 +155,28 @@ class AdminController extends AbstractActionController
     }
     
     
-    
     public function manageusersAction()
     {
         $view = new ViewModel();
         $this->layout('layout/layoutadmin');
+        $this->adminpages();
     	$baseUrl = $this->getRequest()->getbaseUrl();
         if($this->getRequest()->isXmlHttpRequest()){
             $arrList = $this->getModel()->getUserList();
             $dataArray = array();
             foreach($arrList as $val1)
             {
-//         	    echo '<pre>';print_r($val1);exit;
+         	$dateArr = explode(' ',$val1['last_updated']);
+                $disableEdit            =       (in_array(4, $this->roleRightsArr['rightsArr'])) ? '' : 'disabled';
                 $username		=	$val1['username'];
-                $role_name                 =	$val1['role_name'];
+                $role_name              =	$val1['role_name'];
                 $mobile                 =	$val1['mobile'];
+                $last_updated           =	$dateArr[0].' | '.substr($dateArr[1], 0, 5);
+                $lastUpdatedBy          =	$val1['lastUpdatedBy'];
                 $status			=	($val1['is_active']==1) ? 'Active' :	'Inactive';
-                $action			=	($val1['is_active']==1) ? '<button onclick=inActiveStatus('.$val1["id"].')>Inactive</button>' :'<button onclick=activeStatus('.$val1["id"].')>Active</button>';
-                $delete 		=	'<a href="'.$baseUrl.'/admin/addedituser/'.$val1['id'].'" ><button >Edit</button></a><button onclick=deleteRow('.$val1["id"].') >Delete</button>';
-                $dataArray[]    = array("id"=>$val1['id'],"data"=>array(0,$username,$role_name,$mobile,$status,$delete.$action));
+                $action			=	($val1['is_active']==1) ? '<button  onclick=inActiveStatus('.$val1["id"].') class="btn btn-primary" type="button"><i class="fa fa-ban"></i></button>' :'<button  onclick=activeStatus('.$val1["id"].') class="btn btn-primary" type="button"><i class="fa fa-check-square-o"></i></button>';
+                $delete 		=	'<a href="'.$baseUrl.'/admin/addedituser/'.$val1['id'].'" ><button  class="btn btn-primary" type="button"><i class="fa fa-pencil-square-o"></i></button></a> <button '.$disableEdit.'  onclick=deleteRow('.$val1["id"].') class="btn btn-primary" type="button"><i class="fa fa-trash-o"></i></button>';
+                $dataArray[]    = array("id"=>$val1['id'],"data"=>array(0,$username,$role_name,$mobile,$lastUpdatedBy,$last_updated,$status,$delete.' '.$action));
             }
             $json = json_encode($dataArray);
             exit('{rows:'.$json.'}');
@@ -174,7 +198,6 @@ class AdminController extends AbstractActionController
             elseif($tableType == 'PROJECTLISTING')  $tableName = 'project_list';
             elseif($tableType == 'SOURCELISTING')  $tableName = 'source_list';
             elseif($tableType == 'LEADLISTING')  $tableName = 'lead_list';
-            
             
             if($tableName!=''){ 
                 if(isset($selectedIds)){
@@ -209,6 +232,7 @@ class AdminController extends AbstractActionController
     {
         $view = new ViewModel();
         $this->layout('layout/layoutadmin');
+        $this->adminpages();
         $roleId = $this->params()->fromRoute('id1','');
         $roleRightsArr = [];
         if($roleId!=''){
@@ -236,10 +260,10 @@ class AdminController extends AbstractActionController
         $roleId             =   (isset($formData['roleId']) ?  $formData['roleId'] : '');
         $roleRightsFormArr  =   $formData['roleRights'];
         $roleName           =   $formData['roleName'];
-        $seniority          =   $formData['seniority'];
+       // $seniority          =   $formData['seniority'];
         $data = array(
             'role_name'         =>  $roleName,
-            'seniority'         =>  $seniority
+//            'seniority'         =>  $seniority
         );
         if($roleId==''){
             $data['is_active']         = 1;
@@ -287,6 +311,7 @@ class AdminController extends AbstractActionController
     {
         $view = new ViewModel();
         $this->layout('layout/layoutadmin');
+        $this->adminpages();
     	$baseUrl = $this->getRequest()->getbaseUrl();
         $this->getModel()->getSelectedRoleRights(1);
         
@@ -299,11 +324,8 @@ class AdminController extends AbstractActionController
                 $role_name		=	$roles['role_name'];
                 $getRoleRights = $this->getModel()->getSelectedRoleRights($roles['id']);
                 $roleRights		=	$getRoleRights['roleRights'];
-                $seniority		=	$roles['seniority'];
-                $status			=	($roles['is_active']==1) ? 'Active' :	'Inactive';
-                $action			=	($roles['is_active']==1) ? '<button onclick=inActiveStatus('.$roles["id"].')>Inactive</button>' :'<button onclick=activeStatus('.$roles["id"].')>Active</button>';
-                $delete 		=	'<a href="'.$baseUrl.'/admin/addeditrole/'.$roles['id'].'" ><button >Edit</button></a><button onclick=deleteRow('.$roles["id"].') >Delete</button>';
-                $dataArray[]    = array("id"=>$roles['id'],"data"=>array(0,$role_name,$roleRights,$seniority,$status,$delete.$action));
+                $delete 		=	($this->roleRightsArr['seniority'] == 1) ? '<a href="'.$baseUrl.'/admin/addeditrole/'.$roles['id'].'" ><button  class="btn btn-primary" type="button"><i class="fa fa-pencil-square-o"></i></button></a>': '<button  class="btn btn-primary" disabled type="button"><i class="fa fa-pencil-square-o"></i></button>';
+                $dataArray[]    = array("id"=>$roles['id'],"data"=>array($role_name,$roleRights,$delete));
             }
 //          echo '<pre>';print_r($dataArray);exit;
             $json = json_encode($dataArray);
@@ -327,22 +349,17 @@ class AdminController extends AbstractActionController
     {
         $view = new ViewModel();
         $this->layout('layout/layoutadmin');
+        $this->adminpages();
     	$baseUrl = $this->getRequest()->getbaseUrl();
         $projectId = $this->params()->fromRoute('id1','');
         if($projectId!=''){
             $projectDetail = $this->getModel()->getProjectDetail($projectId);
             $view->setVariable('projectDetail', json_encode($projectDetail));
         }
-        
         if($this->getRequest()->isPost()){
 //             echo '<pre>';print_r($this->params()->fromPost());exit;
             $projectId = $this->params()->fromPost('projectId');
             $ProjectName = $this->params()->fromPost('ProjectName');
-            
-//            $checkProjectName = $this->getModel()->checkProjectName($ProjectName);
-            
-//            echo $checkProjectName;exit;
-            
             $data = array(
                 'project_name'         => $ProjectName
             );
@@ -372,12 +389,12 @@ class AdminController extends AbstractActionController
             $dataArray = array();
             foreach($select as $val1)
             {
-//         	    echo '<pre>';print_r($val1);exit;
-                $project_name	=	$val1['project_name'];
+         	$disableEdit            =       (in_array(4, $this->roleRightsArr['rightsArr'])) ? '' : 'disabled';
+                $project_name           =	$val1['project_name'];
                 $status			=	($val1['is_active']==1) ? 'Active' : 'Inactive';
-                $action			=	($val1['is_active']==1) ? '<button onclick=inActiveStatus('.$val1["id"].')>Inactive</button>' :'<button onclick=activeStatus('.$val1["id"].')>Active</button>';
-                $delete 		=	'<a href="'.$baseUrl.'/admin/projects/'.$val1['id'].'" ><button >Edit</button></a><button onclick=deleteRow('.$val1["id"].') >Delete</button>';
-                $dataArray[]    = array("id"=>$val1['id'],"data"=>array(0,$project_name,$status,$delete.$action));
+                $action			=	($val1['is_active']==1) ? '<button  onclick=inActiveStatus('.$val1["id"].') class="btn btn-primary" type="button"><i class="fa fa-ban"></i></button>' :'<button  onclick=activeStatus('.$val1["id"].') class="btn btn-primary" type="button"><i class="fa fa-check-square-o"></i></button>';
+                $delete 		=	'<a href="'.$baseUrl.'/admin/projects/'.$val1['id'].'" ><button  class="btn btn-primary" type="button"><i class="fa fa-pencil-square-o"></i></button></a> <button '.$disableEdit.'  onclick=deleteRow('.$val1["id"].') class="btn btn-primary" type="button"><i class="fa fa-trash-o"></i></button>';
+                $dataArray[]    = array("id"=>$val1['id'],"data"=>array(0,$project_name,$status,$delete.' '.$action));
             }
             $json = json_encode($dataArray);
             exit('{rows:'.$json.'}');
@@ -398,6 +415,7 @@ class AdminController extends AbstractActionController
     {
         $view = new ViewModel();
         $this->layout('layout/layoutadmin');
+        $this->adminpages();
     	$baseUrl = $this->getRequest()->getbaseUrl();
         $sourceId = $this->params()->fromRoute('id1','');
         if($sourceId!=''){
@@ -438,12 +456,12 @@ class AdminController extends AbstractActionController
             $dataArray = array();
             foreach($select as $val1)
             {
-//         	    echo '<pre>';print_r($val1);exit;
+         	$disableEdit    =       (in_array(4, $this->roleRightsArr['rightsArr'])) ? '' : 'disabled';
                 $source_name	=	$val1['source_name'];
-                $status			=	($val1['is_active']==1) ? 'Active' : 'Inactive';
-                $action			=	($val1['is_active']==1) ? '<button onclick=inActiveStatus('.$val1["id"].')>Inactive</button>' :'<button onclick=activeStatus('.$val1["id"].')>Active</button>';
-                $delete 		=	'<a href="'.$baseUrl.'/admin/sources/'.$val1['id'].'" ><button >Edit</button></a><button onclick=deleteRow('.$val1["id"].') >Delete</button>';
-                $dataArray[]    = array("id"=>$val1['id'],"data"=>array(0,$source_name,$status,$delete.$action));
+                $status		=	($val1['is_active']==1) ? 'Active' : 'Inactive';
+                $action		=	($val1['is_active']==1) ? '<button  onclick=inActiveStatus('.$val1["id"].') class="btn btn-primary" type="button"><i class="fa fa-ban"></i></button>' :'<button  onclick=activeStatus('.$val1["id"].') class="btn btn-primary" type="button"><i class="fa fa-check-square-o"></i></button>';
+                $delete 	=	'<a href="'.$baseUrl.'/admin/sources/'.$val1['id'].'" ><button  class="btn btn-primary" type="button"><i class="fa fa-pencil-square-o"></i></button></a> <button '.$disableEdit.'  onclick=deleteRow('.$val1["id"].') class="btn btn-primary" type="button"><i class="fa fa-trash-o"></i></button>';
+                $dataArray[]    = array("id"=>$val1['id'],"data"=>array(0,$source_name,$status,$delete.' '.$action));
             }
             $json = json_encode($dataArray);
             exit('{rows:'.$json.'}');
@@ -462,58 +480,62 @@ class AdminController extends AbstractActionController
     
     public function addeditleadsAction()
     {
-        $view = new ViewModel();
-        $this->layout('layout/layoutadmin');
-        
-        $allSources = $this->getModel()->getAllSources();
-        $view->setVariable('allSources',$allSources);
-        
-        $allProjects = $this->getModel()->getAllProjects();
-        $view->setVariable('allProjects',$allProjects);
-        
-        $leadId = $this->params()->fromRoute('id1', '');
-        if($leadId!=''){
-            $arrList = $this->getModel()->getLeadList($leadId);
-//             echo '<pre>';print_r($arrList);exit;     
-            if(count($arrList)){
-                $view->setVariable('formData', $arrList);
+        if(in_array(1, $this->roleRightsArr['rightsArr'])){
+            $view = new ViewModel();
+            $this->layout('layout/layoutadmin');
+
+            $allSources = $this->getModel()->getAllSources();
+            $view->setVariable('allSources',$allSources);
+
+            $allProjects = $this->getModel()->getAllProjects();
+            $view->setVariable('allProjects',$allProjects);
+
+            $leadId = $this->params()->fromRoute('id1', '');
+            if($leadId!=''){
+                $arrList = $this->getModel()->getLeadList($leadId);
+    //             echo '<pre>';print_r($arrList);exit;     
+                if(count($arrList)){
+                    $view->setVariable('formData', $arrList);
+                }
             }
+            if($this->getRequest()->isPost()){
+    //            echo '<pre>';print_r($this->params()->fromPost());exit;   
+               $leadId = $this->params()->fromPost('leadId'); 
+               $data = [
+                  'customer_name'       => $this->params()->fromPost('CustomerName'),
+                  'mobile'              => $this->params()->fromPost('MobileNumber'),
+                  'alt_no'              => $this->params()->fromPost('AlternateName'),
+                  'other_no'            => $this->params()->fromPost('OtherName'),
+                  'email'               => $this->params()->fromPost('EmailAddress'),
+                  'address'             => $this->params()->fromPost('Address'),
+                  'source_of_enquiry'   => $this->params()->fromPost('SourceOfEnquiry'),
+                  'budget'              => $this->params()->fromPost('Budget'),
+                  'project_interested'  => $this->params()->fromPost('ProjectInterested'),
+                  'requirement'         => $this->params()->fromPost('Requirement')
+               ];
+
+               if($leadId!=''){
+                    $data['last_updated_by']   = $this->loggedInUserDetails->id;
+                    $data['last_updated']     = date('Y-m-d H:i:s');
+
+                   $this->getModel()->updateanywhere('lead_list', $data,['id'=>$leadId]);
+               }else{
+                    $data['comp_id']            = $this->loggedInUserDetails->comp_id;
+                    $data['is_active']          = 1;
+                    $data['is_delete']          = 0;
+                    $data['created_by']         = $this->loggedInUserDetails->id;
+                    $data['last_updated_by']    = $this->loggedInUserDetails->id;
+                    $data['last_updated']       = date('Y-m-d H:i:s');
+                    $data['punch_date']         = date('Y-m-d H:i:s');
+                    $data['date_created']       = date('Y-m-d H:i:s');
+                    $this->getModel()->insertanywhere('lead_list', $data);
+               }
+                return $this->redirect()->toRoute('application',array('controller'=>'admin','action' => 'manageleads'));
+            }
+             return $view;
+        }else{
+            $this->redirect()->toRoute('application',array('controller'=>'index','action' => 'logout'));
         }
-        if($this->getRequest()->isPost()){
-//            echo '<pre>';print_r($this->params()->fromPost());exit;   
-           $leadId = $this->params()->fromPost('leadId'); 
-           $data = [
-              'customer_name'       => $this->params()->fromPost('CustomerName'),
-              'mobile'              => $this->params()->fromPost('MobileNumber'),
-              'alt_no'              => $this->params()->fromPost('AlternateName'),
-              'other_no'            => $this->params()->fromPost('OtherName'),
-              'email'               => $this->params()->fromPost('EmailAddress'),
-              'address'             => $this->params()->fromPost('Address'),
-              'source_of_enquiry'   => $this->params()->fromPost('SourceOfEnquiry'),
-              'budget'              => $this->params()->fromPost('Budget'),
-              'project_interested'  => $this->params()->fromPost('ProjectInterested'),
-              'requirement'         => $this->params()->fromPost('Requirement')
-           ];
-           
-           if($leadId!=''){
-                $data['last_updated_by']   = $this->loggedInUserDetails->id;
-                $data['last_updated']     = date('Y-m-d H:i:s');
-                
-               $this->getModel()->updateanywhere('lead_list', $data,['id'=>$leadId]);
-           }else{
-                $data['comp_id']            = $this->loggedInUserDetails->comp_id;
-                $data['is_active']          = 1;
-                $data['is_delete']          = 0;
-                $data['created_by']         = $this->loggedInUserDetails->id;
-                $data['last_updated_by']    = $this->loggedInUserDetails->id;
-                $data['last_updated']       = date('Y-m-d H:i:s');
-                $data['punch_date']         = date('Y-m-d H:i:s');
-                $data['date_created']       = date('Y-m-d H:i:s');
-                $this->getModel()->insertanywhere('lead_list', $data);
-           }
-            return $this->redirect()->toRoute('application',array('controller'=>'admin','action' => 'manageleads'));
-        }
-         return $view;
     }
     
     public function manageleadsAction(){
@@ -527,43 +549,22 @@ class AdminController extends AbstractActionController
            $arrList = $this->getModel()->getLeadList();
            $table = new TableGateway('source_list',$this->getAdapter());
            $source_list = $table->select(['is_delete'=>0,'comp_id'=>$this->loggedInUserDetails->comp_id])->toArray();
-            
-//    echo $leadHtml;exit;        
             $dataArray = array();
             foreach($arrList as $val1)
             {
-    //         	    echo '<pre>';print_r($val1);exit;
-
-                
-                $sourceHtml = '<select>'; 
-                if(count($source_list)){
-                     foreach($source_list as $source){
-                        $sourceHtml .= '<option value='.$source["id"].' >'.$source["source_name"].'</option>'; 
-                     }  
-                }
-                $sourceHtml .= '</select>';
-                
-                
+                $disableEdit            =   (in_array(4, $this->roleRightsArr['rightsArr'])) ? '' : 'disabled';
                 $dateArr = explode(' ',$val1['punch_date']);
                 $customer_name          =   $val1['customer_name'];
                 $mobile                 =   $val1['mobile'];
-//                $source_of_enquiry      =   $val1['source_name'];
-//                $source_of_enquiry      =   '<select>
-//    <option value="1">option 1</option>
-//    <option value="2">option 2</option>
-//    </select>';
-                
-                $source_of_enquiry      =   $sourceHtml;
-                
+                $source_of_enquiry      =   $val1['source_name'];
                 $project_interested     =   $val1['project_name'];
-    //                $requirement            =   $val1['requirement'];
                 $requirement            =   '<a href="#" data-toggle="tooltip" data-placement="right" title="Requirement - '.$val1['requirement'].'">'.  substr($val1['requirement'], 0, 15).'</a>';
                 $punch_date             =   $dateArr[0];
                 $open_by                =   $val1['open_by'];
-    //                $status		=	($val1['is_active']==1) ? 'Active' : 'Inactive';
-                //$action               =   ($val1['is_active']==1) ? '<button onclick=inActiveStatus('.$val1["id"].')>Inactive</button>' :'<button onclick=activeStatus('.$val1["id"].')>Active</button>';
-                $delete                 =   '<a href="'.$baseUrl.'/admin/addeditleads/'.$val1['id'].'" ><button >Edit</button></a><button onclick=deleteRow('.$val1["id"].') >Delete</button>';
-                $dataArray[]            =   array("id"=>$val1['id'],"data"=>array(0,$customer_name,$mobile,$source_of_enquiry,$project_interested,$requirement,$punch_date,$open_by,$delete));
+                $edit                   =   (in_array(3, $this->roleRightsArr['rightsArr'])) ? '<a href="'.$baseUrl.'/admin/addeditleads/'.$val1['id'].'" ><button title="Update Lead" class="btn btn-primary" type="button"><i class="fa fa-pencil-square-o"></i></button></a>' : '<button disabled="disabled" class="btn btn-primary" type="button"><i class="fa fa-pencil-square-o"></i></button>';
+                $delete                 =  '<button '.$disableEdit.'  onclick=deleteRow('.$val1["id"].') class="btn btn-primary" type="button"><i class="fa fa-trash-o"></i></button>';
+                
+                $dataArray[]            =   array("id"=>$val1['id'],"data"=>array(0,$customer_name,$mobile,$source_of_enquiry,$project_interested,$requirement,$punch_date,$open_by,$edit.' '.$delete));
             }
             
 //    echo '<pre>';print_r($dataArray);exit;        
@@ -603,7 +604,6 @@ class AdminController extends AbstractActionController
             $leadUpdatesHistory = $this->getModel()->getLeadUpdatesHistory($leadId);
 //             echo '<pre>';print_r($leadUpdatesHistory);exit;     
             $view->setVariable('leadUpdatesHistory', $leadUpdatesHistory);
-            
             
             if(count($leadUpdatesHistory)) {
                 $leadUpdatesCurrent = $leadUpdatesHistory[0];
@@ -681,7 +681,6 @@ class AdminController extends AbstractActionController
         $view->setVariable('allRoles', $allRoles);
     	$baseUrl = $this->getRequest()->getbaseUrl();
         $arrList = $this->getModel()->getAssignedLeads();
-        
 //         echo '<pre>';print_r($arrList);exit;
         if(count($arrList)){
             $notAssignedArr       = [];
@@ -732,7 +731,8 @@ class AdminController extends AbstractActionController
                 $punchDateArr = explode(' ', $val1['punchDate']);
                 $punch_date             =   $punchDateArr[0].' | '.substr($punchDateArr[1], 0, 5);
                 $assigned_to            =   $val1['assignedTo'];
-                $assignedDateArr        = explode(' ', $val1['assigned_date']);
+                $assigned_by            =   $val1['assignedBy'];
+                $assignedDateArr        =   explode(' ', $val1['assigned_date']);
                 $assigned_date          =   $assignedDateArr[0].' | '.substr($assignedDateArr[1], 0, 5);
                 if($val1['next_meeting']!=''){
                     $nextMeetingDateArr    = explode(' ', $val1['next_meeting']);
@@ -758,8 +758,9 @@ class AdminController extends AbstractActionController
                 }elseif($val1['status_type']==3){
                     $lead_status   =   'Not Answering';
                 }
-                $delete      =   '<a href="'.$baseUrl.'/admin/updatelead/'.$val1['lead_id'].'" ><button title="Update Lead" class="btn btn-primary" type="button"><i class="fa fa-pencil-square-o"></i></button></a>';
-                $dataArray[] =   array("id"=>$val1['lead_id'],"data"=>array(0,$kk,$customer_name,$mobile,$source_of_enquiry,$project_interested,$punch_date,$assigned_to,$assigned_date,$next_meeting,$open_by,$lead_status,$last_feedback,$client_type,$delete));
+                $delete      =   (in_array(3, $this->roleRightsArr['rightsArr'])) ? '<a href="'.$baseUrl.'/admin/updatelead/'.$val1['lead_id'].'" ><button title="Update Lead" class="btn btn-primary" type="button"><i class="fa fa-pencil-square-o"></i></button></a>' : "<button title='Update Lead' class='btn btn-primary' type='button' disabled='disabled'><i class='fa fa-pencil-square-o'></i></button>";
+                
+                $dataArray[] =   array("id"=>$val1['lead_id'],"data"=>array(0,$kk,$customer_name,$mobile,$source_of_enquiry,$project_interested,$punch_date,$assigned_to,$assigned_by,$assigned_date,$next_meeting,$open_by,$lead_status,$last_feedback,$client_type,$delete));
                 $kk++;
             }
 //    echo '<pre>';print_r($dataArray);exit; 
@@ -859,6 +860,12 @@ class AdminController extends AbstractActionController
             $reassignviewList = $this->getModel()->reassignview($leadId);
 //          echo '<pre>';print_r($reassignviewList);exit;
             exit(json_encode($reassignviewList));
+        }
+    }
+    
+    public function adminpages(){
+        if($this->roleRightsArr['seniority'] == 3 || $this->roleRightsArr['seniority'] == 4){
+            $this->redirect()->toRoute('application',array('controller'=>'index','action' => 'logout'));
         }
     }
 }

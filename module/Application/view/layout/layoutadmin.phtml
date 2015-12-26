@@ -8,7 +8,8 @@ if (defined('RUNNING_FROM_ROOT')) {
 //    if($auth->hasIdentity())
 //        $this->loggedInUserDetails = $auth->getIdentity(); 
     
-    
+    $roleInSession = new Zend\Session\Container('roleInSession');
+    $roleRightsArr  = $roleInSession->roleRightsArr; 
 } ?>
 
 <?php $baseUrl = $this->basePath(); ?>
@@ -208,7 +209,7 @@ if (defined('RUNNING_FROM_ROOT')) {
                   <li class="user-header">
                     <img src="<?php echo $baseUrl;?>/public/dist/img/user2-160x160.jpg" class="img-circle" alt="User Image">
                     <p>
-                      <?php echo $auth->getIdentity()->username;?>
+                      <?php echo $auth->getIdentity()->username;?> (<?php echo $roleRightsArr['role_name'];?>)
                       <small>Member since <?php $dateArr = explode(' ',$auth->getIdentity()->date_created);echo $dateArr[0];?></small>
                     </p>
                   </li>
@@ -258,8 +259,14 @@ if (defined('RUNNING_FROM_ROOT')) {
           <ul class="sidebar-menu">
             <li class="header">MAIN NAVIGATION</li>
             <li class="active treeview">
-              <a href="<?php echo $baseUrl;?>/admin/dashboard"><i class="fa fa-dashboard"></i> <span>Dashboard</span></a>              
+              <?php if($roleRightsArr['seniority'] == 1){?>
+              <a href="<?php echo $baseUrl;?>/admin/dashboard"><i class="fa fa-dashboard"></i> <span>Dashboard</span></a> 
+              <?php }else{?>
+              <a href="<?php echo $baseUrl;?>/admin/userdashboard"><i class="fa fa-dashboard"></i> <span>Dashboard</span></a> 
+              <?php }?>
             </li> 
+            
+            <?php if($roleRightsArr['seniority'] == 1 || $roleRightsArr['seniority'] == 2){?>
             <li class="treeview">
               <a href="#">
                 <i class="fa fa-pie-chart"></i>
@@ -272,6 +279,11 @@ if (defined('RUNNING_FROM_ROOT')) {
               </ul>
             </li>  
             <li class="treeview">
+              <a href="<?php echo $baseUrl;?>/admin/manageroles"><i class="fa fa-dashboard"></i> <span>Manage Roles</span></a>              
+            </li>
+            <?php } ?>
+            
+    <!--    <li class="treeview">
               <a href="#">
                 <i class="fa fa-pie-chart"></i>
                 <span>Roles</span>
@@ -279,9 +291,12 @@ if (defined('RUNNING_FROM_ROOT')) {
               </a>
               <ul class="treeview-menu">
                 <li><a href="<?php echo $baseUrl;?>/admin/manageroles"><i class="fa fa-circle-o"></i> Manage Roles</a></li>  
-                <li><a href="<?php echo $baseUrl;?>/admin/addeditrole"><i class="fa fa-circle-o"></i> Add Role</a></li>            
+                <li><a href="<?php echo $baseUrl;?>/admin/addeditrole"><i class="fa fa-circle-o"></i> Add Role</a></li>           
               </ul>
             </li>  
+    -->         
+            
+            
             <li class="treeview">
               <a href="#">
                 <i class="fa fa-pie-chart"></i>
@@ -289,17 +304,19 @@ if (defined('RUNNING_FROM_ROOT')) {
                 <i class="fa fa-angle-left pull-right"></i>
               </a>
               <ul class="treeview-menu">
+                <?php if(in_array(1, $roleRightsArr['rightsArr'])){?>
                 <li><a href="<?php echo $baseUrl;?>/admin/addeditleads"><i class="fa fa-circle-o"></i> Add Leads</a></li>
+                <?php } if (in_array(2, $roleRightsArr['rightsArr'])){?>
                 <li><a href="<?php echo $baseUrl;?>/admin/manageleads"><i class="fa fa-circle-o"></i> View Leads</a></li>
-                <li><a href="<?php echo $baseUrl;?>/admin/assignedleads"><i class="fa fa-circle-o"></i> Assigned Leads</a></li>                
+                <li><a href="<?php echo $baseUrl;?>/admin/assignedleads"><i class="fa fa-circle-o"></i> Assigned Leads</a></li>                          <?php } ?>
               </ul>
             </li> 
+             <?php if($roleRightsArr['seniority'] == 1 || $roleRightsArr['seniority'] == 2){?>
             <li class="treeview">
-              <a href="<?php echo $baseUrl;?>/admin/projects"><i class="fa fa-dashboard"></i> <span>Manage Projects</span></a>              
-            </li>
+              <a href="<?php echo $baseUrl;?>/admin/projects"><i class="fa fa-dashboard"></i> <span>Manage Projects</span></a>               </li>
             <li class="treeview">
-              <a href="<?php echo $baseUrl;?>/admin/sources"><i class="fa fa-dashboard"></i> <span>Manage Sources</span></a>              
-            </li>
+              <a href="<?php echo $baseUrl;?>/admin/sources"><i class="fa fa-dashboard"></i> <span>Manage Sources</span></a>                </li>
+             <?php }?>
           </ul>
         </section>
         <!-- /.sidebar -->

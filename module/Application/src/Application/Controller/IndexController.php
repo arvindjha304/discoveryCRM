@@ -14,12 +14,14 @@ use Zend\View\Model\ViewModel;
 use Zend\Db\TableGateway\TableGateway;
 use Zend\Authentication\Adapter\DbTable as AuthAdapter;
 use Zend\Authentication\AuthenticationService;
+use Zend\Session\Container;
 
 class IndexController extends AbstractActionController
 {
-	public function getbaseUrl(){
-		$baseUrl = $this->getRequest()->getbaseUrl();
-	}
+    
+    public function getbaseUrl(){
+        $baseUrl = $this->getRequest()->getbaseUrl();
+    }
     public function getAdapter(){
         return $this->getServiceLocator()->get('Zend\Db\Adapter\Adapter');
     }
@@ -49,25 +51,12 @@ class IndexController extends AbstractActionController
             $remember_me = $this->params()->fromPost('remember_me');
             $remember_me = (isset($remember_me)) ? 1 : 0;
             if($useremail!='' && $password!=''){
-               
                 $loginStatus = $this->userLogin($useremail,$password,$remember_me);
-                
-                
-//                echo $loginStatus;exit;
-                
-                
                 if($loginStatus==0){
-                    
-//                    echo $loginStatus;exit;
-                    
                     $this->redirect()->toUrl('index/index/0');
-                    
-//                    $this->redirect()->toRoute('application',array('controller'=>'index','action' => 'index','id1' => 'loginFailed'));
                 }else{
                    $this->redirect()->toRoute('application',array('controller'=>'index','action' => 'otp-code')); 
-                }
-                
-                
+                } 
             }
         }
         return $view;
@@ -145,7 +134,7 @@ class IndexController extends AbstractActionController
     public function otpCodeAction()
     {
         $view = new ViewModel();
-		$view->setTerminal(true);
+	$view->setTerminal(true);
         
         $userDetails = $this->getUserDetails();
         $userId     = $userDetails->id;
@@ -174,10 +163,15 @@ class IndexController extends AbstractActionController
             if($otpcode!=''){
 //              echo base64_encode($otpcode);exit;
                 $checkUserOTP = $this->getModel()->checkUserOTP(base64_encode($otpcode),$userId);
-                if($checkUserOTP==1)
-                    $this->redirect()->toRoute('application',array('controller'=>'admin','action' => 'dashboard'));
-                    //$this->redirect()->toUrl('admin/dashboard');
-                else
+                if($checkUserOTP==1){
+                    $this->getModel()->getRoleInSession($userDetails->role_id);
+                    $roleInSession  = new Container('roleInSession');
+                    $roleRightsArr  = $roleInSession->roleRightsArr;
+                    if($roleRightsArr['seniority'] == 1)
+                        $this->redirect()->toRoute('application',array('controller'=>'admin','action' => 'dashboard'));
+                    else
+                        $this->redirect()->toRoute('application',array('controller'=>'admin','action' => 'userdashboard'));
+                }else
                     $view->setVariable ('errorMsg', 'wrongOTP');
             }
             $view->setVariable ('errorMsg', 'wrongOTP');

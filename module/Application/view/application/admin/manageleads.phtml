@@ -1,4 +1,7 @@
-<?php $baseUrl = $this->basePath(); ?>
+<?php $baseUrl = $this->basePath(); 
+    $roleInSession = new Zend\Session\Container('roleInSession');
+    $roleRightsArr  = $roleInSession->roleRightsArr; 
+?>
 <link rel="STYLESHEET" type="text/css" href="<?php echo $baseUrl;?>/public/dhtmlxgrid/codebase/dhtmlxgrid.css">
 <link rel="stylesheet" type="text/css" href="<?php echo $baseUrl;?>/public/dhtmlxgrid/codebase/skins/dhtmlxgrid_dhx_skyblue.css">
 <link rel="STYLESHEET" type="text/css" href="<?php echo $baseUrl;?>/public/dhtmlxgrid/codebase/ext/dhtmlxgrid_pgn_bricks.css">
@@ -83,7 +86,10 @@
                   <div class="col-md-3"><div class="form-group">                   
                     <select class="form-control select2" style="width: 100%;" name="operationvalue" id="operationvalue" onchange="this.value">
                         <option value=''>Bulk Option</option>
+                        
+                        <?php if(in_array(4, $roleRightsArr['rightsArr'])){?>
                         <option value='delete'>Delete</option>
+                        <?php } ?>
                         <!--<option value='inactive'>Inactivate</option>
                         <option value='active' id='activated'>Activate</option>-->
                     </select>

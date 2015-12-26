@@ -20,6 +20,7 @@ use Zend\Mime\Part as MimePart;
 	protected $serviceLocator;
 	protected $tableGateway;
 	public  $dbAdapterConfig;
+        private $loggedInUserDetails;
 	
 	public function getAdapter() {
      return $this->serviceLocator->get('Zend\Db\Adapter\Adapter');
@@ -27,6 +28,8 @@ use Zend\Mime\Part as MimePart;
      public function __construct(AbstractTableGateway $tableGateway)
      {
          $this->tableGateway = $tableGateway;
+        $auth = new AuthenticationService();
+        $this->loggedInUserDetails = $auth->getIdentity();
      }
 	 
 	 public function setServiceLocator(ServiceLocatorInterface $serviceLocator) {
@@ -204,6 +207,35 @@ use Zend\Mime\Part as MimePart;
             $transport = new \Zend\Mail\Transport\Sendmail();
             $transport->send($message); 
         }
+        return 1;
+    }
+    
+    public function getRoleInSession($role_id) {
+        
+//        echo $role_id;exit;
+        
+        $table = new TableGateway('company_roles',$this->getAdapter());
+        $select = $table->select(function($select) use($role_id){
+            $select->columns(['seniority','role_name'])
+                ->join(['crr'=>'company_role_rights'],'company_roles.id=crr.role_id',['right_id'])
+                ->where(['crr.comp_id'=>$this->loggedInUserDetails->comp_id,'crr.role_id'=>$role_id,'crr.is_active'=>1,'crr.is_delete'=>0]);
+        })->toArray();
+        
+//         echo '<pre>';print_r($select);exit; 
+        
+        $tempArr = [];
+        foreach($select as $key=>$value){
+            if($key==0){
+                $tempArr['seniority']   =  $value['seniority'];
+                $tempArr['role_name']   =  $value['role_name'];
+            }
+            $tempArr['rightsArr'][]     =  $value['right_id'];
+        }
+        
+//        echo '<pre>';print_r($tempArr);exit; 
+        
+        $roleInSession = new Container('roleInSession');
+        $roleInSession->roleRightsArr  = $tempArr;        
         return 1;
     }
     

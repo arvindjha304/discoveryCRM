@@ -35,11 +35,11 @@
                 <div class="col-md-6">
                   <h3 class="box-title">Manage Roles</h3>
                   </div>
-                  <div class="col-md-2 col-md-offset-4" style="padding-right:0px;">
+                  <!--<div class="col-md-2 col-md-offset-4" style="padding-right:0px;">
                   <a href="<?php echo $baseUrl;?>/admin/addeditrole" class="btn btn-block btn-social btn-bitbucket pull-right" style="width:80%;">
                     <i class="fa fa-user"></i> Add Role&nbsp; <i class="fa fa-angle-double-right"></i>
                   </a>
-                  </div>
+                  </div>-->
                 </div><!-- /.box-header -->
                 <div class="box-body">
                     <div id="loadingDiv" class="" style="display: none">
@@ -56,7 +56,7 @@
                     </div> 
                     
                 </div><!-- /.box-body -->
-                <div class="box-header">
+        <!--      <div class="box-header">
                   <div class="col-md-3"><div class="form-group">                   
                     <select class="form-control select2" style="width: 100%;" name="operationvalue" id="operationvalue" onchange="this.value">
                         <option value=''>Bulk Option</option>
@@ -67,7 +67,7 @@
                   </div>
                   </div>
                   <div class="col-md-1 text-right"><button class="btn btn-primary" type="submit" onclick="bulkaction()"> Apply </button></div>
-                </div>
+                </div>-->
               </div><!-- /.box -->
             </div><!-- /.col -->
           </div><!-- /.row -->
@@ -82,14 +82,14 @@
 	var mygrid = new dhtmlXGridObject('manageuser');
 	mygrid.setSkin("dhx_skyblue");
 	mygrid.setImagePath("<?php echo $baseUrl;?>/public/dhtmlxgrid/codebase/imgs/");
-	mygrid.setHeader(",<b>Role Name</b>,<b>Rights</b>,<b>Seniority</b>,<b>Status</b>,<b>Action</b>");							
-	mygrid.attachHeader("#master_checkbox,#text_filter,,,#select_filter,");	
-	mygrid.setInitWidths(" 30, 200, 420, 70, 100, *");
-	mygrid.enableTooltips("false,false,false,false,false,false");
+	mygrid.setHeader("<b>Role Name</b>,<b>Rights</b>,<b>Action</b>");							
+//	mygrid.attachHeader("#text_filter,,");	
+	mygrid.setInitWidths(" 200, 520, *");
+	mygrid.enableTooltips("false,false,false");
 	mygrid.enableAutoHeight(true);   
-	mygrid.setColAlign("center,left,left,left,left,left");
-	mygrid.setColTypes("ch,ro,ro,ed,ro,ro");
-	mygrid.setColSorting("na,str,str,str,str,str");
+	mygrid.setColAlign("left,left,left");
+	mygrid.setColTypes("ro,ro,ro");
+	mygrid.setColSorting("str,str,str");
 	mygrid.enablePaging(true, 10, null, "pagingArea", true, "recinfoArea");
 	mygrid.setPagingSkin("bricks");
     mygrid.attachEvent("onEditCell",doOnCellEdit);

@@ -96,40 +96,40 @@
                 <div class="col-md-6" style="margin-top:30px; margin-bottom:30px;">
                   <div class="form-group">
                     <label>Mobile No. <span class="mandatory">*</span></label>
-                    <input class="form-control" type="text" placeholder="i.e 9999888866" ng-minlength="10" ng-maxlength="10" name="MobileNumber" ng-model="formData.MobileNumber" required>
+                    <input class="form-control" disabled ng-model="formData.MobileNumber">
+                    <input type="text" name="MobileNumber" ng-model="formData.MobileNumber" style="display:none">
+                <!--    <input class="form-control" type="text" placeholder="i.e 9999888866" ng-minlength="10" ng-maxlength="10" name="MobileNumber" ng-model="formData.MobileNumber" required>
                     <span style="color:red" ng-cloak ng-show="myForm.MobileNumber.$dirty && myForm.MobileNumber.$invalid">
                     <span  ng-show="myForm.MobileNumber.$error.required || myForm.MobileNumber.$error.number">Invalid Phone</span>
                     <span  ng-show="(myForm.MobileNumber.$error.minlength || myForm.MobileNumber.$error.maxlength) ">Mobile Number should be of 10 digits</span>
-                    </span>
+                    </span>-->
                   </div><!-- /.form-group -->
                   <div class="form-group">
                     <label>Alternate No.</label>
-                    <input class="form-control" type="text" placeholder="i.e 9999888866" ng-minlength="10" ng-maxlength="10" name="AlternateName" ng-model="formData.AlternateName" >
+                    <input class="form-control" type="text" placeholder="i.e 9999888866" ng-minlength="10" ng-maxlength="10" name="AlternateName" ng-model="formData.AlternateName" ng-blur="CheckMobile(formData.AlternateName,'AlternateName')" >
                     <span style="color:red" ng-cloak ng-show="myForm.AlternateName.$dirty && myForm.AlternateName.$invalid">
                     <span  ng-show="myForm.AlternateName.$error.number">Invalid Phone</span>
                     <span  ng-show="(myForm.AlternateName.$error.minlength || myForm.AlternateName.$error.maxlength) ">Alternate Number should be 10 of digits</span>
                     </span>
+                    <span id="noExistsMsg_AlternateName" style="display:none;color:red">Mobile Number already exists.</span>
                   </div><!-- /.form-group -->
                   <div class="form-group">
                     <label>Other No.</label>
-                    <input class="form-control" type="text" placeholder="i.e 9999888866" ng-minlength="10" ng-maxlength="10" name="OtherName" ng-model="formData.OtherName">
+                    <input class="form-control" type="text" placeholder="i.e 9999888866" ng-minlength="10" ng-maxlength="10" name="OtherName" ng-model="formData.OtherName" ng-blur="CheckMobile(formData.OtherName,'OtherName')">
                     <span style="color:red" ng-cloak ng-show="myForm.OtherName.$dirty && myForm.OtherName.$invalid">
                     <span  ng-show="myForm.OtherName.$error.number">Invalid Phone</span>
                     <span  ng-show="(myForm.OtherName.$error.minlength || myForm.OtherName.$error.maxlength) ">Other Number should be 10 of digits</span>
                     </span>
+                    <span id="noExistsMsg_OtherName" style="display:none;color:red">Mobile Number already exists.</span>
                   </div><!-- /.form-group -->
                   <div class="form-group">
-                    <label>Email ID <span class="mandatory">*</span></label>
-                    <input type="email" placeholder="Enter email" class="form-control" name="EmailAddress" ng-model="formData.EmailAddress" required>
-                    <span style="color:red" ng-style="{color: myColor}" ng-cloak ng-show="myForm.EmailAddress.$dirty && myForm.EmailAddress.$invalid">
-                      <span ng-show="myForm.EmailAddress.$error.required">Email is required.</span>
-                      <span ng-show="myForm.EmailAddress.$error.email">Invalid email address.</span>
-                    </span>
+                    <label>Email ID</label>
+                    <input type="email" placeholder="Enter email" class="form-control" name="EmailAddress" ng-model="formData.EmailAddress">
                   </div><!-- /.form-group -->                   
                 </div><!-- /.col -->                
               </div><!-- /.row -->
               <div class="box-footer-customize">
-                 <button class="btn btn-primary" type="button" ng-click="updateLeadForm()" ng-disabled="(myForm.$invalid )">Update</button>
+                 <button class="btn btn-primary" type="button" ng-click="updateLeadForm()" ng-disabled="(disableForm==true || myForm.$invalid )">Update</button>
                 <button class="btn btn-danger" type="button" style="margin-left:10px;">Cancel</button>
                 <!---<button class="btn btn-warning" type="button" style="margin-left:10px;">Status Update</button>-->
                 <img id="updateLeadLoader" src="<?php echo $baseUrl;?>/public/dist/img/Snakes_chasing.gif" style="Padding-left:15px; width:45px;display: none;" >
@@ -359,13 +359,17 @@
                     <li>                 
                         <div class="timeline-item">                    
                           <h3 class="timeline-header text-red">
-                          <?php echo $leadHistory['last_feedback'];
-                          /*if($leadHistory['status_type'] == 1)                              
-                              echo 'Interested';                              
+                          <?php 
+                            if($leadHistory['status_type'] == 1)                              
+                                echo 'Interested';                              
                             elseif($leadHistory['status_type'] == 2)
                                 echo 'Not Interested ';
-                             else  
-                                 echo 'Not Answering';*/
+                            else  
+                                echo 'Not Answering';
+                            
+                            if($leadHistory['last_feedback']!='')
+                                echo '  ['.$leadHistory['last_feedback'].']';
+                            
                               ?></h3>
                           <div class="timeline-body">
                             <strong>Next Visit :</strong> <?php if($leadHistory['date_time_value'] != '0000-00-00 00:00:00.0') echo $leadHistory['date_time_value']; else echo '';?><br>
@@ -465,6 +469,9 @@
     app.controller('updateLead', function($scope, $http) {
         $scope.allSources           = <?php echo $this->allSources?>;
         $scope.allProjects          = <?php echo $this->allProjects?>;
+        $scope.disableForm = false;
+//        $scope.AlternateName = '';
+//        $scope.formData.OtherName    = '';
         var str = '<?php echo $this->formData[0]['punch_date']?>';
         var res = str.substr(0, 16);
         $scope.formData = {
@@ -491,13 +498,9 @@
             $scope.formData.SourceOfEnquiry = source;
         };
         $scope.updateLeadForm      = function(){
-            
             var url = "<?php echo $baseUrl?>/admin/updateleadstatus?callback=JSON_CALLBACK";
             $('#updateLeadLoader').show();
-            
-            console.log($scope.formData);
-            
-            
+//            console.log($scope.formData);
             $http.post(url,$scope.formData) 
             .success(function (data, status, headers, config) {
                 console.log(data);
@@ -511,6 +514,75 @@
             return false;   
             console.log($scope.formData);
         };
+        
+        $scope.CheckMobile = function(mobileNumber,fieldName){
+             
+             
+//             alert($scope.formData.AlternateName);
+//             
+//             return false;
+            var mobileMatched = 0;
+            if(isNaN($scope.formData.AlternateName)==false){
+                if($scope.formData.AlternateName == $scope.formData.MobileNumber){
+                    $scope.disableForm = true;
+                    mobileMatched = 1;
+                    $('#noExistsMsg_AlternateName').text('Alternate Number and Mobile Number cannot be same.').show();
+                }else if($scope.formData.AlternateName == $scope.formData.OtherName){
+
+                     $scope.disableForm = true;
+                     mobileMatched = 1;
+                     $('#noExistsMsg_AlternateName').text('Alternate Number and Other Number cannot be same.').show();
+                }
+            }
+            if(isNaN($scope.formData.OtherName)==false){
+                if($scope.formData.OtherName == $scope.formData.MobileNumber){
+                    $scope.disableForm = true;
+                    mobileMatched = 1;
+                    $('#noExistsMsg_OtherName').text('Other Number and Mobile Number cannot be same.').show();
+                }else if($scope.formData.AlternateName == $scope.formData.OtherName){
+                     $scope.disableForm = true;
+                     mobileMatched = 1;
+                      $('#noExistsMsg_OtherName').text('Other Number and Alternate Number cannot be same.').show();
+                }
+            }
+            
+            if(mobileMatched == 0){
+                var url = "<?php echo $baseUrl?>/admin/checkmobilenumber";
+                $http.post(url,{'mobileNumber':mobileNumber}) 
+                .success(function (data, status, headers, config) {
+                    if(data==1){
+                        if(fieldName=='AlternateName'){
+                            if($scope.formData.AlternateName  != parseInt('<?php echo $this->formData[0]['alt_no']?>')){
+                                $('#noExistsMsg_'+fieldName).text('').text('Mobile Number already exists').show();
+                                $scope.disableForm = true;
+                            }else $('#noExistsMsg_'+fieldName).hide();
+                        }else if(fieldName=='OtherName'){
+                            if($scope.formData.OtherName  != parseInt('<?php echo $this->formData[0]['other_no']?>')){
+                                $('#noExistsMsg_'+fieldName).text('').text('Mobile Number already exists').show();
+                                $scope.disableForm = true;
+                            }else $('#noExistsMsg_'+fieldName).hide();
+                        }else{
+                            $('#noExistsMsg_'+fieldName).text('').text('Mobile Number already exists').show();
+                            $scope.disableForm = true;
+                        }
+                    }else{
+                        $('#noExistsMsg_'+fieldName).hide();
+                        $scope.disableForm = false;
+//                        $scope.MobileNumber   = $scope.disbledMobileNumber;
+                    }
+                   console.log(data); 
+                // }
+
+                })
+                .error(function (data, status, headers, config) {
+                    //this always gets called
+                    console.log(status);
+                });
+            }
+            return false;
+            
+        }
+        
     });
    app.controller('updateStatus', function($scope, $http) {
         

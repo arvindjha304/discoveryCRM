@@ -742,7 +742,7 @@ class AdminController extends AbstractActionController
                 }
                 $open_by                =   $val1['openBy'];
                 $last_feedback          =   '<a href="#" data-toggle="tooltip" data-placement="left" title="Last Activity - '.$val1['last_feedback'].'">'.  substr($val1['last_feedback'], 0, 15).'</a>';
-                $client_type            =   ($val1['client_type'] ==1) ? 'Client' : 'Broker';
+                $client_type            =   ($val1['client_type'] ==1) ? 'Client' : ($val1['client_type'] ==2 ? 'Broker' : '');
                 
                 if($val1['status_type']==''){
                     $lead_status  =   'Not Updated';

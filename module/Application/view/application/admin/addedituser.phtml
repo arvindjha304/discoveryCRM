@@ -97,7 +97,7 @@
                             <span style="color:red" ng-cloak ng-show="myForm.reportingManagers.$dirty && myForm.reportingManagers.$error.required">Select Reporting Manager</span>
                             </div>                         
                           <div class="box-footer-custom">
-                            <button class="btn btn-primary" type="submit" ng-disabled="(disableButton==true || myForm.$invalid )">Save</button>
+                            <button class="btn btn-primary" type="submit" ng-disabled="(disableButtonEmail==true || disableButtonMobile==true || myForm.$invalid )">Save</button>
                             <button class="btn btn-danger" type="button" style="margin-left:10px;" ng-click="cancelBtn()">Cancel</button>
                           </div>
                         </form>
@@ -118,8 +118,11 @@
     var app = angular.module('myApp', []);
     app.controller('validateCtrl', function($scope, $http) {
         $scope.disbleReportingManager=true;
-        $scope.disableButton = false;
-       
+        $scope.disableButtonEmail = false;
+        $scope.disableButtonMobile = false;
+        $scope.useremail        = '';
+        $scope.userPhone        = '';
+        
         $scope.reportingManagers = [];
 //        myColor = 'red';
         <?php if(isset($this->userData)){?>
@@ -137,7 +140,7 @@
         }
         
         $scope.checkUserEmail = function(useremail){
-            
+//            alert(useremail);
             var url = "<?php echo $baseUrl?>/admin/checkuseremail?callback=JSON_CALLBACK";
             if(useremail!=''){
                $http.post(url,{'useremail':useremail}) 
@@ -146,10 +149,10 @@
                     if(data==1 && useremail!='<?php echo $this->userData[0]["useremail"]?>'){
     //                if(data==1){
                         $('#UserEmailExists').show();
-                        $scope.disableButton = true;
+                        $scope.disableButtonEmail = true;
                     }else{
                         $('#UserEmailExists').hide();
-                        $scope.disableButton = false;
+                        $scope.disableButtonEmail = false;
                     }
                 }) 
             }
@@ -163,10 +166,10 @@
                     console.log(data);
                     if(data==1 && userPhone!='<?php echo $this->userData[0]["mobile"]?>'){
                         $('#UserPhoneExists').show();
-                        $scope.disableButton = true;
+                        $scope.disableButtonMobile = true;
                     }else{
                         $('#UserPhoneExists').hide();
-                        $scope.disableButton = false;
+                        $scope.disableButtonMobile = false;
                     }
                 }) 
             }

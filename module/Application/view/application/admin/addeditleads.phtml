@@ -75,7 +75,7 @@
                             </div>                         
                             <div class="form-group-custom">
                                 <label>Mobile Number <span class="mandatory">*</span></label>
-                                <input type="text" style="display:none"  name="MobileNumber" ng-model="MobileNumber" >
+                                <input type="text" style="border:none;color:white;margin-left: 500px;" name="MobileNumber" ng-model="MobileNumber" >
                                 <!---->
                                 <?php if(count($this->formData[0])){?>
                                     <input class="form-control" type="text" placeholder="i.e 9999888866" ng-minlength="10" ng-maxlength="10" name="disbledMobileNumber" ng-blur="CheckMobile(disbledMobileNumber,'disbledMobileNumber')" ng-model="disbledMobileNumber" required>
@@ -182,10 +182,10 @@
         
         <?php if(isset($this->formData)){?>
             $scope.CustomerName         = '<?php echo $this->formData[0]['customer_name']?>';
-            $scope.disbledMobileNumber  = parseInt('<?php echo $this->formData[0]['mobile']?>');
-            $scope.MobileNumber         = parseInt('<?php echo $this->formData[0]['mobile']?>');
-            $scope.AlternateName        = parseInt('<?php if($this->formData[0]['alt_no']!=0) echo $this->formData[0]['alt_no']?>');
-            $scope.OtherName            = parseInt('<?php if($this->formData[0]['other_no']!=0) echo $this->formData[0]['other_no']?>');
+            $scope.disbledMobileNumber  = parseInt('<?php echo base64_decode($this->formData[0]["mobile"])?>');
+            $scope.MobileNumber         = parseInt('<?php echo base64_decode($this->formData[0]['mobile'])?>');
+            $scope.AlternateName        = parseInt('<?php if($this->formData[0]['alt_no']!="") echo base64_decode($this->formData[0]['alt_no'])?>');
+            $scope.OtherName            = parseInt('<?php if($this->formData[0]['other_no']!="") echo base64_decode($this->formData[0]['other_no'])?>');
             $scope.EmailAddress         = '<?php echo $this->formData[0]['email']?>';
             $scope.Address              = '<?php echo $this->formData[0]['address']?>';
             $scope.SourceOfEnquiry      = '<?php echo $this->formData[0]['source_of_enquiry']?>';
@@ -245,17 +245,17 @@
                     }else{
                         if(data==1){
                             if(fieldName=='disbledMobileNumber'){
-                                if($scope.disbledMobileNumber  != parseInt('<?php echo $this->formData[0]['mobile']?>')){
+                                if($scope.disbledMobileNumber  != parseInt('<?php echo base64_decode($this->formData[0]['mobile'])?>')){
                                     $('#noExistsMsg_'+fieldName).text('').text('Mobile Number already exists').show();
                                     $scope.disableForm = true;
                                 }else $('#noExistsMsg_'+fieldName).hide();
                             }else if(fieldName=='AlternateName'){
-                                if($scope.AlternateName  != parseInt('<?php echo $this->formData[0]['alt_no']?>')){
+                                if($scope.AlternateName  != parseInt('<?php echo base64_decode($this->formData[0]['alt_no'])?>')){
                                     $('#noExistsMsg_'+fieldName).text('').text('Mobile Number already exists').show();
                                     $scope.disableForm = true;
                                 }else $('#noExistsMsg_'+fieldName).hide();
                             }else if(fieldName=='OtherName'){
-                                if($scope.OtherName  != parseInt('<?php echo $this->formData[0]['other_no']?>')){
+                                if($scope.OtherName  != parseInt('<?php echo base64_decode($this->formData[0]['other_no'])?>')){
                                     $('#noExistsMsg_'+fieldName).text('').text('Mobile Number already exists').show();
                                     $scope.disableForm = true;
                                 }else $('#noExistsMsg_'+fieldName).hide();
@@ -283,21 +283,13 @@
         $scope.cancelBtn = function(){
             window.location.href = '<?php echo $baseUrl?>/admin/manageleads';
         }
-//        $scope.submitEditForm = function(){
-////            $scope.MobileNumber        
-////            $scope.AlternateName       
-////            $scope.OtherName  
-//            if($scope.AlternateName !=''){
-//                if($scope.AlternateName == $scope.MobileNumber){
-//                    console.log('AlternateName == MobileNumber');
-//                    $scope.disableForm = false;
-//                }else if($scope.AlternateName == $scope.OtherName){
-//                     console.log('AlternateName == OtherName');
-//                     $scope.disableForm = false;
-//                }
-//            }
-//            $('#addLeadForm').submit();
-//        }
+        $scope.submitEditForm = function(){
+//            $scope.MobileNumber        
+//            $scope.AlternateName       
+//            $scope.OtherName  
+            
+            $('#addLeadForm').submit();
+        }
     });
     
     // ng-app was ommitted from the html so that

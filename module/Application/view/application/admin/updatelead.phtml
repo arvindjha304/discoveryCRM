@@ -215,7 +215,7 @@
         </div><!-- /.row -->
           
           
-          <div class="row" style="margin-top:30px;" ng-show="(leadStatusForm.statusType=='2')">
+          <div class="row" style="margin-top:30px;" ng-show="(leadStatusForm.statusType=='2')"> 
             <div class="col-xs-12 col-sm-12 col-md-12">
               <!-- jQuery Knob -->
               <div class="box-solid" style="background-color:#ecf0f5;border:1px solid #d2d6de;">               
@@ -479,9 +479,9 @@
             SourceOfEnquiry      : '<?php echo $this->formData[0]['source_of_enquiry']?>',
             ProjectInterested    : '<?php echo $this->formData[0]['project_interested']?>',
             CustomerName         : '<?php echo $this->formData[0]['customer_name']?>',
-            MobileNumber         : parseInt('<?php echo $this->formData[0]['mobile']?>'),
-            AlternateName        : parseInt('<?php if($this->formData[0]['alt_no']!=0) echo $this->formData[0]['alt_no']?>'),
-            OtherName            : parseInt('<?php if($this->formData[0]['other_no']!=0) echo $this->formData[0]['other_no']?>'),
+            MobileNumber         : parseInt('<?php echo base64_decode($this->formData[0]['mobile'])?>'),
+            AlternateName        : parseInt('<?php if($this->formData[0]['alt_no']!='') echo base64_decode($this->formData[0]['alt_no'])?>'),
+            OtherName            : parseInt('<?php if($this->formData[0]['other_no']!='') echo base64_decode($this->formData[0]['other_no'])?>'),
             EmailAddress         : '<?php echo $this->formData[0]['email']?>',
             Address              : '<?php echo $this->formData[0]['address']?>',
             PunchDate            : res,
@@ -552,12 +552,12 @@
                 .success(function (data, status, headers, config) {
                     if(data==1){
                         if(fieldName=='AlternateName'){
-                            if($scope.formData.AlternateName  != parseInt('<?php echo $this->formData[0]['alt_no']?>')){
+                            if($scope.formData.AlternateName  != parseInt('<?php echo base64_decode($this->formData[0]['alt_no'])?>')){
                                 $('#noExistsMsg_'+fieldName).text('').text('Mobile Number already exists').show();
                                 $scope.disableForm = true;
                             }else $('#noExistsMsg_'+fieldName).hide();
                         }else if(fieldName=='OtherName'){
-                            if($scope.formData.OtherName  != parseInt('<?php echo $this->formData[0]['other_no']?>')){
+                            if($scope.formData.OtherName  != parseInt('<?php echo base64_decode($this->formData[0]['other_no'])?>')){
                                 $('#noExistsMsg_'+fieldName).text('').text('Mobile Number already exists').show();
                                 $scope.disableForm = true;
                             }else $('#noExistsMsg_'+fieldName).hide();

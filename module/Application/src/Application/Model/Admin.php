@@ -77,7 +77,8 @@ use Zend\Session\Container;
             if($userId!='')
                 $select->where->equalTo('userlist.id',$userId);
             $select->join(['cr'=>'company_roles'],'cr.id=userlist.role_id','role_name')
-                    ->join(['usr'=>'userlist'],'usr.id=userlist.last_updated_by',['lastUpdatedBy'=>'username']);
+                    ->join(['usr'=>'userlist'],'usr.id=userlist.last_updated_by',['lastUpdatedBy'=>'username'])
+                    ->join(['usr2'=>'userlist'],'userlist.reporting_manager=usr2.id',['managerName'=>'username'],'left');
             $select->where(['userlist.is_delete'=>0,'userlist.comp_id'=>$this->loggedInUserDetails->comp_id]);
         })->toArray();
 //        echo '<pre>';print_r($userList);exit;

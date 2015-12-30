@@ -47,28 +47,28 @@ class Module implements AutoloaderProviderInterface, ConfigProviderInterface, Vi
     public function getServiceConfig()
     {
     	return array(
-    		'factories' => array(
-    			'Application\Model\Index' =>  function($sm) {
-    				$tableGateway = $sm->get('GetTableGateway');
-    					$table = new Model\Index($tableGateway);
-    					return $table;
-    				},
-    				'Application\Model\Admin' =>  function($sm) {
-                        $tableGateway = $sm->get('GetTableGateway');
-                        $table = new Model\Admin($tableGateway);
-                        return $table;
-    				},
-//                    'Application\Model\User' =>  function($sm) {
-//                        $tableGateway = $sm->get('GetTableGateway');
-//                        $table = new Model\User($tableGateway);
-//                        return $table;
-//    				},        
-    				'GetTableGateway' => function($sm){
-	    				 $dbAdapter = $sm->get('Zend\Db\Adapter\Adapter');
-	    				 return new TableGateway('otp_codes', $dbAdapter, null);
-    				},
-    
-    			),
+            'factories' => array(
+                'Application\Model\Index' =>  function($sm) {
+                    $tableGateway = $sm->get('GetTableGateway');
+                    $table = new Model\Index($tableGateway);
+                    return $table;
+                },
+                'Application\Model\Admin' =>  function($sm) {
+                    $tableGateway = $sm->get('GetTableGateway');
+                    $table = new Model\Admin($tableGateway);
+                    return $table;
+                },
+//              'Application\Model\User' =>  function($sm) {
+//                  $tableGateway = $sm->get('GetTableGateway');
+//                  $table = new Model\User($tableGateway);
+//                  return $table;
+//    		},        
+                'GetTableGateway' => function($sm){
+                    $dbAdapter = $sm->get('Zend\Db\Adapter\Adapter');
+                    return new TableGateway('otp_codes', $dbAdapter, null);
+                },
+
+            ),
     	);
     }
     

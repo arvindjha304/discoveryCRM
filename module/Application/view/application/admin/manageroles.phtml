@@ -100,8 +100,9 @@
 	// mygrid.parse(<?php echo $this->jsonData?>,callBack,"json");
 	mygrid.clearAndLoad(strgridURL,callBack,"json");
 	function callBack(){
-		
-		
+            $(function () {
+               $('[data-toggle="tooltip"]').tooltip()
+            })
 	}
 	function doOnCellEdit(stage,rowId,cellInd,newValue,oldValue){
 		if(stage==2){

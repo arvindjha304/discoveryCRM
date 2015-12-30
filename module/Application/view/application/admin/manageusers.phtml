@@ -82,14 +82,14 @@
 	var mygrid = new dhtmlXGridObject('manageuser');
 	mygrid.setSkin("dhx_skyblue");
 	mygrid.setImagePath("<?php echo $baseUrl;?>/public/dhtmlxgrid/codebase/imgs/");
-	mygrid.setHeader(",<b>Name</b>,<b>Role</b>,<b>Mobile</b>,<b>Last Updated By</b>,<b>Last Updated Time</b>,<b>Status</b>,<b>Action</b>");							
-	mygrid.attachHeader("#master_checkbox,#text_filter,#text_filter,#text_filter,#text_filter,#text_filter,#text_filter,");	
-	mygrid.setInitWidths(" 30, 200, 100, 100, 130, 130, 100, *");
-	mygrid.enableTooltips("false,false,false,false,false,false,false,false");
+	mygrid.setHeader(",<b>Name</b>,<b>Role</b>,<b>Reporting Manager</b>,<b>Mobile</b>,<b>Last Updated By</b>,<b>Last Updated Time</b>,<b>Status</b>,<b>Action</b>");							
+	mygrid.attachHeader("#master_checkbox,#text_filter,#text_filter,#text_filter,#text_filter,#text_filter,#text_filter,#text_filter,");	
+	mygrid.setInitWidths(" 30, 200, 100, 130, 100, 130, 130, 100, *");
+	mygrid.enableTooltips("false,false,false,false,false,false,false,false,false");
 	mygrid.enableAutoHeight(true);   
-	mygrid.setColAlign("center,left,left,left,left,left,left,left");
-	mygrid.setColTypes("ch,ro,ro,ro,ro,ro,ro,ro");
-	mygrid.setColSorting("na,str,str,str,str,str,str,str");
+	mygrid.setColAlign("center,left,left,left,left,left,left,left,left");
+	mygrid.setColTypes("ch,ro,ro,ro,ro,ro,ro,ro,ro");
+	mygrid.setColSorting("na,str,str,str,str,str,str,str,str");
 	mygrid.enablePaging(true, 10, null, "pagingArea", true, "recinfoArea");
 	mygrid.setPagingSkin("bricks");
 	// mygrid.attachEvent("onXLS", function() { $("#preloader").show() });
@@ -99,8 +99,9 @@
 	// mygrid.parse(<?php echo $this->jsonData?>,callBack,"json");
 	mygrid.clearAndLoad(strgridURL,callBack,"json");
 	function callBack(){
-		
-		
+            $(function () {
+               $('[data-toggle="tooltip"]').tooltip()
+            })	
 	}
 	
 	function deleteRow(id){

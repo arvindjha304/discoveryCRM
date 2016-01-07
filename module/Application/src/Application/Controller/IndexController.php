@@ -165,6 +165,7 @@ class IndexController extends AbstractActionController
                 $checkUserOTP = $this->getModel()->checkUserOTP(base64_encode($otpcode),$userId);
                 if($checkUserOTP==1){
                     $this->getModel()->getRoleInSession($userDetails->role_id);
+                    $this->getModel()->insertUserHistory($userDetails->id);
                     $roleInSession  = new Container('roleInSession');
                     $roleRightsArr  = $roleInSession->roleRightsArr;
                     if($roleRightsArr['seniority'] == 1)
@@ -186,6 +187,7 @@ class IndexController extends AbstractActionController
     
     public function logoutAction(){
         $auth = new AuthenticationService();
+        $this->getModel()->updateUserHistory();
         $auth->clearIdentity();
         $this->redirect()->toRoute('application',array('controller'=>'index'));
     }

@@ -119,69 +119,69 @@
 	mygrid.clearAndLoad(strgridURL,callBack,"json");
 	function callBack(){
             $(function () {
-               $('[data-toggle="tooltip"]').tooltip()
+               $('[data-toggle="tooltip"]').tooltip();
             })	
 	}
 	
 	function deleteRow(id){
-		SITEROOT = '<?php echo $baseUrl?>';
-		$.post(SITEROOT+'/admin/updatestatus', {id:id,action:'delete',tableType:'PROJECTLISTING'},function(response){
-			if(response == '1')
-			{
-				mygrid.clearAndLoad('<?php echo $baseUrl;?>/admin/projects',callBack,"json");
-			}
-		
-		}) ;
+            SITEROOT = '<?php echo $baseUrl?>';
+            $.post(SITEROOT+'/admin/updatestatus', {id:id,action:'delete',tableType:'PROJECTLISTING'},function(response){
+                    if(response == '1')
+                    {
+                            mygrid.clearAndLoad('<?php echo $baseUrl;?>/admin/projects',callBack,"json");
+                    }
+
+            }) ;
 	}
 	
 	function activeStatus(id){
-		SITEROOT = '<?php echo $baseUrl?>';
-		$.post(SITEROOT+'/admin/updatestatus', {id:id,action:'active',tableType:'PROJECTLISTING'},function(response){
-			if(response == '1')
-			{
-				mygrid.clearAndLoad('<?php echo $baseUrl;?>/admin/projects',callBack,"json");
-			}
-		
-		}) ;
+            SITEROOT = '<?php echo $baseUrl?>';
+            $.post(SITEROOT+'/admin/updatestatus', {id:id,action:'active',tableType:'PROJECTLISTING'},function(response){
+                    if(response == '1')
+                    {
+                            mygrid.clearAndLoad('<?php echo $baseUrl;?>/admin/projects',callBack,"json");
+                    }
+
+            }) ;
 		
 	}
 	
 	function inActiveStatus(id){
-		SITEROOT = '<?php echo $baseUrl?>';
-		$.post(SITEROOT+'/admin/updatestatus', {id:id,action:'inactive',tableType:'PROJECTLISTING'},function(response){
-			// alert(response);
-			if(response == '1')
-			{
-				mygrid.clearAndLoad('<?php echo $baseUrl;?>/admin/projects',callBack,"json");
-			}
-		}) ;
+            SITEROOT = '<?php echo $baseUrl?>';
+            $.post(SITEROOT+'/admin/updatestatus', {id:id,action:'inactive',tableType:'PROJECTLISTING'},function(response){
+                    // alert(response);
+                    if(response == '1')
+                    {
+                            mygrid.clearAndLoad('<?php echo $baseUrl;?>/admin/projects',callBack,"json");
+                    }
+            }) ;
 	}
 	
 	
 	function getSelectedIds(){
-		var selected_rows = new Array();
-		mygrid.forEachRow(function(id) {
-			if(mygrid.cells(id, 0).getValue()==1){
-				selected_rows.push(id);
-			}
-		});		
-		return selected_rows.join(",");
+            var selected_rows = new Array();
+            mygrid.forEachRow(function(id) {
+                    if(mygrid.cells(id, 0).getValue()==1){
+                            selected_rows.push(id);
+                    }
+            });		
+            return selected_rows.join(",");
 	}
 
 
 	function bulkaction(){
-        var action = $('#operationvalue').val();
-        if(action!=''){
-            var selectedIds = getSelectedIds();
-            SITEROOT = '<?php echo $baseUrl?>';
-            $.post(SITEROOT+'/admin/updatestatus', {selectedIds:selectedIds,action:action,tableType:'PROJECTLISTING'},function(response){
-                if(response == '1')
-                {
-                    mygrid.clearAndLoad('<?php echo $baseUrl;?>/admin/projects',callBack,"json");
-                }
-            }) ;		
+            var action = $('#operationvalue').val();
+            if(action!=''){
+                var selectedIds = getSelectedIds();
+                SITEROOT = '<?php echo $baseUrl?>';
+                $.post(SITEROOT+'/admin/updatestatus', {selectedIds:selectedIds,action:action,tableType:'PROJECTLISTING'},function(response){
+                    if(response == '1')
+                    {
+                        mygrid.clearAndLoad('<?php echo $baseUrl;?>/admin/projects',callBack,"json");
+                    }
+                }) ;		
+            }
         }
-    }
 
 	var app = angular.module('myApp', []);
     var projectDetail         = <?php if(isset($this->projectDetail)) echo $this->projectDetail; else echo '{}'?>;

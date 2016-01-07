@@ -868,17 +868,106 @@ class AdminController extends AbstractActionController
     }
     
       
-//    public function checkuseremailAction()
-//    {
-//        $postdata = file_get_contents("php://input");
-//        $request = json_decode($postdata);
-//        $useremail = $request->useremail; 
-//        if($useremail!=''){
-//            $admin = $this->getServiceLocator()->get('Application\Model\Admin');
-//            echo $admin->checkUseremail($useremail);  
-//        }
-//        exit;
-//    }
+    public function userforloginhistoryAction(){
+        $postdata = file_get_contents("php://input");
+        $request = json_decode($postdata);
+        if(count($request)){
+            $searchUser = $request->searchUser; 
+            if($searchUser!=''){
+                
+//                $this->getModel()->userforloginhistory();
+                
+                
+                
+                echo $searchUser;exit;
+                
+                
+            }   
+        }
+        exit;
+    }  
+    public function loginhistoryAction(){
+        $view = new ViewModel();
+        $this->layout('layout/layoutadmin');
+        
+        $loginHistory = $this->getModel()->getLoginHistory();
+        $view->setVariable('loginHistory', $loginHistory);
+        
+        return $view;
+        
+    }
+    
+    public function apicredentialsAction(){
+        $view = new ViewModel();
+        $this->layout('layout/layoutadmin');
+        
+        $magicBrickDetail   = $this->getModel()->getMagicBrickData();
+        $acresData          = $this->getModel()->getAcresData();
+        $smsApiData         = $this->getModel()->getSmsApiData();
+        
+        $view->setVariable('magicBrickDetail', $magicBrickDetail);
+        $view->setVariable('acresData', $acresData);
+        $view->setVariable('smsApiData', $smsApiData);
+        
+        return $view;
+    }
+    
+    public function magicbricksformAction() {
+        if($this->getRequest()->isXmlHttpRequest()){
+            $id     = $this->params()->fromPost('Id');
+            $data = [
+                'source_id'         => $this->params()->fromPost('Source'),
+                'magic_brick_key'   => $this->params()->fromPost('Key'),
+                'comp_id'           => $this->loggedInUserDetails->comp_id,
+                'last_updated_by'   => $this->loggedInUserDetails->id
+            ];
+            if($id==''){
+                $this->getModel()->insertanywhere('magic_brick_credentials', $data);
+            }else{
+                $this->getModel()->updateanywhere('magic_brick_credentials', $data,['id'=>$id]);
+            }
+        }
+        exit;
+    }
+    
+    public function acresformAction() {
+        if($this->getRequest()->isXmlHttpRequest()){
+            $id         = $this->params()->fromPost('Id');
+            $data = [
+                'source_id'         => $this->params()->fromPost('Source'),
+                'acres_username'  => $this->params()->fromPost('UserName'),
+                'acres_pswd'      => $this->params()->fromPost('Pswd'),
+                'comp_id'           => $this->loggedInUserDetails->comp_id,
+                'last_updated_by'   => $this->loggedInUserDetails->id
+            ];
+            if($id==''){
+                $this->getModel()->insertanywhere('acres_api_credentials', $data);
+            }else{
+                $this->getModel()->updateanywhere('acres_api_credentials', $data,['id'=>$id]);
+            }
+        }
+        exit;
+    }
+    
+    public function smsapiformAction() {
+        if($this->getRequest()->isXmlHttpRequest()){
+            $id         = $this->params()->fromPost('Id');
+            $data = [
+                'sms_user_name'     => $this->params()->fromPost('UserName'),
+                'sms_pswd'          => $this->params()->fromPost('Pswd'),
+                'comp_id'           => $this->loggedInUserDetails->comp_id,
+                'last_updated_by'   => $this->loggedInUserDetails->id
+            ];
+            if($id==''){
+                $this->getModel()->insertanywhere('sms_api_credentials', $data);
+            }else{
+                $this->getModel()->updateanywhere('sms_api_credentials', $data,['id'=>$id]);
+            }
+        }
+        exit;
+    }
+    
+    
     public function updateleadintableAction(){
         if($this->getRequest()->isXmlHttpRequest()){
             $leadId = $this->params()->fromPost('leadId');

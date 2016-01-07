@@ -450,4 +450,38 @@ use Zend\Session\Container;
         })->toArray();
         if(count($projects)) return 1; else return 0;
     }
+    
+    public function getLoginHistory() {
+        $tableGateway = new TableGateway('user_login_history',$this->getAdapter());
+        $loginHistory = $tableGateway->select(function($select){
+            $select->join(['us'=>'userlist'],'user_login_history.user_id=us.id',['username']);
+        })->toArray();
+        return $loginHistory;
+    }
+    
+    public function userforloginhistory() {
+        $tableGateway = new TableGateway('userlist',$this->getAdapter());
+        $loginHistory = $tableGateway->select(function($select){
+            
+        })->toArray();
+        return $loginHistory;
+    }
+    public function getMagicBrickData() {
+        $tableGateway = new TableGateway('magic_brick_credentials',$this->getAdapter());
+        $magicBrickData = $tableGateway->select(['comp_id'=>$this->loggedInUserDetails->comp_id])->toArray();
+        return $magicBrickData;
+    }
+    public function getAcresData() {
+        $tableGateway = new TableGateway('acres_api_credentials',$this->getAdapter());
+        $acresData = $tableGateway->select(['comp_id'=>$this->loggedInUserDetails->comp_id])->toArray();
+        return $acresData;
+    }
+    public function getSmsApiData() {
+        $tableGateway = new TableGateway('sms_api_credentials',$this->getAdapter());
+        $smsApiData = $tableGateway->select(['comp_id'=>$this->loggedInUserDetails->comp_id])->toArray();
+        return $smsApiData;
+    }
+    
+    
+    
 }

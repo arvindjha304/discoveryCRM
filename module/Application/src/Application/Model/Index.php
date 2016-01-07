@@ -209,11 +209,46 @@ use Zend\Mime\Part as MimePart;
         }
         return 1;
     }
+    public function insertUserHistory($user_id) {
+        
+        $where = array(
+            'user_id' => $user_id,
+            'comp_id' => $this->loggedInUserDetails->comp_id
+        );
+        
+        $this->updateanywhere('user_login_history', ['status'=>1], $where);
+        
+        $data = [];
+        $data['user_id']        = $user_id;
+        $data['ip_address']     = $_SERVER['REMOTE_ADDR'];
+        $data['login_time']     = date('Y-m-d H-i-s');
+        $data['logout_time']    = '';
+        $data['status']         = 0;
+        $data['comp_id']        = $this->loggedInUserDetails->comp_id;
+        $this->insertanywhere('user_login_history',$data);
+        return 1;
+    }
+    
+    public function updateUserHistory($user_id) {
+        
+        $where = array(
+            'user_id'   => $this->loggedInUserDetails->id,
+            'comp_id'   => $this->loggedInUserDetails->comp_id,
+            'status'    => 0
+        );
+        
+        $data = array(
+            'logout_time' =>    date('Y-m-d H-i-s'),
+            'status'      =>    1
+        );
+        
+        $this->updateanywhere('user_login_history', $data, $where);
+        
+    }
+    
+    
     
     public function getRoleInSession($role_id) {
-        
-//        echo $role_id;exit;
-        
         $table = new TableGateway('company_roles',$this->getAdapter());
         $select = $table->select(function($select) use($role_id){
             $select->columns(['seniority','role_name'])

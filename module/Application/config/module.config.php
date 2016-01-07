@@ -105,9 +105,9 @@ return array(
 		),
 		'controllers' => array(
                     'invokables' => array(
-                        'Application\Controller\Index' 		=> 'Application\Controller\IndexController',
-                         'Application\Controller\Admin'         => 'Application\Controller\AdminController',
-                        'Application\Controller\User' 		=> 'Application\Controller\UserController',
+                        'Application\Controller\Index'   => 'Application\Controller\IndexController',
+                        'Application\Controller\Admin'   => 'Application\Controller\AdminController',
+                        'Application\Controller\Api' 	 => 'Application\Controller\ApiController',
                     ),
 		),
 

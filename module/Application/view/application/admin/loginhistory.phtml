@@ -1,0 +1,179 @@
+<?php $baseUrl = $this->basePath(); 
+
+//echo '<pre>';print_r($_SERVER);exit;
+?>
+
+<link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+<!-- Content Wrapper. Contains page content -->
+<div class="content-wrapper">
+        <!-- Content Header (Page header) -->
+        <section class="content-header">
+          <h1>
+            Login History
+            <small>(Advanced Search)</small>
+          </h1>
+          <ol class="breadcrumb">
+            <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
+            <li class="active">Login History</li>
+          </ol>
+        </section>
+
+        <!-- Main content -->
+        <section class="content">
+          <div class="row">
+            <div class="col-xs-12">
+              <div class="box box-primary box-custom">
+              	<div class="box-header">
+                <div class="col-md-12" style="padding-left:0px;">
+                  <h3 class="box-title">Advanced Search</h3>
+                  </div>                  
+                </div><!-- /.box-header -->
+                <div class="box-body" ng-app="myApp" ng-controller="myCtrl">
+                  <form>
+                    <div class="col-md-3">
+                    	<div class="form-group">                   
+                            <input class="form-control select2" type="text" ng-keyup="getAllUsers(searchUser)" ng-model="searchUser">
+                  		</div>
+                    </div>
+                    <div class="col-md-3">
+                    	<div class="form-group">                   
+                            <select class="form-control select2" style="width: 100%;" ng-model="searchType"  ng-change="checkSearchType(searchType)">
+                              <option value="0">Select Type</option>
+                              <option value="1">Date</option>
+                              <option value="2">Last One Week</option>
+                              <option value="3">Last One Month</option>
+                            </select>
+                  	</div>
+                    </div>
+                    <div class="col-md-3" id="form_datetime_div"  style="display: none" >
+                    	<div class="form-group">                   
+                            <input type="text" class="form-control pull-right form_datetime"name="dateTimeValue"  >
+                  	</div>
+                    </div>
+                      
+                    <div class="col-md-1">
+                       <button class="btn btn-danger" type="submit"> Search </button>
+                    </div>                                   
+                </form>
+                </div>
+                <hr>
+                <div class="box-header">
+                <div class="col-md-12" style="padding-left:0px;">
+                  <h3 class="box-title">Login History</h3>
+                  </div>                  
+                </div><!-- /.box-header -->
+                <div class="box-body">
+                  <table id="example1" class="table table-bordered table-striped">
+                    <thead>
+                      <tr>
+                        <th>Serial No.</th>
+                        <th>User Name</th>
+                        <th>Login Date | Time</th>
+                        <th>Logout Date | Time</th>
+                        <th>IP Address</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                        <?php if(count($this->loginHistory)){
+                            $ii=1;
+                            foreach($this->loginHistory as $loginHistory){
+                                
+                                $loginTimeArr        =   explode(' ', $loginHistory['login_time']);
+                                $loginTime           =   $loginTimeArr[0].' | '.substr($loginTimeArr[1], 0, 5);
+                                
+                                $logoutTimeArr        =   explode(' ', $loginHistory['logout_time']);
+                                $logoutTime           =   ($loginHistory['logout_time']!='0000-00-00 00:00:00') ? ($logoutTimeArr[0].' | '.substr($logoutTimeArr[1], 0, 5)) : '';
+                        ?>
+                            <tr>
+                            <td><?php echo ($ii<10) ? '0'.$ii : $ii;?>.</td>
+                            <td><?php echo ucwords($loginHistory['username']);?></td>
+                            <td><?php echo $loginTime;?></td>
+                            <td><?php echo $logoutTime;?></td>
+                            <td><?php echo $loginHistory['ip_address'];?></td>
+                            </tr> 
+                        <?php $ii++; }}?>
+                                                                                               
+                    </tbody>
+                    <tfoot>
+                      <tr>                        
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div><!-- /.box-body -->                
+              </div><!-- /.box -->
+            </div><!-- /.col -->
+          </div><!-- /.row -->
+          
+          
+        </section><!-- /.content -->
+      </div><!-- /.content-wrapper -->
+        <script src="//code.jquery.com/jquery-1.10.2.js"></script>
+        <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+  
+  
+      <script src="<?php echo $baseUrl;?>/public/angular.min.js"></script>  
+    
+      <script>
+       
+        $(function() {
+           $( ".form_datetime" ).datepicker({  maxDate: new Date() });
+        });
+    
+        var app = angular.module("myApp", []);
+        app.controller("myCtrl", function($scope, $http) {
+            
+//            $scope.UserRoles    = <?php echo $this->allRoles?>;
+//            $scope.AllUsers     = [];
+//            $scope.AssignButton = true;
+
+            $scope.searchType = 0;
+            
+            $scope.checkSearchType = function(searchType){
+                if(searchType==1){
+                    $('#form_datetime_div').show();
+                }else{
+                    $('#form_datetime_div').hide();    
+                }
+//                alert(searchType);
+            }
+            
+            $scope.getAllUsers = function(searchUser){
+                if(searchUser!=''){
+                    var url = "<?php echo $baseUrl?>/admin/userforloginhistory?callback=JSON_CALLBACK";
+                    $http.post(url,{'searchUser':searchUser}) 
+                    .success(function (data, status, headers, config) {
+                            console.log(data);
+//                        $scope.AllUsers = data;
+                    })
+                    .error(function (data, status, headers, config) {
+                        //this always gets called
+                        console.log(status);
+                    });
+                    return false;   
+                }
+            }
+            
+            
+//            $scope.getUsers     = function(role_id) {
+//                if(role_id!=''){
+//                    var url = "<?php echo $baseUrl?>/admin/getusersbyrole?callback=JSON_CALLBACK";
+//                        $http.post(url,{'role_id':role_id}) 
+//                        .success(function (data, status, headers, config) {
+////                            console.log(data);
+//                            $scope.AllUsers = data;
+//                        })
+//                        .error(function (data, status, headers, config) {
+//                            //this always gets called
+//                            console.log(status);
+//                        });
+//                        return false;   
+//                }else{
+//                    $scope.AllUsers     = [];
+//                }            
+//            }
+
+                
+            
+            
+        });
+      </script>

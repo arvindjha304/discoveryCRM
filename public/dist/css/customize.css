@@ -76,3 +76,21 @@ background-color: #ffe0b3;
 .assigned-head-form-pad{
     padding:0px;
 }
+.box-footer-customize {
+    background-color: #fff;
+    border-bottom-left-radius: 3px;
+    border-bottom-right-radius: 3px;
+    border-top-color: #fff;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    border-top-style: solid;
+    border-top-width: 1px;
+    padding-bottom: 30px;
+    padding-right: 10px;
+}
+.pad-left-3 {
+    padding-left: 30px;
+}
+.marg-top-3 {
+    margin-top: 30px;
+}

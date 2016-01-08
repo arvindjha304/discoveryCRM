@@ -79,7 +79,7 @@ class ApiController extends AbstractActionController
                 $xml = simplexml_load_string($response, "SimpleXMLElement", LIBXML_NOCDATA);
                 $json = json_encode($xml);
                 $array = json_decode($json,false);
-echo '<pre>';print_r($array);exit;
+//echo '<pre>';print_r($array);exit;
                 if(array_key_exists('Resp', $array) && count($array->Resp)){
                    foreach($array->Resp as $leads){
                        
@@ -98,7 +98,7 @@ echo '<pre>';print_r($array);exit;
                                 'address'             => '',
                                 'source_of_enquiry'   => $sourceId,
                                 'budget'              => '',
-                                'project_interested'  => 2,
+                                'project_interested'  => 0,
                                 'requirement'         => $leads->QryDtl->CmpctLabl,
                                 'comp_id'             => $compId,
                                 'is_active'           => 1,
@@ -168,7 +168,7 @@ echo '<pre>';print_r($array);exit;
                                 'address'             => '',
                                 'source_of_enquiry'   => $sourceId,
                                 'budget'              => '',
-                                'project_interested'  => 2,
+                                'project_interested'  => 0,
                                 'requirement'         => $leads->msg,
                                 'comp_id'             => $compId,
                                 'is_active'           => 1,

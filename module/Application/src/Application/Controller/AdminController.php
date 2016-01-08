@@ -579,8 +579,8 @@ class AdminController extends AbstractActionController
     	$baseUrl = $this->getRequest()->getbaseUrl();
         if($this->getRequest()->isXmlHttpRequest()){
            $arrList = $this->getModel()->getLeadList();
-           $table = new TableGateway('source_list',$this->getAdapter());
-           $source_list = $table->select(['is_delete'=>0,'comp_id'=>$this->loggedInUserDetails->comp_id])->toArray();
+//           $table = new TableGateway('source_list',$this->getAdapter());
+//           $source_list = $table->select(['is_delete'=>0,'comp_id'=>$this->loggedInUserDetails->comp_id])->toArray();
             $dataArray = array();
             foreach($arrList as $val1)
             {
@@ -916,8 +916,8 @@ class AdminController extends AbstractActionController
         if($this->getRequest()->isXmlHttpRequest()){
             $id     = $this->params()->fromPost('Id');
             $data = [
-                'source_id'         => $this->params()->fromPost('Source'),
-                'magic_brick_key'   => $this->params()->fromPost('Key'),
+                'source_id'         => trim($this->params()->fromPost('Source')),
+                'magic_brick_key'   => trim($this->params()->fromPost('Key')),
                 'comp_id'           => $this->loggedInUserDetails->comp_id,
                 'last_updated_by'   => $this->loggedInUserDetails->id
             ];
@@ -934,9 +934,9 @@ class AdminController extends AbstractActionController
         if($this->getRequest()->isXmlHttpRequest()){
             $id         = $this->params()->fromPost('Id');
             $data = [
-                'source_id'         => $this->params()->fromPost('Source'),
-                'acres_username'  => $this->params()->fromPost('UserName'),
-                'acres_pswd'      => $this->params()->fromPost('Pswd'),
+                'source_id'         => trim($this->params()->fromPost('Source')),
+                'acres_username'    => trim($this->params()->fromPost('UserName')),
+                'acres_pswd'        => trim($this->params()->fromPost('Pswd')),
                 'comp_id'           => $this->loggedInUserDetails->comp_id,
                 'last_updated_by'   => $this->loggedInUserDetails->id
             ];
@@ -953,8 +953,8 @@ class AdminController extends AbstractActionController
         if($this->getRequest()->isXmlHttpRequest()){
             $id         = $this->params()->fromPost('Id');
             $data = [
-                'sms_user_name'     => $this->params()->fromPost('UserName'),
-                'sms_pswd'          => $this->params()->fromPost('Pswd'),
+                'sms_user_name'     => trim($this->params()->fromPost('UserName')),
+                'sms_pswd'          => trim($this->params()->fromPost('Pswd')),
                 'comp_id'           => $this->loggedInUserDetails->comp_id,
                 'last_updated_by'   => $this->loggedInUserDetails->id
             ];

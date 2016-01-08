@@ -43,6 +43,9 @@ class ApiController extends AbstractActionController
         if($compId!=''){
 //            echo $compId;exit;
             
+            $fdate = date('Y-m-d 00:00:00',strtotime('-1 Days'));
+            $tdate = date('Y-m-d 00:00:00');   
+           
             $nintyNineAcresCredentials = $this->getNintyNineAcresCredentials($compId);
             
             if(count($nintyNineAcresCredentials)){
@@ -55,8 +58,8 @@ class ApiController extends AbstractActionController
                 <query>
                 <user_name>'.$userName.'</user_name>
                 <pswd>'.$password.'</pswd>
-                <start_date>2016-01-05 00:00:00</start_date>
-                <end_date>2016-01-06 00:00:00</end_date>
+                <start_date>'.$fdate.'</start_date>
+                <end_date>'.$tdate.'</end_date>
                 </query>';  
 
                 $url = "http://www.99acres.com/99api/v1/getmy99Response/OeAuXClO43hwseaXEQ/uid/";
@@ -76,13 +79,11 @@ class ApiController extends AbstractActionController
                 $xml = simplexml_load_string($response, "SimpleXMLElement", LIBXML_NOCDATA);
                 $json = json_encode($xml);
                 $array = json_decode($json,false);
-
+echo '<pre>';print_r($array);exit;
                 if(array_key_exists('Resp', $array) && count($array->Resp)){
                    foreach($array->Resp as $leads){
-//                        echo '<pre>';print_r($leads);exit;
+                       
                         $mobile = $leads->CntctDtl->Phone;
-//                        echo $mobile.'<br>';
-    //                        settype($mobile,"float"); 
                         $mobile = base64_encode($mobile);
                         $checkdata = $this->checkIfLeadExists($mobile,$compId);
     //                      echo $checkdata;exit; 

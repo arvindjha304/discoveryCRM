@@ -70,7 +70,61 @@ use Zend\Session\Container;
         $id = $table->lastInsertValue;
         return $id;
     }
+    
+    public function getLeadBySource(){
+        $tableGateway = new TableGateway(['sl'=>'source_list'],$this->getAdapter());
+        $leadArr      = $tableGateway->select(function($select){
+            $select->columns(['sourceName'=>'source_name'])
+                ->join(['ll'=>'lead_list'],'sl.id=ll.source_of_enquiry',['numOfLeads' => new Expression('COUNT(ll.source_of_enquiry)')])
+                ->where(['sl.is_active'=>1,'sl.is_delete'=>0,'sl.comp_id'=>$this->loggedInUserDetails->comp_id,'ll.is_active'=>1,'ll.is_delete'=>0])
+                ->group('ll.source_of_enquiry');
+        })->toArray(); 
+//        echo '<pre>';print_r($leadArr);exit;
+        return $leadArr;
+    }
 	
+    public function getLeadByStatus(){
+        $tableGateway = new TableGateway(['uls'=>'updated_lead_status'],$this->getAdapter());
+        $leadArr      = $tableGateway->select(function($select){
+            $select->columns(['statusName'=>new Expression("IF(uls.status_type=1,IF(uls.interested_type=1,'Site Visit',IF(uls.interested_type=2,'Meeting','Follow Up')),IF(uls.status_type=2,'Not Interested','Not Answering'))"),'numOfLeads'=>new Expression("count(uls.status_type)")])
+                ->join(['ll'=>'lead_list'],'ll.id=uls.lead_id',[])
+                ->where(['uls.comp_id'=>$this->loggedInUserDetails->comp_id])
+                ->group('uls.status_type')
+                ->group('uls.interested_type');
+            
+        })->toArray(); 
+//        echo '<pre>';print_r($leadArr);exit;
+        return $leadArr;
+    }
+		
+    public function getLeadByDays(){
+        
+        $tableGateway = new TableGateway(['ll'=>'lead_list'],$this->getAdapter());
+        $leadArr      = $tableGateway->select(function($select){
+            $oldDate = date('Y-m-j',strtotime( '-7 day' , time()));
+            $select->columns(['punch_date'=>new Expression('DATE_FORMAT(ll.punch_date,"%b %d \'%y")'),'noOfLeads'=>new Expression('count(punch_date)')])
+                    ->group(new Expression('date(punch_date)'))
+                    ->where->between('punch_date', $oldDate, date('Y-m-d'));
+        })->toArray(); 
+//        echo '<pre>';print_r($leadArr);exit;
+        return $leadArr;
+    }
+    
+    		
+    public function getLeadByExecutive(){
+        
+        $tableGateway = new TableGateway(['ul'=>'userlist'],$this->getAdapter());
+        $leadArr      = $tableGateway->select(function($select){
+            $select->columns(['username'])
+                ->join(['cr'=>'company_roles'],'ul.role_id=cr.id',['role_name'])
+                ->join(['al'=>'assigned_lead'],'al.assigned_to=ul.id',['noOfLeads'=>new Expression('count(assigned_to)')])
+                ->where(['ul.is_active'=>1,'ul.is_delete'=>0,'al.is_active'=>1,'ul.comp_id'=>$this->loggedInUserDetails->comp_id])
+                ->group('al.assigned_to');
+        })->toArray(); 
+//        echo '<pre>';print_r($leadArr);exit;
+        return $leadArr;
+    }
+    
     public function getUserList($userId=''){
         $tableGateway = new TableGateway('userlist',$this->getAdapter());
         $userList = $tableGateway->select(function($select) use ($userId){
@@ -178,9 +232,7 @@ use Zend\Session\Container;
                 ->where(['is_delete'=>0,'comp_id'=>$this->loggedInUserDetails->comp_id]);
         if($this->roleRightsArr['seniority']!=1)
             $select->where->greaterThan ('seniority', $this->roleRightsArr['seniority']);
-        
         $select->order('seniority');
-                
         $result = $sql->prepareStatementForSqlObject($select)->execute();
         return $result;
     }
@@ -344,21 +396,6 @@ use Zend\Session\Container;
         if($result>0) return 1; else return 0;
     }
      
-//    public function checkMobile($mobile) {
-//        
-//        $sql = new Sql($this->getAdapter());
-//        $where = new Where();
-//        $where->OR->equalTo('mobile', $mobile);
-////        $where->OR->equalTo('alt_no', $mobile);
-////        $where->OR->equalTo('other_no', $mobile);
-//        
-//        $select = $sql->select()->from('lead_list');
-//        $select->where($where);
-//        $select->where(['is_active'=>1,'is_delete'=>0,'comp_id'=>$this->loggedInUserDetails->comp_id]);
-//        $result = $sql->prepareStatementForSqlObject($select)->execute()->count();
-////        echo $result;exit;
-//        if($result>0) return 1; else return 0;
-//    }
     public function getAssignedLeads(){
         $teamUserArr = $this->getTeamUserArr();
         $tableGateway = new TableGateway('assigned_lead',$this->getAdapter());

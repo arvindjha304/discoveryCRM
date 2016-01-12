@@ -165,6 +165,7 @@ class IndexController extends AbstractActionController
                 $checkUserOTP = $this->getModel()->checkUserOTP(base64_encode($otpcode),$userId);
                 if($checkUserOTP==1){
                     $this->getModel()->getRoleInSession($userDetails->role_id);
+                    
                     $this->getModel()->insertUserHistory($userDetails->id);
                     $roleInSession  = new Container('roleInSession');
                     $roleRightsArr  = $roleInSession->roleRightsArr;

@@ -48,15 +48,26 @@ class AdminController extends AbstractActionController
     {
         $view = new ViewModel();
         $this->layout('layout/layoutadmin');
-        $this->adminpages();
-//        $roleInSession = new Container('roleInSession');
-//        $roleRightsArr  = $roleInSession->roleRightsArr; 
-        
-//         echo '<pre>';print_r($this->roleRightsArr);exit; 
-        
+        $leadByExecutive = $this->getModel()->getLeadByExecutive();
+        $view->setVariable('leadByExecutive', $leadByExecutive);
         return $view;
     }
-     public function userdashboardAction()
+    
+    public function leadbysourceAction() {
+        $leadBySource = $this->getModel()->getLeadBySource();
+        exit(json_encode($leadBySource));
+    }
+    public function leadbystatusAction() {
+        $leadByStatus = $this->getModel()->getLeadByStatus();
+        exit(json_encode($leadByStatus));
+    }
+    
+    public function leadbydaysAction() {
+        $leadByStatus = $this->getModel()->getLeadByDays();
+        exit(json_encode($leadByStatus));
+    }
+    
+    public function userdashboardAction()
     {
         $view = new ViewModel();
         $this->layout('layout/layoutadmin');

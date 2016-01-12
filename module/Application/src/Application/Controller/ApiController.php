@@ -41,8 +41,6 @@ class ApiController extends AbstractActionController
         
         $compId = $this->params()->fromRoute('id1', '');
         if($compId!=''){
-//            echo $compId;exit;
-            
             $fdate = date('Y-m-d 00:00:00',strtotime('-1 Days'));
             $tdate = date('Y-m-d 00:00:00');   
            
@@ -75,11 +73,13 @@ class ApiController extends AbstractActionController
 
                 $context  = stream_context_create($stream_options);
                 $response = file_get_contents($url, null, $context);
-
+                
                 $xml = simplexml_load_string($response, "SimpleXMLElement", LIBXML_NOCDATA);
                 $json = json_encode($xml);
                 $array = json_decode($json,false);
-//echo '<pre>';print_r($array);exit;
+                
+//                echo '<pre>';print_r($array);exit;
+                
                 if(array_key_exists('Resp', $array) && count($array->Resp)){
                    foreach($array->Resp as $leads){
                        
@@ -114,7 +114,7 @@ class ApiController extends AbstractActionController
                         }
                     } 
                 }
-        }
+            }
         }
        exit('99 Acres Lead Added Succesfully');
     }

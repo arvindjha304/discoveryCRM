@@ -1,23 +1,222 @@
 <?php $baseUrl = $this->basePath(); ?>
+ <!-- Content Wrapper. Contains page content -->
+      <div class="content-wrapper">
+        <!-- Content Header (Page header) -->
+        <section class="content-header">
+          <h1>
+            Dashboard
+            <small>Control panel</small>
+          </h1>
+          <ol class="breadcrumb">
+            <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
+            <li class="active">Dashboard</li>
+          </ol>
+        </section>
 
-	  
-<!-- Content Wrapper. Contains page content -->
-<div class="content-wrapper">
-<!-- Content Header (Page header) -->
-<section class="content-header">
-  <h1>
-	Dashboard
-	<small>Control panel</small>
-  </h1>
-  <ol class="breadcrumb">
-	<li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
-	<li class="active">Dashboard</li>
-  </ol>
-</section>
+        <!-- Main content -->
+        <section class="content">
+          <!-- Small boxes (Stat box) -->
+          <!-- /.row -->
+          <!-- Main row -->
+          <div class="row">
+            <!-- Left col -->
+            <section class="col-lg-6 connectedSortable">
+              <!-- Lead by Source-->
+              <div class="nav-tabs-custom">
+                <!-- Tabs within a box -->
+                <ul class="nav nav-tabs pull-right">                  
+                  <li class="pull-left header"><i class="fa fa-inbox"></i> Lead by Source</li>
+                </ul>
+                <div class="tab-content graph-home no-padding" id="Lead_by_Source">
+                  <img src="<?php echo $baseUrl;?>/public/dist/img/ajax-loader.GIF" class="center-block">
+                </div>
+              </div><!-- /Lead by Source -->
 
-<!-- Main content -->
-<section class="content">
-fjh
+              <!-- Lead by Status -->
+             <div class="nav-tabs-custom">
+                <!-- Tabs within a box -->
+                <ul class="nav nav-tabs pull-right">                  
+                  <li class="pull-left header"><i class="fa fa-inbox"></i> Lead by Status</li>
+                </ul>
+                <div class="tab-content graph-home no-padding" id="lead_By_Status">
+                  <img src="<?php echo $baseUrl;?>/public/dist/img/ajax-loader.GIF" class="center-block">
+                </div>
+              </div><!-- /Lead by Status -->
 
-</section><!-- /.content -->
-</div><!-- /.content-wrapper -->
+             <!-- Add new Graph ----------------------------------------------------><!-- /.box -->
+
+             
+
+            </section><!-- /.Left col -->
+            <!-- right col (We are only adding the ID to make the widgets sortable)-->
+            <section class="col-lg-6 connectedSortable">
+
+              <!-- Lead by Day -->
+              <div class="nav-tabs-custom">
+                <!-- Tabs within a box -->
+                <ul class="nav nav-tabs pull-right">                  
+                  <li class="pull-left header"><i class="fa fa-inbox"></i> Lead by Day</li>
+                </ul>
+                <div class="tab-content graph-home no-padding" id="lead_By_Days" >
+                    <img src="<?php echo $baseUrl;?>/public/dist/img/ajax-loader.GIF" class="center-block">
+                </div>
+              </div>
+              <!-- /.box -->
+
+              <!-- Lead by Executive -->
+              <div class="nav-tabs-custom">
+                <!-- Tabs within a box -->
+                <ul class="nav nav-tabs pull-right">                  
+                  <li class="pull-left header"><i class="fa fa-inbox"></i> Lead by Executive</li>
+                </ul>
+                <div class="tab-content no-padding" class="stats-info stats-last widget-shadow" style="width: 500px; height: 250px; margin-left: 10px; overflow-y: scroll;">
+                    
+                    <table class="table stats-table ">
+                        <thead>
+                            <tr>
+                                <th>S.No</th>
+                                <th>Name</th>
+                                <th>Role</th>
+                                <th>Lead Assigned</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php if(count($this->leadByExecutive)){
+                                $ii=1;
+                                foreach($this->leadByExecutive as $leadByExecutive){
+                            ?>
+                                <tr>
+                                    <th scope="row"><?php echo $ii?></th>
+                                    <td><?php echo $leadByExecutive['username']?></td>
+                                    <td><?php echo $leadByExecutive['role_name']?></td>
+                                    <td><?php echo $leadByExecutive['noOfLeads']?></td>
+                                </tr>
+                            <?php
+                               $ii++; }
+                            }?>
+                            <!--    <tr>
+                                    <th scope="row">2</th>
+                                    <td>Aliquam</td>
+                                    <td><span class="label label-warning">New</span></td>
+                                    <td><h5>35% <i class="fa fa-level-up"></i></h5></td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">3</th>
+                                    <td>Lorem ipsum</td>
+                                    <td><span class="label label-danger">Overdue</span></td>
+                                    <td><h5 class="down">40% <i class="fa fa-level-down"></i></h5></td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">4</th>
+                                    <td>Aliquam</td>
+                                    <td><span class="label label-info">Out of stock</span></td>
+                                    <td><h5>100% <i class="fa fa-level-up"></i></h5></td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">5</th>
+                                    <td>Lorem ipsum</td>
+                                    <td><span class="label label-success">In progress</span></td>
+                                    <td><h5 class="down">10% <i class="fa fa-level-down"></i></h5></td>
+                                </tr>-->
+                        </tbody>
+                    </table>
+					
+                </div>
+              </div><!-- /.box -->
+
+              <!-- Add new Graph ----------------------------------------------------><!-- /.box -->
+
+            </section><!-- right col -->
+          </div><!-- /.row (main row) -->
+
+        </section><!-- /.content -->
+      </div><!-- /.content-wrapper -->
+      
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script src="<?php echo $baseUrl;?>/public/plugins/jQuery/jQuery-2.1.4.min.js"></script>
+    <script type="text/javascript">
+
+      // Load the Visualization API and the piechart package.
+      google.load('visualization', '1.0', {'packages':['corechart','bar']});
+
+      // Set a callback to run when the Google Visualization API is loaded.
+        google.setOnLoadCallback(function(){
+            
+            $.post("<?php echo $baseUrl?>/admin/leadbysource", function(returnData, status){
+//                console.log(data);
+                var data = new google.visualization.DataTable();
+                data.addColumn('string', 'Source Name');
+                data.addColumn('number', 'No of Leads');
+                var dataSting = [];
+                if(Object.keys(returnData).length > 0){
+                    $.each( returnData, function( key, value ) {
+                        var tempArr = [value.sourceName,parseInt(value.numOfLeads)];
+                        dataSting.push(tempArr);
+                    });
+                }
+                data.addRows(dataSting);
+                // Set chart options
+                var options = {'title':''};
+                // Instantiate and draw our chart, passing in some options.
+                var chart = new google.visualization.PieChart(document.getElementById('Lead_by_Source'));
+                chart.draw(data, options);
+            },'json');
+        });
+
+      
+      
+        google.setOnLoadCallback(function(){
+            $.post("<?php echo $baseUrl?>/admin/leadbystatus", function(returnData, status){
+//                console.log(data);
+                var dataSting = [['Status Name', 'No of Leads']];
+                if(Object.keys(returnData).length > 0){
+                    $.each( returnData, function( key, value ) {
+                        var tempArr = [value.statusName,parseInt(value.numOfLeads)];
+                        dataSting.push(tempArr);
+                    });
+                }
+                var data = google.visualization.arrayToDataTable(dataSting);      
+                var options = {title: '',pieHole: 0.4, };
+                var chart = new google.visualization.PieChart(document.getElementById('lead_By_Status'));
+                chart.draw(data, options);
+            },'json');
+            
+        });
+     
+    
+        google.setOnLoadCallback(function(){
+            $.post("<?php echo $baseUrl?>/admin/leadbydays", function(returnData, status){
+                var dataSting = [['Last 7 Days', 'No of Leads']];
+                if(Object.keys(returnData).length > 0){
+                    $.each( returnData, function( key, value ) {
+                        var tempArr = [value.punch_date,parseInt(value.noOfLeads)];
+                        dataSting.push(tempArr);
+                    });
+                }
+                var data = google.visualization.arrayToDataTable(dataSting);
+                var options = {chart: {title: '', subtitle: '',}};
+                var chart = new google.charts.Bar(document.getElementById('lead_By_Days'));
+                chart.draw(data, options);
+            
+//                var data = google.visualization.arrayToDataTable([
+//                  ['Year', 'Sales', 'Expenses', 'Profit', 'Profit', 'Sales', 'Expenses', 'Profit', 'Profit'],
+//                  ['2014', 1000, 400, 200, 200, 1000, 400, 200, 200],
+//                  ['2015', 1170, 460, 250, 200, 1000, 400, 200, 200],
+//                  ['2016', 660, 1120, 300, 200, 1000, 400, 200, 200],
+//                  ['2017', 1030, 540, 350, 200, 1000, 400, 200, 200],
+//                  ['2014', 1000, 400, 200, 200, 1000, 400, 200, 200],
+//                  ['2015', 1170, 460, 250, 200, 1000, 400, 200, 200],
+//                  ['2016', 660, 1120, 300, 200, 1000, 400, 200, 200],
+//                ]);
+//
+//                var options = {chart: {title: '',subtitle: '',}};
+//
+//                var chart = new google.charts.Bar(document.getElementById('lead_By_Days'));
+//
+//                chart.draw(data, options);
+
+            },'json');
+        });
+
+    </script>

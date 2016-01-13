@@ -169,10 +169,10 @@ class IndexController extends AbstractActionController
                     $this->getModel()->insertUserHistory($userDetails->id);
                     $roleInSession  = new Container('roleInSession');
                     $roleRightsArr  = $roleInSession->roleRightsArr;
-                    if($roleRightsArr['seniority'] == 1)
+//                    if($roleRightsArr['seniority'] == 1)
                         $this->redirect()->toRoute('application',array('controller'=>'admin','action' => 'dashboard'));
-                    else
-                        $this->redirect()->toRoute('application',array('controller'=>'admin','action' => 'userdashboard'));
+//                    else
+//                        $this->redirect()->toRoute('application',array('controller'=>'admin','action' => 'userdashboard'));
                 }else
                     $view->setVariable ('errorMsg', 'wrongOTP');
             }

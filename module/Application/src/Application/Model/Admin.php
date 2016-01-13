@@ -74,24 +74,67 @@ use Zend\Session\Container;
     public function getLeadBySource(){
         $tableGateway = new TableGateway(['sl'=>'source_list'],$this->getAdapter());
         $leadArr      = $tableGateway->select(function($select){
+            $teamUserArr = $this->getTeamUserArr();
             $select->columns(['sourceName'=>'source_name'])
                 ->join(['ll'=>'lead_list'],'sl.id=ll.source_of_enquiry',['numOfLeads' => new Expression('COUNT(ll.source_of_enquiry)')])
-                ->where(['sl.is_active'=>1,'sl.is_delete'=>0,'sl.comp_id'=>$this->loggedInUserDetails->comp_id,'ll.is_active'=>1,'ll.is_delete'=>0])
-                ->group('ll.source_of_enquiry');
+                ->where(['sl.is_active'=>1,'sl.is_delete'=>0,'sl.comp_id'=>$this->loggedInUserDetails->comp_id,'ll.is_active'=>1,'ll.is_delete'=>0]);
+            
+            if($this->roleRightsArr['seniority']==4){
+                $select->join(['al'=>'assigned_lead'],'ll.id=al.lead_id',[]);
+                $select->where(['al.assigned_to'=>$this->loggedInUserDetails->id]);
+            }elseif($this->roleRightsArr['seniority']==3){
+                $select->join(['al'=>'assigned_lead'],'ll.id=al.lead_id',[]);
+                if(count($teamUserArr)){
+                    $allUserStr = $teamUserArr[0]['teamUsrIds'].','.$this->loggedInUserDetails->id;
+                    $allUserArr = explode(',',$allUserStr);
+                    $select->where->in('al.assigned_to',$allUserArr);
+                }else{
+                    $select->where(['al.assigned_to'=>$this->loggedInUserDetails->id]);
+                }    
+            }
+            
+            
+            $select->group('ll.source_of_enquiry');
         })->toArray(); 
 //        echo '<pre>';print_r($leadArr);exit;
         return $leadArr;
     }
 	
-    public function getLeadByStatus(){
+    public function getLeadByStatus($statusType=''){
         $tableGateway = new TableGateway(['uls'=>'updated_lead_status'],$this->getAdapter());
-        $leadArr      = $tableGateway->select(function($select){
+        $leadArr      = $tableGateway->select(function($select) use($statusType){
+            $teamUserArr = $this->getTeamUserArr();
             $select->columns(['statusName'=>new Expression("IF(uls.status_type=1,IF(uls.interested_type=1,'Site Visit',IF(uls.interested_type=2,'Meeting','Follow Up')),IF(uls.status_type=2,'Not Interested','Not Answering'))"),'numOfLeads'=>new Expression("count(uls.status_type)")])
-                ->join(['ll'=>'lead_list'],'ll.id=uls.lead_id',[])
-                ->where(['uls.comp_id'=>$this->loggedInUserDetails->comp_id])
-                ->group('uls.status_type')
-                ->group('uls.interested_type');
+                ->join(['ll'=>'lead_list'],'ll.id=uls.lead_id',[]);
             
+            if($this->roleRightsArr['seniority']==4){
+                $select->join(['al'=>'assigned_lead'],'uls.lead_id=al.lead_id',[]);
+                $select->where(['al.assigned_to'=>$this->loggedInUserDetails->id]);
+            }elseif($this->roleRightsArr['seniority']==3){
+                $select->join(['al'=>'assigned_lead'],'uls.lead_id=al.lead_id',[]);
+                if(count($teamUserArr)){
+                    $allUserStr = $teamUserArr[0]['teamUsrIds'].','.$this->loggedInUserDetails->id;
+                    $allUserArr = explode(',',$allUserStr);
+                    $select->where->in('al.assigned_to',$allUserArr);
+                }else{
+                    $select->where(['al.assigned_to'=>$this->loggedInUserDetails->id]);
+                }    
+            }   
+            
+            if($statusType=='today'){
+                $oldDate = date('Y-m-j',strtotime( '-1 day' , time()));
+                $futureDate = date('Y-m-j',strtotime( '+1 day' , time()));
+
+    //            $today = '2016-01-22' ;
+    //            $oldDate = date('Y-m-j',strtotime( '-1 day' , strtotime($today)));
+    //            $futureDate = date('Y-m-j',strtotime( '+1 day' , strtotime($today)));
+    //            echo $oldDate.'======='.$futureDate;exit;
+                $select->where->between('uls.date_time_value', $oldDate, $futureDate);
+            }
+            
+            $select->where(['uls.comp_id'=>$this->loggedInUserDetails->comp_id,'uls.is_active'=>1])
+                    ->group('uls.status_type')
+                    ->group('uls.interested_type');
         })->toArray(); 
 //        echo '<pre>';print_r($leadArr);exit;
         return $leadArr;
@@ -101,9 +144,23 @@ use Zend\Session\Container;
         
         $tableGateway = new TableGateway(['ll'=>'lead_list'],$this->getAdapter());
         $leadArr      = $tableGateway->select(function($select){
+            $teamUserArr = $this->getTeamUserArr();
             $oldDate = date('Y-m-j',strtotime( '-7 day' , time()));
-            $select->columns(['punch_date'=>new Expression('DATE_FORMAT(ll.punch_date,"%b %d \'%y")'),'noOfLeads'=>new Expression('count(punch_date)')])
-                    ->group(new Expression('date(punch_date)'))
+            $select->columns(['punch_date'=>new Expression('DATE_FORMAT(ll.punch_date,"%b %d \'%y")'),'noOfLeads'=>new Expression('count(punch_date)')]);
+            if($this->roleRightsArr['seniority']==4){
+                $select->join(['al'=>'assigned_lead'],'ll.id=al.lead_id',[]);
+                $select->where(['al.assigned_to'=>$this->loggedInUserDetails->id]);
+            }elseif($this->roleRightsArr['seniority']==3){
+                $select->join(['al'=>'assigned_lead'],'ll.id=al.lead_id',[]);
+                if(count($teamUserArr)){
+                    $allUserStr = $teamUserArr[0]['teamUsrIds'].','.$this->loggedInUserDetails->id;
+                    $allUserArr = explode(',',$allUserStr);
+                    $select->where->in('al.assigned_to',$allUserArr);
+                }else{
+                    $select->where(['al.assigned_to'=>$this->loggedInUserDetails->id]);
+                }    
+            }
+            $select->group(new Expression('date(punch_date)'))
                     ->where->between('punch_date', $oldDate, date('Y-m-d'));
         })->toArray(); 
 //        echo '<pre>';print_r($leadArr);exit;
@@ -250,9 +307,7 @@ use Zend\Session\Container;
                 $dataArray[]    = $tempArr;
             }
         }
-        
 //        echo '<pre>';print_r($dataArray);exit;
-        
         return json_encode($dataArray);
     }
     
@@ -374,9 +429,7 @@ use Zend\Session\Container;
                $dataArray[]     = $tempArr;
             }
         }
-        
 //        echo '<pre>';print_r($dataArray);exit;
-        
         return json_encode($dataArray);;
     }
     

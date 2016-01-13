@@ -46,10 +46,34 @@ class AdminController extends AbstractActionController
     }
     public function dashboardAction()
     {
+        
+//        $this->getModel()->getLeadByDays();
+//        exit;
+        
         $view = new ViewModel();
         $this->layout('layout/layoutadmin');
         $leadByExecutive = $this->getModel()->getLeadByExecutive();
         $view->setVariable('leadByExecutive', $leadByExecutive);
+        
+        
+        
+        
+        $leadByStatus = $this->getModel()->getLeadByStatus('today');
+        $statusArr = [];
+        if(count($leadByStatus)){
+            foreach($leadByStatus as $leads){
+                 
+                if($leads['statusName']=='Site Visit') $statusArr['SiteVisit'] = $leads['numOfLeads'];
+                if($leads['statusName']=='Meeting') $statusArr['Meeting'] = $leads['numOfLeads'];
+                if($leads['statusName']=='Follow Up') $statusArr['FollowUp'] = $leads['numOfLeads'];
+                
+            }
+        }
+        
+        
+//        echo '<pre>';print_r($leadByStatus);exit; 
+        
+        $view->setVariable('leadByStatus', $statusArr);
         return $view;
     }
     

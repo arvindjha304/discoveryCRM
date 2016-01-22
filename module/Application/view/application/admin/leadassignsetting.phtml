@@ -1,0 +1,115 @@
+<?php $baseUrl = $this->basePath(); ?>
+
+	  
+<!-- Content Wrapper. Contains page content -->
+    <div class="content-wrapper">
+      <!-- Content Header (Page header) -->
+      <section class="content-header">
+        <h1>
+          Auto Lead Assign
+          <small>&nbsp;</small>
+        </h1>
+        <ol class="breadcrumb">
+          <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
+          <!---<li>&nbsp;</li>--->
+          <li class="active">Auto Lead Assign</li>
+        </ol>
+      </section>
+
+      <!-- Main content -->
+      <section class="content">
+        <div class="row">
+          <div class="col-md-12">
+            <div class="box box-info">
+              <div class="box-header">
+                <h3 class="box-title">&nbsp; <small>&nbsp;</small></h3>                  
+              </div><!-- /.box-header -->
+              <div class="box-body pad">
+    
+                <div class="row" style="margin-bottom:20px;">
+                  <div class="col-xs-12 col-sm-12 col-md-6">
+                    <!-- jQuery Knob -->
+                    <div class="box-solid hidden-div">               
+                      <div class="box-body">
+                        <div class="row">
+                          <div class="col-md-6 col-sm-6 col-xs-6 show-interested" style="padding-left: 20px;">
+                              <input type="radio" name="LeadAssignType" value="0" class="minimal" <?php 
+                              if(count($this->company_settings)){
+                                  if($this->company_settings[0]['lead_auto_assign'] == 0) echo 'checked';
+                              }?>> Manual  
+                          </div><!-- ./col -->
+                          <div class="col-md-6 col-sm-6 col-xs-6 show-not-interested" style="padding-left: 20px;">
+                            <input type="radio" name="LeadAssignType" value="1" class="minimal" <?php 
+                              if(count($this->company_settings)){
+                                  if($this->company_settings[0]['lead_auto_assign'] == 1) echo 'checked';
+                              }?>> Automatic
+                          </div><!-- ./col -->                                                     
+                        </div><!-- /.row -->
+                      </div><!-- /.box-body -->
+                    </div><!-- /.box -->
+                  </div><!-- /.col -->
+                </div>
+                  
+                 
+            <div class="clearfix">&nbsp;</div>
+            <div id="sourceUserList" style="<?php 
+                              if(count($this->company_settings)){
+                                  if($this->company_settings[0]['lead_auto_assign'] == 0) echo 'display:none';
+                              }?>">
+        <?php foreach($this->sourcetList as $source){?>
+        
+       <div class="col-md-3 col-sm-6 col-xs-6 show-interested" >
+            <div class="form-group-custom">
+                <label>Source</label><br>
+                <?php echo $source['source_name'];?>                         
+            </div><!-- /.form-group -->                      
+        </div><!-- ./col -->
+        <div class="col-md-3 col-sm-6 col-xs-6 show-not-interested">
+          <div class="form-group-custom">
+                    <label>User</label>
+                    <select style="width: 100%;" class="form-control select2 select2-hidden-accessible" tabindex="-1" aria-hidden="true" onchange="return assignAutoLeadToUser(this.value);">
+                      <option >Select User</option>
+                      <?php foreach ($this->userList as $value) { ?>
+                      <option value="<?php echo $source['id'].'##'.$value['id'];?>" 
+                       <?php if(isset($this->autoAssignSourceUser[$source['id']])){
+                          if($this->autoAssignSourceUser[$source['id']] == $value['id']) echo 'selected';
+                        }?>>
+                          <?php echo $value['username'].' ('.$value['role_name'].')';?>
+                      </option>
+                      <?php    }?>
+                      
+                    </select>
+                            </div><!-- /.form-group -->                  
+        </div><!-- ./col -->
+       <div class="col-md-6">&nbsp;</div><!-- ./col -->
+       <div class="clearfix">&nbsp;</div>
+
+        <?php }?>
+    </div>  
+     
+    </div>
+    
+  </div><!-- /.box -->
+          </div><!-- /.col-->
+        </div><!-- ./row -->
+      </section><!-- /.content -->
+    </div><!-- /.content-wrapper -->
+
+    <script src="<?php echo $baseUrl;?>/public/plugins/jQuery/jQuery-2.1.4.min.js"></script>
+    <script>
+    $('[name=LeadAssignType]').click(function(){
+//        alert($(this).val());
+        var value = $(this).val();
+        if(value==1)
+            $('#sourceUserList').show('slow');
+        else
+           $('#sourceUserList').hide('slow'); 
+       
+        $.post('<?php echo $baseUrl?>/admin/autoleadassign', {value:value,action:'LeadAssignType'}) ;
+    });
+    
+    function assignAutoLeadToUser(value){
+        $.post('<?php echo $baseUrl?>/admin/autoleadassign', {value:value,action:'assignAutoLeadToUser'}) ;
+    }
+    </script>
+

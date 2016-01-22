@@ -13,7 +13,7 @@ use Zend\Authentication\AuthenticationService;
 use Zend\Session\Container;
 
 
- class Admin extends AbstractTableGateway implements ServiceLocatorAwareInterface {
+class Admin extends AbstractTableGateway implements ServiceLocatorAwareInterface {
 
 	protected $serviceLocator;
 	protected $tableGateway;
@@ -24,8 +24,7 @@ use Zend\Session\Container;
     public function getAdapter() {
         return $this->serviceLocator->get('Zend\Db\Adapter\Adapter');
     }
-    public function __construct(AbstractTableGateway $tableGateway)
-    {
+    public function __construct(AbstractTableGateway $tableGateway){
         $this->tableGateway = $tableGateway;
         $auth = new AuthenticationService();
         $this->loggedInUserDetails = $auth->getIdentity(); 
@@ -139,7 +138,21 @@ use Zend\Session\Container;
 //        echo '<pre>';print_r($leadArr);exit;
         return $leadArr;
     }
-		
+	
+    
+    public function getFollowUpMissed() {
+        $tableGateway = new TableGateway(['uls'=>'updated_lead_status'],$this->getAdapter());
+        $select = $tableGateway->select(function($select){
+            $select->columns(['followUpMissed'=>new Expression('count(uls.date_time_value)')]);
+            $followUpMissedDate = date('Y-m-j',strtotime( '-1 day' , time()));
+            $oldDate = date('Y-m-j',strtotime( '-1 day' , strtotime($followUpMissedDate)));
+            $futureDate = date('Y-m-j',strtotime( '+1 day' , strtotime($followUpMissedDate)));
+            $select->where->between('uls.date_time_value', $oldDate, $futureDate);
+            $select->where(['uls.comp_id'=>$this->loggedInUserDetails->comp_id,'uls.is_active'=>1]);
+        })->toArray();
+//        echo '<pre>';print_r($select);exit;
+        return $select;
+    }
     public function getLeadByDays(){
         
         $tableGateway = new TableGateway(['ll'=>'lead_list'],$this->getAdapter());
@@ -172,11 +185,23 @@ use Zend\Session\Container;
         
         $tableGateway = new TableGateway(['ul'=>'userlist'],$this->getAdapter());
         $leadArr      = $tableGateway->select(function($select){
+            $teamUserArr = $this->getTeamUserArr();
             $select->columns(['username'])
                 ->join(['cr'=>'company_roles'],'ul.role_id=cr.id',['role_name'])
                 ->join(['al'=>'assigned_lead'],'al.assigned_to=ul.id',['noOfLeads'=>new Expression('count(assigned_to)')])
-                ->where(['ul.is_active'=>1,'ul.is_delete'=>0,'al.is_active'=>1,'ul.comp_id'=>$this->loggedInUserDetails->comp_id])
-                ->group('al.assigned_to');
+                ->where(['ul.is_active'=>1,'ul.is_delete'=>0,'al.is_active'=>1,'ul.comp_id'=>$this->loggedInUserDetails->comp_id]);
+                if($this->roleRightsArr['seniority']==4){
+                    $select->where(['al.assigned_to'=>$this->loggedInUserDetails->id]);
+                }elseif($this->roleRightsArr['seniority']==3){
+                    if(count($teamUserArr)){
+                        $allUserStr = $teamUserArr[0]['teamUsrIds'].','.$this->loggedInUserDetails->id;
+                        $allUserArr = explode(',',$allUserStr);
+                        $select->where->in('al.assigned_to',$allUserArr);
+                    }else{
+                        $select->where(['al.assigned_to'=>$this->loggedInUserDetails->id]);
+                    }    
+                }
+                $select->group('al.assigned_to');
         })->toArray(); 
 //        echo '<pre>';print_r($leadArr);exit;
         return $leadArr;
@@ -378,6 +403,16 @@ use Zend\Session\Container;
         return $result;
     }
 	
+    public function getSourceList(){
+        
+        $table = new TableGateway('source_list',$this->getAdapter());
+        $sourcetList = $table->select(function($select) {
+            $select->join(['ul'=>'userlist'],'ul.id=source_list.last_updated_by',['lastUpdatedBy'=>'username'])
+                    ->where(['source_list.is_delete'=>0,'source_list.comp_id'=>$this->loggedInUserDetails->comp_id]);
+        })->toArray();
+        return $sourcetList;
+    }
+    
     public function getSourceDetail($sourceId){
         
         $sql = new Sql($this->getAdapter());
@@ -456,11 +491,11 @@ use Zend\Session\Container;
             $onExpression = new Expression('uls.lead_id=ll.id AND uls.is_active = 1');
             $select->join(['ll'=>'lead_list'],'assigned_lead.lead_id=ll.id',['lead_id'=>'id','customer_name','mobile','created_by','punchDate'=>'punch_date'])
                     ->join(['pl'=>'project_list'],'pl.id=ll.project_interested',['project_name'],'left')
-                    ->join(['sl'=>'source_list'],'sl.id=ll.source_of_enquiry',['source_name'])
+                    ->join(['sl'=>'source_list'],'sl.id=ll.source_of_enquiry',['source_name'],'left')
                     ->join(['uls'=>'updated_lead_status'],$onExpression,['next_meeting'=>'date_time_value','lead_status'=>'status_type','last_feedback','status_type','interested_type','client_type'],'left')
-                    ->join(['usrAsg'=>'userlist'],'usrAsg.id=assigned_lead.assigned_to',['assignedTo'=>'username'])
-                    ->join(['asby'=>'userlist'],'asby.id=assigned_lead.assigned_by',['assignedBy'=>'username'])
-                    ->join(['usrOpn'=>'userlist'],'usrOpn.id=ll.created_by',['openBy'=>'username']);
+                    ->join(['usrAsg'=>'userlist'],'usrAsg.id=assigned_lead.assigned_to',['assignedTo'=>'username'],'left')
+                    ->join(['asby'=>'userlist'],'asby.id=assigned_lead.assigned_by',['assignedBy'=>'username'],'left')
+                    ->join(['usrOpn'=>'userlist'],'usrOpn.id=ll.created_by',['openBy'=>'username'],'left');
             
             $select->where(['ll.is_delete'=>0,'ll.comp_id'=>$this->loggedInUserDetails->comp_id,'assigned_lead.is_active'=>1]);
             if($this->roleRightsArr['seniority']==4){
@@ -571,7 +606,61 @@ use Zend\Session\Container;
         $smsApiData = $tableGateway->select(['comp_id'=>$this->loggedInUserDetails->comp_id])->toArray();
         return $smsApiData;
     }
+    public function setLeadAssigntype($request) {
+        $table = new TableGateway('company_settings',$this->getAdapter());
+        $company_settings = $table->select(['comp_id'=>$this->loggedInUserDetails->comp_id])->toArray();
+        $data = array(
+            'comp_id' => $this->loggedInUserDetails->comp_id,
+            'lead_auto_assign' => $request['value']
+        );
+        if(count($company_settings)==0){
+            $this->insertanywhere('company_settings', $data);
+        }else{
+            $this->updateanywhere('company_settings', $data, ['comp_id'=>$this->loggedInUserDetails->comp_id]);
+        }
+        return 1;
+    }
     
+    public function assignAutoLeadToUser($request) {
+        
+        $idArr = explode('##',$request['value']);
+//         echo '<pre>';print_r($idArr);exit; 
+        $sourceId  = $idArr[0];
+        $userId    = $idArr[1];
+        $table = new TableGateway('auto_assign_source_user',$this->getAdapter());
+        $where = [
+            'source_id' => $sourceId,
+            'comp_id'   => $this->loggedInUserDetails->comp_id
+        ];
+        
+        $auto_assign_source_user = $table->select($where)->toArray();
+        $data = array(
+            'source_id' => $sourceId,
+            'user_id'   => $userId,
+            'comp_id'   => $this->loggedInUserDetails->comp_id,
+            'assign_date' => date('Y-m-d')
+        );
+        if(count($auto_assign_source_user)==0){
+            $this->insertanywhere('auto_assign_source_user', $data);
+        }else{
+            $this->updateanywhere('auto_assign_source_user', $data, $where);
+        }
+        return 1;
+    }
+    
+    public function autoAssignSourceUserList() {
+        
+        $table = new TableGateway('auto_assign_source_user',$this->getAdapter());
+        $auto_assign_source_user = $table->select(['comp_id'   => $this->loggedInUserDetails->comp_id])->toArray();
+//        echo '<pre>';print_r($auto_assign_source_user);exit; 
+        $tempArr = [];
+        if(count($auto_assign_source_user)){
+            foreach ($auto_assign_source_user as $source_user)
+                $tempArr[$source_user['source_id']] = $source_user['user_id'];
+        }
+//        echo '<pre>';print_r($tempArr);exit; 
+        return $tempArr;
+    }
     
     
 }

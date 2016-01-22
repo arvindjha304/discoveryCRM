@@ -58,11 +58,11 @@ class Module implements AutoloaderProviderInterface, ConfigProviderInterface, Vi
                     $table = new Model\Admin($tableGateway);
                     return $table;
                 },
-//              'Application\Model\User' =>  function($sm) {
-//                  $tableGateway = $sm->get('GetTableGateway');
-//                  $table = new Model\User($tableGateway);
-//                  return $table;
-//    		},        
+              'Application\Model\Api' =>  function($sm) {
+                  $tableGateway = $sm->get('GetTableGateway');
+                  $table = new Model\Api($tableGateway);
+                  return $table;
+    		},        
                 'GetTableGateway' => function($sm){
                     $dbAdapter = $sm->get('Zend\Db\Adapter\Adapter');
                     return new TableGateway('otp_codes', $dbAdapter, null);

@@ -46,19 +46,14 @@ class AdminController extends AbstractActionController
     }
     public function dashboardAction()
     {
-        
-//        $this->getModel()->getLeadByDays();
-//        exit;
-        
         $view = new ViewModel();
         $this->layout('layout/layoutadmin');
         $leadByExecutive = $this->getModel()->getLeadByExecutive();
         $view->setVariable('leadByExecutive', $leadByExecutive);
         
-        
-        
-        
-        $leadByStatus = $this->getModel()->getLeadByStatus('today');
+        $leadByStatus   = $this->getModel()->getLeadByStatus('today');
+        $followUpMissed = $this->getModel()->getFollowUpMissed();
+        $view->setVariable('followUpMissed', $followUpMissed);
         $statusArr = [];
         if(count($leadByStatus)){
             foreach($leadByStatus as $leads){
@@ -69,10 +64,7 @@ class AdminController extends AbstractActionController
                 
             }
         }
-        
-        
 //        echo '<pre>';print_r($leadByStatus);exit; 
-        
         $view->setVariable('leadByStatus', $statusArr);
         return $view;
     }
@@ -107,10 +99,7 @@ class AdminController extends AbstractActionController
          $postdata = file_get_contents("php://input");
         $request = json_decode($postdata);
         if(count($request)){
-            
 //            echo '<pre>';print_r($request);exit; 
-            
-            
             $useremail  = $request->useremail;
             if($useremail!='')
               echo $this->getModel()->checkUserEmail($useremail);
@@ -199,9 +188,6 @@ class AdminController extends AbstractActionController
     	$baseUrl = $this->getRequest()->getbaseUrl();
         if($this->getRequest()->isXmlHttpRequest()){
             $arrList = $this->getModel()->getUserList();
-            
-            
-            
             $dataArray = array();
             foreach($arrList as $val1)
             {
@@ -261,9 +247,9 @@ class AdminController extends AbstractActionController
     		'id'	=> 	$id,
     	); 
     	if($action=='delete'){
-    		$this->getModel()->deleteanywhere($table,$where);
+            $this->getModel()->deleteanywhere($table,$where);
     	}else{
-    		$this->getModel()->updateanywhere($table,$data,$where);
+            $this->getModel()->updateanywhere($table,$data,$where);
     	}
         return 1;
     }
@@ -297,7 +283,6 @@ class AdminController extends AbstractActionController
     public function manageAddEditRoles($formData,$roleRightsArr) {
         
 //        echo '<pre>';print_r($formData);exit;
-        
         $roleId             =   (isset($formData['roleId']) ?  $formData['roleId'] : '');
         $roleRightsFormArr  =   $formData['roleRights'];
         $roleName           =   $formData['roleName'];
@@ -429,11 +414,7 @@ class AdminController extends AbstractActionController
             $projectList = $table->select(function($select) {
                 $select->join(['ul'=>'userlist'],'ul.id=project_list.last_updated_by',['lastUpdatedBy'=>'username'])
                         ->where(['project_list.is_delete'=>0,'project_list.comp_id'=>$this->loggedInUserDetails->comp_id]);
-                
                 })->toArray();
-            
-//            $projectList = $table->select(['is_delete'=>0,'comp_id'=>$this->loggedInUserDetails->comp_id])->toArray();
-            
 //            echo '<pre>';print_r($projectList);exit;
             $dataArray = array();
             foreach($projectList as $val1)
@@ -475,7 +456,6 @@ class AdminController extends AbstractActionController
             $sourceDetail = $this->getModel()->getSourceDetail($sourceId);
             $view->setVariable('sourceDetail', json_encode($sourceDetail));
         }
-        
         if($this->getRequest()->isPost()){
 //          echo '<pre>';print_r($this->params()->fromPost());exit;
             $sourceId   = $this->params()->fromPost('sourceId');
@@ -502,15 +482,7 @@ class AdminController extends AbstractActionController
         }
         
         if($this->getRequest()->isXmlHttpRequest()){
-            //$arrList = $this->getModel()->getUserList();
-            $table = new TableGateway('source_list',$this->getAdapter());
-//            $select = $table->select(['is_delete'=>0,'comp_id'=>$this->loggedInUserDetails->comp_id])->toArray();
-
-            
-            $sourcetList = $table->select(function($select) {
-                $select->join(['ul'=>'userlist'],'ul.id=source_list.last_updated_by',['lastUpdatedBy'=>'username'])
-                        ->where(['source_list.is_delete'=>0,'source_list.comp_id'=>$this->loggedInUserDetails->comp_id]);
-            })->toArray();
+            $sourcetList = $this->getModel()->getSourceList();
 //            echo '<pre>';print_r($sourcetList);exit;
             $dataArray = array();
             foreach($sourcetList as $val1)
@@ -563,10 +535,7 @@ class AdminController extends AbstractActionController
             if($this->getRequest()->isPost()){
 //                echo '<pre>';print_r($this->params()->fromPost());exit;   
                 
-                $formData = $this->params()->fromPost();
-                
-                
-                
+               $formData = $this->params()->fromPost();
                $leadId = $formData['leadId']; 
                $data = [
                   'customer_name'       => $formData['CustomerName'],
@@ -614,6 +583,9 @@ class AdminController extends AbstractActionController
     	$baseUrl = $this->getRequest()->getbaseUrl();
         if($this->getRequest()->isXmlHttpRequest()){
            $arrList = $this->getModel()->getLeadList();
+           
+//           echo '<pre>';print_r($arrList);exit;  
+           
 //           $table = new TableGateway('source_list',$this->getAdapter());
 //           $source_list = $table->select(['is_delete'=>0,'comp_id'=>$this->loggedInUserDetails->comp_id])->toArray();
             $dataArray = array();
@@ -640,6 +612,59 @@ class AdminController extends AbstractActionController
             exit('{rows:'.$json.'}');
         }
         return $view;  
+    }
+    
+        
+    public function uploadAction() {
+        $baseurl = $this->getRequest()->getbaseUrl();
+        if (is_uploaded_file($_FILES['uploadfile']['tmp_name'])) {
+            $handle = fopen($_FILES['uploadfile']['tmp_name'], "r");
+            $count=0;
+            $leadSuccessCount=0;
+            while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
+                if($count==0){
+                    if($data[0]!='Customer Name' || $data[1]!='Mobile' || $data[2]!='Email' || $data[3]!='Requirement' || $data[4]!='Punch Date')
+                        exit('Data Format Not Correct. Please Download Template CSV File.');
+                }
+                if($count!=0){
+                    if($data[0]!='' && $data[1]!=''){
+                        $mobile = base64_encode($data[1]);
+                        $mobileExist = $this->getModel()->checkMobile($mobile);
+                        if($mobileExist==0){
+                            $tempArr = [
+                                'customer_name'       => ucwords($data[0]),
+                                'mobile'              => $mobile,
+                                'alt_no'              => '',
+                                'other_no'            => '',
+                                'email'               => $data[2],
+                                'address'             => '',
+                                'source_of_enquiry'   => 3,
+                                'budget'              => '',
+                                'project_interested'  => 0,
+                                'requirement'         => $data[3],
+                                'comp_id'             => $this->loggedInUserDetails->comp_id,
+                                'is_active'           => 1,
+                                'is_delete'           => 0,
+                                'created_by'          => $this->loggedInUserDetails->id,
+                                'last_updated_by'     => $this->loggedInUserDetails->id,
+                                'last_updated'        => date('Y-m-d H:i:s'),
+                                'punch_date'          => date('Y-m-d H:i:s', strtotime($data[4])),
+                                'date_created'        => date('Y-m-d H:i:s')
+                            ];
+    //                      echo '<pre>';print_r($tempArr);exit;
+                            $this->getModel()->insertanywhere('lead_list', $tempArr); 
+                            $leadSuccessCount++; 
+                        }
+                    }
+                }
+//                echo '<pre>';print_r($data);
+                $count++;
+            }
+            fclose($handle);
+            exit($leadSuccessCount." out of ".($count-1)." Leads Added Successfully.");
+//            exit("Lead Uploaded Successfully.");
+        }
+        exit;
     }
     
     public function getusersbyroleAction(){
@@ -790,7 +815,6 @@ class AdminController extends AbstractActionController
             $kk=1;
             foreach($arrList as $val1)
             {
-//         	    echo '<pre>';print_r($val1);exit;
                 $reassignView = ($val1['is_reassigned']==1) ? '<br><span class="label label-danger" onclick="return reassignView(\''.$val1['lead_id'].'\')">Reassign View</span>' : '';
                 $customer_name          =   $val1['customer_name'].$reassignView;
                 $mobile                 =   base64_decode($val1['mobile']);
@@ -836,6 +860,42 @@ class AdminController extends AbstractActionController
             exit('{rows:'.$json.'}');
         }
         return $view;  
+    }
+    
+    public function leadassignsettingAction() {    
+        $view = new ViewModel();
+        $this->layout('layout/layoutadmin');
+        $sourcetList = $this->getModel()->getSourceList();
+//        echo '<pre>';print_r($sourcetList);exit;
+        $view->setVariable('sourcetList', $sourcetList);
+        
+        
+        $userList = $this->getModel()->getUserList();
+//        echo '<pre>';print_r($userList);exit;
+        $view->setVariable('userList', $userList);
+        
+        $table = new TableGateway('company_settings',$this->getAdapter());
+        $select = $table->select(['comp_id'   => $this->loggedInUserDetails->comp_id])->toArray();
+//        echo '<pre>';print_r($select);exit;
+        
+        $view->setVariable('company_settings', $select);
+        
+        $autoAssignSourceUser = $this->getModel()->autoAssignSourceUserList();
+        $view->setVariable('autoAssignSourceUser', $autoAssignSourceUser);
+        return $view;
+    }
+    
+    public function autoleadassignAction() {
+        
+        $request = $this->params()->fromPost();
+        if(count($request)){
+            if($request['action']=='LeadAssignType'){
+                $this->getModel()->setLeadAssigntype($request);
+            }else{
+                $this->getModel()->assignAutoLeadToUser($request);
+            }
+        }
+        exit;  
     }
     
     public function assignleadstouserAction(){

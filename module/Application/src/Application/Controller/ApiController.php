@@ -26,15 +26,53 @@ class ApiController extends AbstractActionController
     public function getAdapter(){
         return $this->getServiceLocator()->get('Zend\Db\Adapter\Adapter');
     }
-    public function getModel(){
-        return  $this->getServiceLocator()->get('Application\Model\Index');
-    }
     
     public function indexAction()
     {
-//        echo 'hii';
+//      echo 'hii';
         exit;
+    }
+    
+    public function autoleadassignAction() {
+//      check company_settings if lead auto assign = 1
+//	get all from auto_assign_source_user
+//	loop{
+//          get all lead of current source id from lead list
+//          check if lead assigned to user
+//          assign it to user
+//	}
         
+        $companySettings = $this->getModel()->getCompanySettings();
+        if(count($companySettings)){
+            foreach ($companySettings as $company){
+                $compId = $company['comp_id'];
+                $lead_auto_assign = $company['lead_auto_assign'];
+                if($lead_auto_assign==1){
+                    $autoAssignSourceUser = $this->getModel()->auto_assign_source_user($compId);
+                    if(count($autoAssignSourceUser)){
+                        foreach ($autoAssignSourceUser as $autoAssign){
+                            $source_id      = $autoAssign['source_id'];
+                            $user_id        = $autoAssign['user_id'];
+                            
+//                            echo $source_id.'========';
+                            
+                            $leadList = $this->getModel()->getSourceLeads($source_id,$compId);
+                            
+//                            echo '<pre>';print_r($leadList);
+                            
+                            if(count($leadList)){
+                                foreach($leadList as $leads){
+                                    $lead_id = $leads['id'];
+                                    $this->getModel()->assignLeadToUser($lead_id,$user_id,$compId);
+                                }
+                            } 
+                        } 
+                    }   
+                }
+
+            }
+        }
+        exit('Lead Assgned Successfully');
     }
     
     public function nintynineacresapiAction() {
@@ -148,15 +186,9 @@ class ApiController extends AbstractActionController
 //                        echo '<pre>';print_r($leads);exit;
                         $mobile = $leads->mobile;
 //                        settype($mobile,"float"); 
-                        
-                        
                         $mobile = base64_encode($mobile);
-                        
                         $checkdata = $this->checkIfLeadExists($mobile,$compId);
-                        
 //                      echo $checkdata;exit;  
-                        
-                        
                         if($checkdata == 0)
                         { 
                             $data = [
@@ -220,6 +252,10 @@ class ApiController extends AbstractActionController
         $db = $this->getServiceLocator()->get('Zend\Db\Adapter\Adapter');
         $table = new TableGateway($mytable, $db);
         $results = $table->insert($data);
+    }
+    
+    public function getModel(){
+        return  $this->getServiceLocator()->get('Application\Model\Api');
     }
     
 

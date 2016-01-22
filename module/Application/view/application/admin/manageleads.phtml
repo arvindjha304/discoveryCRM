@@ -13,6 +13,11 @@
 <script type="text/javascript" src="<?php echo $baseUrl;?>/public/dhtmlxgrid/codebase/dhtmlxgridcell.js" ></script>
 <script type="text/javascript" src="<?php echo $baseUrl;?>/public/dhtmlxgrid/codebase/ext/dhtmlxgrid_filter.js" ></script>
 <script type="text/javascript" src="<?php echo $baseUrl;?>/public/dhtmlxgrid/codebase/ext/dhtmlxgrid_pgn.js"></script>
+
+
+
+<script src="//code.jquery.com/jquery-1.10.2.js"></script>
+<script src="<?php echo $baseUrl;?>/public/dist/js/ajaxupload.3.5.js"></script>
 	  
 <!-- Content Wrapper. Contains page content -->
 <div class="content-wrapper">
@@ -96,7 +101,10 @@
                   </div>
                   </div>
                   <div class="col-md-1 text-right"><button class="btn btn-primary" type="submit" onclick="bulkaction()"> Apply </button></div>
+                  <div class="col-md-1 text-right"><button class="btn btn-primary" type="button" id="uploadCSV"> Upload CSV </button></div>
+                  <span id="uploadCSVstatus" style="color:red;margin-left: 20px;font-size: 17px;"></span>
                 </div>
+                
               </div><!-- /.box -->
             </div><!-- /.col -->
           </div><!-- /.row -->
@@ -173,7 +181,68 @@
 //		}) ;
 //	}
 	
-	
+    
+        $(function(){
+            var btnUpload=$('#uploadCSV');
+            var status=$('#uploadCSVstatus');
+            
+            var url='<?php echo $baseUrl ?>';
+            var SITEROOT=url+"/admin/upload";
+            new AjaxUpload(btnUpload,
+            {
+                action: SITEROOT,
+                name:'uploadfile' ,
+                onSubmit: function(file, ext){
+//                    if (! (ext && /^(jpg|png|jpeg|gif)$/.test(ext))){
+                    if (! (ext && /^(csv)$/.test(ext))){
+                        // extension is not allowed
+//                        alert('not csv file');
+                        status.text('Only CSV files are allowed');
+                        return false;
+                    }
+                    status.text('Uploading...');
+                },
+                onComplete: function(file, response){
+                    //On completion clear the status
+                    status.text(response);
+                }
+            });
+        });
+
+//       function ajaxUpload(btnUpload,status,id){
+//            var url='<?php echo $baseUrl ?>';
+//            var SITEROOT=url+"/backend/admin/upload";
+//            new AjaxUpload(btnUpload,
+//            {
+//                action: SITEROOT,
+//                name:'uploadfile' ,
+//                onSubmit: function(file, ext){
+//                    if (! (ext && /^(jpg|png|jpeg|gif)$/.test(ext))){
+//                        // extension is not allowed
+//                        status.text('Only JPG, PNG or GIF files are allowed');
+//                        return false;
+//                    }
+//                    status.text('Uploading...');
+//                },
+//                onComplete: function(file, response){
+//                    //On completion clear the status
+//                    status.text('');
+//                    var filepath = url+'/public/uploadfiles/'+response;
+//                    id = parseInt(id);
+//                           $('#files_'+id).html('');
+//                    if(response != ""){
+//                        document.getElementById("imagename_"+id).value = response;
+//                        $('#preview_'+id).show();
+//                        $('#files_'+id).html('<img height="50" width="50"  src="'+filepath+'" alt="" /><br />').addClass('success');
+//                      //  $('#lastImageId').val(id+1);
+//                    } else{
+//                       // $('<div></div>').appendTo('#files').text(response).addClass('error');
+//                    }
+//
+//                }
+//            });
+//       }
+        
 	function getSelectedIds(){
 		var selected_rows = new Array();
 		mygrid.forEachRow(function(id) {

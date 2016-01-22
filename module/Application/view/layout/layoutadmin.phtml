@@ -308,7 +308,8 @@ if (defined('RUNNING_FROM_ROOT')) {
                 <li><a href="<?php echo $baseUrl;?>/admin/addeditleads"><i class="fa fa-circle-o"></i> Add Leads</a></li>
                 <?php } if (in_array(2, $roleRightsArr['rightsArr'])){?>
                 <li><a href="<?php echo $baseUrl;?>/admin/manageleads"><i class="fa fa-circle-o"></i> View Leads</a></li>
-                <li><a href="<?php echo $baseUrl;?>/admin/assignedleads"><i class="fa fa-circle-o"></i> Assigned Leads</a></li>                          <?php } ?>
+                <li><a href="<?php echo $baseUrl;?>/admin/assignedleads"><i class="fa fa-circle-o"></i> Assigned Leads</a></li>             <li><a href="<?php echo $baseUrl;?>/admin/leadassignsetting"><i class="fa fa-circle-o"></i> Lead Assign Setting </a></li>             
+                    <?php } ?>
               </ul>
             </li> 
              <?php if($roleRightsArr['seniority'] == 1 || $roleRightsArr['seniority'] == 2){?>

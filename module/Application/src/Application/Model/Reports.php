@@ -111,16 +111,54 @@ class Reports extends AbstractTableGateway implements ServiceLocatorAwareInterfa
     public function getSourceWiseReport($start_date,$end_date) {
         
         
+        //        correct query codes condition in join
         
-        //select sl.source_name,count(ll.id) as total_leads,count(al.id) as assigned_leads 
+        
+        
+        $table = new TableGateway(['sl'=>'source_list'],$this->getAdapter());
+        
+         //select sl.source_name,count(ll.id) as total_leads,count(al.id) as assigned_leads 
         //from source_list sl 
         //left join lead_list ll on sl.id=ll.source_of_enquiry and ll.is_active=1 and ll.is_delete=0 and ll.comp_id=1
         //left join assigned_lead al on al.lead_id=ll.id  and al.is_active=1 and al.comp_id=1
         //where sl.is_active=1 and sl.is_delete=0 and sl.comp_id=1
         //group by sl.id
-
-  
         
+        $source_list = $table->select(function($select) use($start_date,$end_date){
+            $select->columns(['id','source_name'])
+                    
+                    ->join(['ll'=>'lead_list'],new Expression('sl.id=ll.source_of_enquiry and ll.is_active=1 and ll.is_delete=0 and ll.comp_id='.$this->loggedInUserDetails->comp_id),['total_leads'=>new Expression('COUNT(ll.id)')],'left')
+                    
+                    ->join(['al'=>'assigned_lead'],new Expression('al.lead_id=ll.id  and al.is_active=1 and al.comp_id='.$this->loggedInUserDetails->comp_id),['assigned_leads'=>new Expression('COUNT(al.id)')],'left')
+                    
+                    ->where(['sl.is_active'=>1,'sl.is_delete'=>0,'sl.comp_id'=>$this->loggedInUserDetails->comp_id]);
+            
+            if($start_date!='' && $end_date=='')
+                $select->where->greaterThanOrEqualTo('sl.creation_date',date('Y-m-d',  strtotime($start_date)));
+            elseif($start_date=='' && $end_date!='')
+                $select->where->lessThanOrEqualTo('sl.creation_date',date('Y-m-d',  strtotime($end_date)));
+            elseif($start_date!='' && $end_date!='')
+                $select->where->between('sl.creation_date',date('Y-m-d',  strtotime($start_date)),date('Y-m-d',  strtotime($end_date)));
+            
+                $select->group('sl.id');
+                
+        })->toArray();
+//         echo '<pre>';print_r($result);exit;
+        $dataArray = array();
+        if(count($source_list))
+        {    
+            foreach($source_list as $val1)
+            {
+                $source_name		= ucwords($val1['source_name']);
+                $total_leads		= $val1['total_leads'];
+                $assigned_leads         = $val1['assigned_leads'];
+                $unassigned_leads       = $total_leads-$assigned_leads;
+                $dataArray[]    = array("id"=>$val1['id'],"data"=>array($source_name,$total_leads,$assigned_leads,$unassigned_leads));
+            }
+        }    
+//        echo '<pre>';print_r($dataArray);exit;
+        $json = json_encode($dataArray);
+        exit('{rows:'.$json.'}');
     }
     
     public function getProjectWiseReport($start_date,$end_date) {
@@ -134,6 +172,42 @@ class Reports extends AbstractTableGateway implements ServiceLocatorAwareInterfa
         //where pl.is_active=1 and pl.is_delete=0 and pl.comp_id=1
         //group by pl.id
         
+        
+//        correct query codes condition in join
+        
+        $table = new TableGateway(['pl'=>'project_list'],$this->getAdapter());
+        $project_list = $table->select(function($select) use($start_date,$end_date){
+            $select->columns(['id','project_name'])
+                    ->join(['ll'=>'lead_list'],new Expression('pl.id=ll.project_interested and ll.is_active=1 and ll.is_delete=0 and ll.comp_id='.$this->loggedInUserDetails->comp_id),['total_leads'=>new Expression('COUNT(ll.id)')],'left')
+                    
+                    ->join(['al'=>'assigned_lead'],new Expression('al.lead_id=ll.id  and al.is_active=1 and al.comp_id='.$this->loggedInUserDetails->comp_id),['assigned_leads'=>new Expression('COUNT(al.id)')],'left')
+                    ->where(['pl.is_active'=>1,'pl.is_delete'=>0,'pl.comp_id'=>$this->loggedInUserDetails->comp_id]);
+            
+            if($start_date!='' && $end_date=='')
+                $select->where->greaterThanOrEqualTo('pl.creation_date',date('Y-m-d',  strtotime($start_date)));
+            elseif($start_date=='' && $end_date!='')
+                $select->where->lessThanOrEqualTo('pl.creation_date',date('Y-m-d',  strtotime($end_date)));
+            elseif($start_date!='' && $end_date!='')
+                $select->where->between('pl.creation_date',date('Y-m-d',  strtotime($start_date)),date('Y-m-d',  strtotime($end_date)));
+            
+                    $select->group('pl.id');
+        })->toArray();
+//         echo '<pre>';print_r($project_list);exit;
+        $dataArray = array();
+        if(count($project_list))
+        {    
+            foreach($project_list as $val1)
+            {
+                $project_name		= ucwords($val1['project_name']);
+                $total_leads		= $val1['total_leads'];
+                $assigned_leads         = $val1['assigned_leads'];
+                $unassigned_leads       = $total_leads-$assigned_leads;
+                $dataArray[]    = array("id"=>$val1['id'],"data"=>array($project_name,$total_leads,$assigned_leads,$unassigned_leads));
+            }
+        }    
+//        echo '<pre>';print_r($dataArray);exit;
+        $json = json_encode($dataArray);
+        exit('{rows:'.$json.'}');
     }
     
     

@@ -77,7 +77,6 @@ class Admin extends AbstractTableGateway implements ServiceLocatorAwareInterface
             $select->columns(['sourceName'=>'source_name'])
                 ->join(['ll'=>'lead_list'],'sl.id=ll.source_of_enquiry',['numOfLeads' => new Expression('COUNT(ll.source_of_enquiry)')])
                 ->where(['sl.is_active'=>1,'sl.is_delete'=>0,'sl.comp_id'=>$this->loggedInUserDetails->comp_id,'ll.is_active'=>1,'ll.is_delete'=>0]);
-            
             if($this->roleRightsArr['seniority']==4){
                 $select->join(['al'=>'assigned_lead'],'ll.id=al.lead_id',[]);
                 $select->where(['al.assigned_to'=>$this->loggedInUserDetails->id]);
@@ -91,8 +90,6 @@ class Admin extends AbstractTableGateway implements ServiceLocatorAwareInterface
                     $select->where(['al.assigned_to'=>$this->loggedInUserDetails->id]);
                 }    
             }
-            
-            
             $select->group('ll.source_of_enquiry');
         })->toArray(); 
 //        echo '<pre>';print_r($leadArr);exit;

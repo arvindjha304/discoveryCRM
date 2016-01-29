@@ -27,6 +27,10 @@ class ApiController extends AbstractActionController
         return $this->getServiceLocator()->get('Zend\Db\Adapter\Adapter');
     }
     
+    public function getModel(){
+        return  $this->getServiceLocator()->get('Application\Model\Api');
+    }
+    
     public function indexAction()
     {
 //      echo 'hii';
@@ -34,14 +38,6 @@ class ApiController extends AbstractActionController
     }
     
     public function autoleadassignAction() {
-//      check company_settings if lead auto assign = 1
-//	get all from auto_assign_source_user
-//	loop{
-//          get all lead of current source id from lead list
-//          check if lead assigned to user
-//          assign it to user
-//	}
-        
         $companySettings = $this->getModel()->getCompanySettings();
         if(count($companySettings)){
             foreach ($companySettings as $company){
@@ -53,13 +49,7 @@ class ApiController extends AbstractActionController
                         foreach ($autoAssignSourceUser as $autoAssign){
                             $source_id      = $autoAssign['source_id'];
                             $user_id        = $autoAssign['user_id'];
-                            
-//                            echo $source_id.'========';
-                            
                             $leadList = $this->getModel()->getSourceLeads($source_id,$compId);
-                            
-//                            echo '<pre>';print_r($leadList);
-                            
                             if(count($leadList)){
                                 foreach($leadList as $leads){
                                     $lead_id = $leads['id'];
@@ -82,7 +72,7 @@ class ApiController extends AbstractActionController
             $fdate = date('Y-m-d 00:00:00',strtotime('-1 Days'));
             $tdate = date('Y-m-d 00:00:00');   
            
-            $nintyNineAcresCredentials = $this->getNintyNineAcresCredentials($compId);
+            $nintyNineAcresCredentials = $this->getModel()->getNintyNineAcresCredentials($compId);
             
             if(count($nintyNineAcresCredentials)){
                 
@@ -123,7 +113,7 @@ class ApiController extends AbstractActionController
                        
                         $mobile = $leads->CntctDtl->Phone;
                         $mobile = base64_encode($mobile);
-                        $checkdata = $this->checkIfLeadExists($mobile,$compId);
+                        $checkdata = $this->getModel()->checkIfLeadExists($mobile,$compId);
     //                      echo $checkdata;exit; 
                         if($checkdata == 0)
                         { 
@@ -148,7 +138,7 @@ class ApiController extends AbstractActionController
                                 'date_created'        => date('Y-m-d H:i:s')
                             ];
 //                                echo '<pre>';print_r($data);exit;
-                            $this->insertanywhere('lead_list', $data);
+                            $this->getModel()->insertanywhere('lead_list', $data);
                         }
                     } 
                 }
@@ -165,12 +155,11 @@ class ApiController extends AbstractActionController
         if($compId!=''){
 //            echo $compId;exit;
             
-            $magicBrickCredentials = $this->getMagicBrickCredentials($compId);
+            $magicBrickCredentials = $this->getModel()->getMagicBrickCredentials($compId);
             
             if(count($magicBrickCredentials)){
                 
 //                echo '<pre>';print_r($magicBrickCredentials); exit;
-                
                 $magicBricksKey = $magicBrickCredentials[0]['magic_brick_key'];
                 $sourceId       = $magicBrickCredentials[0]['source_id'];
 
@@ -211,7 +200,6 @@ class ApiController extends AbstractActionController
                                 'punch_date'          => $leads->dt,
                                 'date_created'        => date('Y-m-d H:i:s')
                              ];
-                            
 //                            echo '<pre>';print_r($data);exit;
                             $this->insertanywhere('lead_list', $data);
 //                            exit('1111');
@@ -223,40 +211,48 @@ class ApiController extends AbstractActionController
        exit('Magic Brick Lead Added Succesfully');
     }
     
-    public function getMagicBrickCredentials($compId){
-        $table = new TableGateway('magic_brick_credentials',$this->getAdapter());
-        $select = $table->select(['comp_id'=>$compId])->toArray();
-        return $select;
+    public function morningmailAction() {
+        $allCompanies = $this->getModel()->getAllCompanies();
+        if(count($allCompanies)){
+            foreach($allCompanies as $comp){
+                $comp_id = $comp['id'];
+                $user_list = $this->getModel()->getUserList($comp_id);
+                foreach($user_list as $user){
+                    $user_id = $user['id'];
+                    $seniority = $user['seniority'];
+                    $morningReport = $this->getModel()->getMorningReport($comp_id,$user_id,$seniority);
+                    echo '<pre>';print_r($morningReport);exit;
+                }
+            }
+            
+        }
+      exit;
     }
     
-    public function getNintyNineAcresCredentials($compId){
-        $table = new TableGateway('acres_api_credentials',$this->getAdapter());
-        $select = $table->select(['comp_id'=>$compId])->toArray();
-        return $select;
+    public function eveningmailAction(){
+        $allCompanies = $this->getModel()->getAllCompanies();
+        if(count($allCompanies)){
+            foreach($allCompanies as $comp){
+                $comp_id = $comp['id'];
+                $user_list = $this->getModel()->getUserList($comp_id);
+                foreach($user_list as $user){
+                    $user_id = $user['id'];
+                    $seniority = $user['seniority'];
+                    $morningReport = $this->getModel()->getEveningReport($comp_id,$user_id,$seniority);
+                    echo '<pre>';print_r($morningReport);exit;
+                }
+            }
+            
+        }
+      exit;  
     }
     
     
-    public function checkIfLeadExists($mobile,$compId) {
-//        settype($mobile,"float"); 
-        $table = new TableGateway('lead_list',$this->getAdapter());
-        $result = $table->select(function($select) use($mobile){
-            $select->where->OR->equalTo('mobile', $mobile);
-            $select->where->OR->equalTo('alt_no', $mobile);
-            $select->where->OR->equalTo('other_no', $mobile);
-        })->toArray();
-        if(count($result)>0) return 1; else return 0;
-    }
     
     
-    public function insertanywhere($mytable, array $data) {
-        $db = $this->getServiceLocator()->get('Zend\Db\Adapter\Adapter');
-        $table = new TableGateway($mytable, $db);
-        $results = $table->insert($data);
-    }
     
-    public function getModel(){
-        return  $this->getServiceLocator()->get('Application\Model\Api');
-    }
+    
+    
     
 
 }

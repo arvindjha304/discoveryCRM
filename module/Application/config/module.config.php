@@ -39,7 +39,7 @@ return array(
                             ),
                         ),
                     ),
-                    'application' => array(			//use this route to redirect to any controller or action
+                'application' => array(			//use this route to redirect to any controller or action
                     'type'    => 'Segment',
                     'options' => array(
                         'route'    => '/[:controller[/:action]]',
@@ -108,6 +108,7 @@ return array(
                         'Application\Controller\Index'   => 'Application\Controller\IndexController',
                         'Application\Controller\Admin'   => 'Application\Controller\AdminController',
                         'Application\Controller\Api' 	 => 'Application\Controller\ApiController',
+                        'Application\Controller\Reports' => 'Application\Controller\ReportsController',
                     ),
 		),
 

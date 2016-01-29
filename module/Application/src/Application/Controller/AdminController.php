@@ -862,16 +862,13 @@ class AdminController extends AbstractActionController
         return $view;  
     }
     
-    public function leadassignsettingAction() {    
+    public function leadassignsettingAction() {
         $view = new ViewModel();
         $this->layout('layout/layoutadmin');
         $sourcetList = $this->getModel()->getSourceList();
-//        echo '<pre>';print_r($sourcetList);exit;
         $view->setVariable('sourcetList', $sourcetList);
         
-        
         $userList = $this->getModel()->getUserList();
-//        echo '<pre>';print_r($userList);exit;
         $view->setVariable('userList', $userList);
         
         $table = new TableGateway('company_settings',$this->getAdapter());

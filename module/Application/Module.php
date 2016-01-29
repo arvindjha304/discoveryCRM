@@ -62,7 +62,13 @@ class Module implements AutoloaderProviderInterface, ConfigProviderInterface, Vi
                   $tableGateway = $sm->get('GetTableGateway');
                   $table = new Model\Api($tableGateway);
                   return $table;
-    		},        
+    		}, 
+                        
+              'Application\Model\Reports' =>  function($sm) {
+                  $tableGateway = $sm->get('GetTableGateway');
+                  $table = new Model\Reports($tableGateway);
+                  return $table;
+    		}, 
                 'GetTableGateway' => function($sm){
                     $dbAdapter = $sm->get('Zend\Db\Adapter\Adapter');
                     return new TableGateway('otp_codes', $dbAdapter, null);
@@ -81,37 +87,37 @@ class Module implements AutoloaderProviderInterface, ConfigProviderInterface, Vi
     
     	$container = new Container('initialized');
     	if (!isset($container->init)) {
-    		$serviceManager = $e->getApplication()->getServiceManager();
-    		$request        = $serviceManager->get('Request');
-    
-    		$session->regenerateId(true);
-    		$container->init          = 1;
-    		$container->remoteAddr    = $request->getServer()->get('REMOTE_ADDR');
-    		$container->httpUserAgent = $request->getServer()->get('HTTP_USER_AGENT');
-    
-    		$config = $serviceManager->get('Config');
-    		if (!isset($config['session'])) {
-    			return;
-    		}
-    
-    		$sessionConfig = $config['session'];
-    		if (isset($sessionConfig['validators'])) {
-    			$chain   = $session->getValidatorChain();
-    
-    			foreach ($sessionConfig['validators'] as $validator) {
-    				switch ($validator) {
-    					case 'Zend\Session\Validator\HttpUserAgent':
-    						$validator = new $validator($container->httpUserAgent);
-    						break;
-    					case 'Zend\Session\Validator\RemoteAddr':
-    						$validator  = new $validator($container->remoteAddr);
-    						break;
-    					default:
-    						$validator = new $validator();
-    				}
-    				$chain->attach('session.validate', array($validator, 'isValid'));
-    			}
-    		}
+            $serviceManager = $e->getApplication()->getServiceManager();
+            $request        = $serviceManager->get('Request');
+
+            $session->regenerateId(true);
+            $container->init          = 1;
+            $container->remoteAddr    = $request->getServer()->get('REMOTE_ADDR');
+            $container->httpUserAgent = $request->getServer()->get('HTTP_USER_AGENT');
+
+            $config = $serviceManager->get('Config');
+            if (!isset($config['session'])) {
+                    return;
+            }
+
+            $sessionConfig = $config['session'];
+            if (isset($sessionConfig['validators'])) {
+                    $chain   = $session->getValidatorChain();
+
+                    foreach ($sessionConfig['validators'] as $validator) {
+                            switch ($validator) {
+                                    case 'Zend\Session\Validator\HttpUserAgent':
+                                            $validator = new $validator($container->httpUserAgent);
+                                            break;
+                                    case 'Zend\Session\Validator\RemoteAddr':
+                                            $validator  = new $validator($container->remoteAddr);
+                                            break;
+                                    default:
+                                            $validator = new $validator();
+                            }
+                            $chain->attach('session.validate', array($validator, 'isValid'));
+                    }
+            }
     	}
     }
     

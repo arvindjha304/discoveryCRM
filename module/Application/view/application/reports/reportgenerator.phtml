@@ -1,0 +1,279 @@
+<?php $baseUrl = $this->basePath(); 
+
+
+//echo $baseUrl;exit;
+?>
+ <!-- Content Wrapper. Contains page content --> 
+    <script src="//code.jquery.com/jquery-1.10.2.js"></script>
+    <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+ <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+ <link rel="STYLESHEET" type="text/css" href="<?php echo $baseUrl;?>/public/dhtmlxgrid/codebase/dhtmlxgrid.css">
+<link rel="stylesheet" type="text/css" href="<?php echo $baseUrl;?>/public/dhtmlxgrid/codebase/skins/dhtmlxgrid_dhx_skyblue.css">
+<link rel="STYLESHEET" type="text/css" href="<?php echo $baseUrl;?>/public/dhtmlxgrid/codebase/ext/dhtmlxgrid_pgn_bricks.css">
+<link rel="STYLESHEET" type="text/css" href="<?php echo $baseUrl;?>/public/dhtmlxgrid/codebase/dhtmlxcombo.css">
+
+
+<script type="text/javascript" src="<?php echo $baseUrl;?>/public/dhtmlxgrid/codebase/dhtmlxcommon.js"></script>
+<script type="text/javascript" src="<?php echo $baseUrl;?>/public/dhtmlxgrid/codebase/dhtmlxgrid.js"></script>
+
+
+<!-- For Export grid in the PDF and Excel file-->
+<script type="text/javascript" src="<?php echo $baseUrl;?>/public/dhtmlxgrid/codebase/dhtmlxgrid_export.js"></script>
+<script type="text/javascript" src="<?php echo $baseUrl;?>/public/dhtmlxgrid/codebase/ext/dhtmlxgrid_srnd.js"></script>
+
+<script type="text/javascript" src="<?php echo $baseUrl;?>/public/dhtmlxgrid/codebase/dhtmlxcombo.js"></script>
+<script type="text/javascript" src="<?php echo $baseUrl;?>/public/dhtmlxgrid/codebase/dhtmlxgridcell.js" ></script>
+<script type="text/javascript" src="<?php echo $baseUrl;?>/public/dhtmlxgrid/codebase/ext/dhtmlxgrid_filter.js" ></script>
+<script type="text/javascript" src="<?php echo $baseUrl;?>/public/dhtmlxgrid/codebase/ext/dhtmlxgrid_pgn.js"></script>
+    <div class="content-wrapper">
+        <!-- Content Header (Page header) -->
+        <section class="content-header">
+          <h1>
+            Report Generator
+          </h1>
+          <ol class="breadcrumb">
+            <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
+            <li class="active">Report Generator</li>
+          </ol>
+        </section>
+
+        <!-- Main content -->
+        <section class="content">
+          <div class="row">
+            <div class="col-xs-12">
+              <div class="box box-primary box-custom">
+              	<div class="box-header">
+                <div class="col-md-12" style="padding-left:0px;">
+                  <h3 class="box-title">Advanced Search</h3>
+                  </div>                  
+                </div><!-- /.box-header --> 
+                <div class="box-body" >
+                    <form action="" class="form-horizontal" > 
+                        <div class="form-group">
+                            <span class="error_msg" style="color:red;display: none;">Error</span>
+                        </div>
+                    <div class="form-group">
+                      <label for="inputEmail3" class="col-sm-3 control-label " style="text-align:left;">Start Date</label>
+                        <div class="col-sm-9">
+                            <input type="email" class="form-control report_start_date" onblur="return checkDate()" name="report_start_date" id="inputEmail3" placeholder="Start Date" style="width:33.3%;">
+                        </div>
+                    </div>
+            
+                    <div class="form-group">
+                    <label for="inputEmail3" class="col-sm-3 control-label" style="text-align:left;">End Date</label>
+                     <div class="col-sm-9">
+                        <input type="email" class="form-control report_end_date" onblur="return checkDate()" placeholder="End Date" style="width:33.3%;">
+                    </div>
+                  </div>
+            
+            <div class="form-group">
+             <label for="inputEmail3" class="col-sm-3 control-label" style="text-align:left;">Report Type</label>
+              <div class="col-sm-9">
+                <select class="form-control report_type" style="width:33.3%;" >
+                 <option value="user_report">User Report</option>
+                 <option value="source_wise_report">Source-wise Report</option>
+                 <option value="project_wise_report">Project-wise Report</option>
+                 <option value="lead_report">Lead Report</option>
+                 <option value="user_lead_report">User Lead Report</option>
+                </select>
+             </div>
+           </div>
+            
+            <div class="form-group">
+            <div class="col-sm-10">
+                <button type="button"  onclick="return generateReport()" id="submitBtn" class="btn btn-primary">Submit</button>
+            </div>
+            </div>
+                      
+         </form>              
+        <hr>
+        <div style="display: none;" id="reportDiv">
+        <div class="box-header">
+        <div class="col-md-12" style="padding-left:0px;">
+          <h3 class="box-title">Manage Projects</h3>
+          <div class="pull-right">
+              <button type="button" onclick="return exportGridData('excel')" class="btn btn-primary">Export as Excel</button>
+              <button type="button" onclick="return exportGridData('csv')" class="btn btn-primary">Export as CSV</button>
+              <button type="button" onclick="return exportGridData('pdf')" class="btn btn-primary">Export as PDF</button>
+          </div>
+          </div>                  
+        </div><!-- /.box-header -->
+        <div class="box-body">
+            <div id="loadingDiv" class="" style="display: none">
+                <img src="images/350.gif"  border="0" />
+            </div>
+            <div id="user_list">
+                <div id='preloader' style="display:none;" >
+                <img class=""src='images/animatedEllipse2.gif' border='0' style="width:50px;  left: 560px;position: absolute; top: 450px;z-index:2000"  ></div>	
+                <div id="gridbox" class="gridbox" style="width:100% !important; background-color:white; margin-left: 0px;"></div>
+                <div class="pagingWrap">
+                    <div style="width:100%;float:left;" id="recinfoArea"></div>
+                    <div id="pagingArea"></div>
+                </div>
+            </div> 
+        </div><!-- /.box-body -->
+        </div>     
+        </div><!-- /.box -->
+       </div><!-- /.col -->
+     </div><!-- /.row -->
+          
+          
+        </section><!-- /.content -->
+    </div><!-- /.content-wrapper -->
+      
+   
+
+    <script>
+
+    $(function() {
+       $( ".report_start_date,.report_end_date" ).datepicker({
+            maxDate: new Date() ,
+            onClose: function() {        
+                $(this).trigger('blur');
+            }
+       });
+//       $( ".report_end_date" ).datepicker({  maxDate: new Date() });
+    });
+
+    function generateReport(){
+        
+        var report_start_date   = $('.report_start_date').val();
+        var report_end_date     = $('.report_end_date').val();        
+        var report_type         = $('.report_type').val();
+
+//       alert(report_start_date+'====='+report_end_date+'====='+report_type);
+         
+        if(report_type=='user_report'){
+            var data = 'Username,Email,Phone,Role,Reporting Manager,Date Joined,Status';
+        }else if(report_type=='source_wise_report'){
+            var data = 'Source Name,No of Leads, No of Assigned Leads,No of Unassigned Leads';    
+        }else if(report_type=='project_wise_report'){
+            var data = 'Project Name, No of Leads, No of Assigned Leads,No of Unassigned Leads';    
+        }else if(report_type=='lead_report'){
+            var data = 'Total Leads,Assigned Leads,Unassigned Leads,Interested Leads,Not Interested Leads,Not Answered Leads,Broker,Client';   
+        }else if(report_type=='user_lead_report'){
+            var data = 'Username,Total Lead Assigned,Total Site Visit,Total Follow Up,Total Meeting,Total Follow Up Missed';
+        }
+        
+        var querynew ='report_start_date='+report_start_date+'&report_end_date='+report_end_date+'&report_type='+report_type;
+        
+        var headerArray = [];
+        var cspanArray = [];
+        var headerwidthArray = [];
+        var headersortArray = [];
+        var coltypeArray = [];
+        var toolTipsArray = [];
+        var header = '';
+        var headerwidth = '';
+        var headersort = '';
+        var filter = '';
+        var coltype = '';
+        var col_rows = data.split(",");
+        var col_length = col_rows.length;
+        if(col_length <= 2)
+            var width = 500;
+        else if(col_length <= 4 && col_length > 2)
+            var width = 400;
+        else if(col_length <= 6 && col_length > 4)
+            var width = 300;
+        else if(col_length <= 8 && col_length > 6)
+            var width = 180;
+        else if(col_length <= 10 && col_length > 8)
+            var width = 140;
+        else	
+            var width = '100';
+        
+        
+        jQuery.each(col_rows, function(index, value){
+            
+            if(index != 0)
+                cspanArray.push('#cspan');
+            headerArray.push('<span style="color: #4d4d4d;font-size: 14px;margin-left: 05px;">'+value+'</span>');
+            headerwidthArray.push(Math.round(width)+1);
+            headersortArray.push("str");
+            coltypeArray.push("ro");
+            if (filter == '')
+                filter+= '#text_filter,';
+            // else if (value.indexOf("Date") >= 0)
+                    // filter+= '#select_filter,';
+            else
+                filter+= '#text_filter,';
+
+            toolTipsArray.push("false");
+        });
+        
+         
+        cspan = cspanArray.join(",");
+        header = headerArray.join(",");
+        headerwidth = headerwidthArray.join(",");
+        headersort = headersortArray.join(",");
+        coltype = coltypeArray.join(",");
+        toolTips = toolTipsArray.join(",");
+
+        dhx_globalImgPath = "<?php echo $baseUrl;?>/public/dhtmlxgrid/codebase/imgs/";
+        mygrid = new dhtmlXGridObject('gridbox');
+        mygrid.setImagePath("<?php echo $baseUrl;?>/public/dhtmlxgrid/codebase/imgs/");
+//        mygrid.setHeader("<span class='fl' style='color: #4d4d4d;font-size: 20px;margin-right: 10px;padding: 7px 5px;'> Report - <span id='reportName'> </span></span><span class='fromDateDiv mt12 fl' style='display:none;'><span id='fromText'></span><span id='showFromDate'></span></span><span class='toDateDiv mt12 fl' style='display:none;'><span class='ml10' id='to'></span><span id='showToDate'></span></span><span id='userName'> </span>,"+cspan);
+//        mygrid.attachHeader(header);
+        mygrid.setHeader(header);
+        mygrid.setInitWidths(headerwidth);
+        //mygrid.enableAutoHeight(true);
+        //mygrid.enableAutoWidth(true);
+        mygrid.enablePaging(true, 10, null, "pagingArea", true, "recinfoArea");
+        mygrid.setPagingSkin("bricks");
+//        mygrid.enableColumnAutoSize(true);
+
+//        $("#report_builder").hide();
+//        $("#showReportDiv").show();
+//        $("#reportOuterdiv").css("min-height","0px");
+
+        mygrid.attachEvent("onXLS",function(){
+            $('#loadingiddis').show();
+        })
+        
+       
+        
+        //For Sorting in the column
+        mygrid.setColSorting(headersort);
+        mygrid.enableTooltips(toolTips);
+        mygrid.setColTypes(coltype);
+        mygrid.attachHeader(""+filter+"");
+//        mygrid.enableColumnMove(true);
+        mygrid.init();
+        mygrid.setSkin("dhx_skyblue");
+        mygrid.attachEvent("onXLE",function(){
+                $('#loadingiddis').hide();
+        })
+        $('#reportDiv').show();
+        mygrid.clearAndLoad("<?php echo $baseUrl;?>/reports/getreport"+"?"+querynew,"json");
+        
+    } 
+    
+    function exportGridData(type){
+        if(type == 'excel')
+            mygrid.toExcel('<?php echo $baseUrl;?>/public/dhtmlxgrid/codebase/grid-excel-php/generate.php');
+        else if(type == 'csv'){
+            mygrid.toExcel('<?php echo $baseUrl ;?>/public/dhtmlxgrid/codebase/grid-excel-php/generate_csv.php');
+        }else 
+            mygrid.toPDF('<?php echo $baseUrl;?>/public/dhtmlxgrid/codebase/grid-pdf-php/generate.php');
+    }
+    
+    function checkDate(){
+        var start_date   = $('.report_start_date').val();
+        var end_date     = $('.report_end_date').val(); 
+//        console.log(start_date);
+        if(start_date !=''){
+            var start_date_sec = new Date(start_date).getTime();
+            var end_date_sec = new Date(end_date).getTime();
+            if(start_date_sec > end_date_sec){
+                $('#submitBtn').attr('disabled','disabled');
+                $('.error_msg').text('End Date cannot be greater than Start Date').show();
+            }else{
+                $('#submitBtn').removeAttr('disabled');
+                $('.error_msg').hide();
+            }
+        }  
+    }
+
+    </script>
+    

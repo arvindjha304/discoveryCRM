@@ -97,6 +97,7 @@ background-color: #ffe0b3;
 .graph-home{width: 500px; height: 250px;margin-left: 10px;}
 .graph-home img{padding-top:60px;}
 
+/*-------------Widget-------------*/
 .widget {
     -moz-border-bottom-colors: none;
     -moz-border-left-colors: none;
@@ -124,15 +125,15 @@ background-color: #ffe0b3;
     padding-left: 0;
     padding-right: 0;
     padding-top: 0;
-    width: 32%;
+    width: 23%;
 }
 .stats-left {
     background-color: #3366CC;
     float: left;
-    padding-bottom: 1em;
-    padding-left: 1em;
-    padding-right: 1em;
-    padding-top: 1em;
+    padding-bottom: .5em;
+    padding-left: .5em;
+    padding-right: .5em;
+    padding-top: .5em;
     text-align: center;
     width: 70%;
 }
@@ -142,16 +143,16 @@ background-color: #ffe0b3;
 }
 .stats-left h4 {
     color: #fff;
-    font-size: 2em;
+    font-size: 1.3em;
     margin-top: 10px;
 }
 .stats-right {
     background-color: rgba(51, 102, 204, 0.88);
     float: right;
-    padding-bottom: 2.12em;
+    padding-bottom: 1.25em;
     padding-left: 1em;
     padding-right: 1em;
-    padding-top: 2.12em;
+    padding-top: 1.25em;
     text-align: center;
     width: 30%;
 }
@@ -170,6 +171,11 @@ background-color: #ffe0b3;
 }
 .widget.states-mdl {
     margin-bottom: 0;
+    margin-left: 2%;    
+    margin-top: 0;
+}
+.widget.states-mdl2 {
+    margin-bottom: 0;
     margin-left: 2%;
     margin-right: 2%;
     margin-top: 0;
@@ -179,6 +185,12 @@ background-color: #ffe0b3;
 }
 .states-mdl .stats-right {
     background-color: rgba(220, 57, 18, 0.88);
+}
+.states-mdl2 .stats-left {
+    background-color: #00a65a;
+}
+.states-mdl2 .stats-right {
+    background-color: rgba(0, 166, 90, 0.88);
 }
 .states-last .stats-left {
     background-color: #FF9900;

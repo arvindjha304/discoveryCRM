@@ -4,6 +4,28 @@
 ?>
 
 <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+
+
+<style>
+   .select-list-item-first{
+     border-top-left-radius: 0px !important;
+  border-top-right-radius: 0px !important;
+  Padding-top:5px;
+  padding-bottom:5px;
+   }
+   .select-list-item-last{
+     border-bottom-left-radius: 0px !important;
+  border-bottom-right-radius: 0px !important;
+  Padding-top:5px;
+  padding-bottom:5px;
+   }
+   .select-list-item{
+     Padding-top:5px;
+  padding-bottom:5px;
+   }
+   </style>
+
+
 <!-- Content Wrapper. Contains page content -->
 <div class="content-wrapper">
         <!-- Content Header (Page header) -->
@@ -31,9 +53,18 @@
                 <div class="box-body" ng-app="myApp" ng-controller="myCtrl">
                   <form>
                     <div class="col-md-3">
-                    	<div class="form-group">                   
-                            <input class="form-control select2" type="text" ng-keyup="getAllUsers(searchUser)" ng-model="searchUser">
-                  		</div>
+                     <div class="form-group" style="margin-bottom:0px;">                   
+                            <input class="form-control" type="text" placeholder="Select a User">
+                    </div>
+                        <div>
+                         <ul class="list-group">
+                              <li class="list-group-item select-list-item-first">Pooja</li>
+                              <li class="list-group-item select-list-item">Kavita</li>
+                              <li class="list-group-item select-list-item">Arvind Jha</li>
+                              <li class="list-group-item select-list-item">Akash Bhardwaj</li>
+                              <li class="list-group-item select-list-item-last">Zahid</li>
+                            </ul>
+                        </div>
                     </div>
                     <div class="col-md-3">
                     	<div class="form-group">                   
@@ -62,7 +93,7 @@
                   <h3 class="box-title">Login History</h3>
                   </div>                  
                 </div><!-- /.box-header -->
-                <div class="box-body">
+                <div class="box-body" style="height:500px; overflow-y:scroll;">
                   <table id="example1" class="table table-bordered table-striped">
                     <thead>
                       <tr>

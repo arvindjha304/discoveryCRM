@@ -105,6 +105,7 @@ use Zend\Mime\Part as MimePart;
             'otp_code'      => base64_encode($otp),
             'user_id'       =>  $userid,
             'is_used'       =>  0,
+            'company_id'    =>  $userDetails->comp_id,
             'date_created'  =>  date('Y-m-d H:i:s')
         );
         

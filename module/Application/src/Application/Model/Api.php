@@ -70,6 +70,29 @@ class Api extends AbstractTableGateway implements ServiceLocatorAwareInterface {
         return $id;
     }
     
+    public function getMagicBrickCredentials($compId){
+        $table = new TableGateway('magic_brick_credentials',$this->getAdapter());
+        $select = $table->select(['comp_id'=>$compId])->toArray();
+        return $select;
+    }
+    
+    public function getNintyNineAcresCredentials($compId){
+        $table = new TableGateway('acres_api_credentials',$this->getAdapter());
+        $select = $table->select(['comp_id'=>$compId])->toArray();
+        return $select;
+    }
+    
+    public function checkIfLeadExists($mobile,$compId) {
+//        settype($mobile,"float"); 
+        $table = new TableGateway('lead_list',$this->getAdapter());
+        $result = $table->select(function($select) use($mobile){
+            $select->where->OR->equalTo('mobile', $mobile);
+            $select->where->OR->equalTo('alt_no', $mobile);
+            $select->where->OR->equalTo('other_no', $mobile);
+        })->toArray();
+        if(count($result)>0) return 1; else return 0;
+    }
+    
     public function getCompanySettings() {
         $table = new TableGateway('company_settings',$this->getAdapter());
         $select = $table->select()->toArray();
@@ -102,17 +125,106 @@ class Api extends AbstractTableGateway implements ServiceLocatorAwareInterface {
             'assigned_date' => date('Y-m-d H:i:s'),
             'comp_id'       => $compId
         ]; 
-        // check if lead assigned to user
-        
         $table = new TableGateway('assigned_lead',$this->getAdapter());
         $select = $table->select(['lead_id'=>$lead_id,'assigned_to'=>$user_id,'is_active'=>1])->toArray();
-        
         if(count($select)==0){
             $this->insertanywhere('assigned_lead', $data);
             $this->updateanywhere('lead_list', ['is_assigned'=>1],['id'=>$lead_id]); 
         }
         return 1;
     }
+    
+    public function getAllCompanies() {
+        $table = new TableGateway('companies',$this->getAdapter());
+        $select = $table->select(['is_active'=>1,'is_delete'=>0])->toArray();
+        return $select;
+    }
+    
+    public function getUserList($comp_id){
+        $tableGateway = new TableGateway(['ul'=>'userlist'],$this->getAdapter());
+        $userList = $tableGateway->select(function($select) use ($comp_id){
+            $select->columns(['id','role_id','comp_id'])
+                    ->join(['cr'=>'company_roles'],'cr.id=ul.role_id',['role_name','seniority']);
+            $select->where(['ul.is_delete'=>0,'ul.comp_id'=>$comp_id]);
+        })->toArray();
+//        echo '<pre>';print_r($userList);exit;
+        return $userList;
+    }
+    
+    public function getMorningReport($comp_id,$user_id,$seniority) {
+        $tableGateway = new TableGateway(['uls'=>'updated_lead_status'],$this->getAdapter());
+        $returnArr      = $tableGateway->select(function($select) use($comp_id,$user_id,$seniority){
+            $teamUserArr = $this->getTeamUserArr($comp_id,$user_id,$seniority);
+            $select->columns(['statusName'=>new Expression("IF(uls.interested_type=1,'Site Visit',IF(uls.interested_type=2,'Meeting','Follow Up'))"),'numOfLeads'=>new Expression("count(uls.status_type)")]);
+            $select->join(['ll'=>'lead_list'],'ll.id=uls.lead_id',[]);
+            if($seniority==4){
+                $select->join(['al'=>'assigned_lead'],'uls.lead_id=al.lead_id',[]);
+                $select->where(['al.assigned_to'=>$user_id]);
+            }elseif($seniority==3){
+                $select->join(['al'=>'assigned_lead'],'uls.lead_id=al.lead_id',[]);
+                if(count($teamUserArr)){
+                    $allUserStr = $teamUserArr[0]['teamUsrIds'].','.$user_id;
+                    $allUserArr = explode(',',$allUserStr);
+                    $select->where->in('al.assigned_to',$allUserArr);
+                }else{
+                    $select->where(['al.assigned_to'=>$user_id]);
+                }    
+            }  
+            $oldDate = date('Y-m-j',strtotime( '-1 day' , time()));
+            $futureDate = date('Y-m-j',strtotime( '+1 day' , time()));
+            $select->where->between('uls.date_time_value', $oldDate, $futureDate);
+            $select->where(['uls.comp_id'=>$comp_id,'uls.is_active'=>1,'uls.status_type'=>1])
+                    ->group('uls.status_type')
+                    ->group('uls.interested_type');
+        })->toArray(); 
+        echo '<pre>';print_r($returnArr);exit;
+        return $returnArr;
+    }
+     
+    public function getEveningReport($comp_id,$user_id,$seniority) {
+        $tableGateway = new TableGateway(['uls'=>'updated_lead_status'],$this->getAdapter());
+        $returnArr      = $tableGateway->select(function($select) use($comp_id,$user_id,$seniority){
+            $teamUserArr = $this->getTeamUserArr($comp_id,$user_id,$seniority);
+            $select->columns(['statusName'=>new Expression("IF(uls.interested_type=1,'Site Visit',IF(uls.interested_type=2,'Meeting','Follow Up'))"),'numOfLeads'=>new Expression("count(uls.status_type)")]);
+            $select->join(['ll'=>'lead_list'],'ll.id=uls.lead_id',[]);
+            
+            if($seniority==4){
+                $select->join(['al'=>'assigned_lead'],'uls.lead_id=al.lead_id',[]);
+                $select->where(['al.assigned_to'=>$user_id]);
+            }elseif($seniority==3){
+                $select->join(['al'=>'assigned_lead'],'uls.lead_id=al.lead_id',[]);
+                if(count($teamUserArr)){
+                    $allUserStr = $teamUserArr[0]['teamUsrIds'].','.$user_id;
+                    $allUserArr = explode(',',$allUserStr);
+                    $select->where->in('al.assigned_to',$allUserArr);
+                }else{
+                    $select->where(['al.assigned_to'=>$user_id]);
+                }    
+            }
+            
+            $oldDate = date('Y-m-j',strtotime( '-1 day' , time()));
+            $futureDate = date('Y-m-j',strtotime( '+1 day' , time()));
+            $select->where->between('uls.date_time_value', $oldDate, $futureDate);
+            $select->where(['uls.comp_id'=>$comp_id,'uls.is_active'=>1,'uls.status_type'=>1])
+                    ->group('uls.status_type')
+                    ->group('uls.interested_type');
+        })->toArray(); 
+        echo '<pre>';print_r($returnArr);exit;
+        return $returnArr;
+    }   
+    
+    public function getTeamUserArr($comp_id,$user_id,$seniority){
+       $teamUserArr = [];
+        if($seniority==3){
+            $table = new TableGateway('userlist',$this->getAdapter());
+            $teamUserArr = $table->select(function($select){
+                $select->columns(['teamUsrIds' => new Expression('GROUP_CONCAT(id)')]);
+                $select->where(['reporting_manager'=>$user_id,'is_active'=>1,'is_delete'=>0]);
+            })->toArray();
+        }
+        return $teamUserArr;
+    }
+    
     
     
     

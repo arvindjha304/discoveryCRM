@@ -835,7 +835,7 @@ CREATE TABLE `updated_lead_status` (
   `status_type` int(1) NOT NULL,
   `interested_type` int(1) NOT NULL,
   `bogus_lead` int(1) NOT NULL,
-  `date_time_value` datetime(1) NOT NULL,
+  `date_time_value` datetime NOT NULL,
   `lead_rating` int(1) NOT NULL,
   `client_type` int(1) NOT NULL,
   `last_feedback` text,
